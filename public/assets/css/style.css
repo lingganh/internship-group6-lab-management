@@ -1,0 +1,75 @@
+.navbar-st {
+    background-color: #1376bc;
+    --navbar-hover-bg: rgba(var(--white-rgb), 0.1);
+    --navbar-disabled-bg: transparent;
+    --navbar-hover-active-bg: rgba(var(--white-rgb), 0.15);
+    --navbar-hover-active-color: #fff;
+    --navbar-active-bg: rgba(var(--white-rgb), 0.15);
+    --navbar-color: #fff;
+    --navbar-link-color: #fff;
+    --navbar-link-hover-color: #fff;
+    --navbar-hover-color: #fff;
+}
+
+.seminar .seminar-section .seminar-list .empty-calendar img{
+    width: 250px;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+    display: flex
+;
+    overflow: hidden;
+    padding-top: 10px;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .date_stamp {
+    width: 55px;
+    text-align: center;
+    margin-right: 7px;
+    margin-top: 6px;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .date_stamp .date_stamp_top {
+    color: #fff;
+    font-size: 12px;
+    background: #1376bc;
+    padding: 2px 0 2px 0;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .date_stamp .date_stamp_top .weekday {
+    font-size: 11px;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .date_stamp .date_stamp_top .event_date {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .date_stamp .date_time_bottom {
+    padding: 2px 0 2px 0;
+    font-size: 12px;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .seminar_item_right .article-title {
+    font-size: 1.3em !important;
+    font-weight: normal;
+}
+
+.seminar .seminar-section .seminar-list .seminar-item .seminar_item_right .article-title a {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+}
