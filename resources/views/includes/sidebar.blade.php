@@ -106,8 +106,8 @@
                     <i class="ph-dots-three sidebar-resize-show"></i>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
-                       class="nav-link {{ request()->routeIs('admin.coming-soon') ? 'active' : '' }}">
+                    <a href="{{route('admin.users.index')}}"
+                       class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
                         <i class="ph-user"></i>
                         <span>Người dùng</span>
                     </a>

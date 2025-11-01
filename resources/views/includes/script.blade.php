@@ -14,7 +14,7 @@
 <script src="{{ asset('assets/js/vendor/notifications/noty.min.js') }}"></script>
 <script src="{{ asset('assets/js/vendor/ui/fullcalendar/main.min.js') }}"></script>
 <script src="{{ asset('assets/js/app.js') }}"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {{--<!-- /theme JS files -->--}}
 
 
@@ -25,27 +25,72 @@
 
 @yield('script_custom')
 {{--<!-- /JS custom  -->--}}
+
 <script>
-    $(document).ready(function () {
-        @if(\session()->has('success'))
-        new Noty({
-            title: 'Thành công',
-            text: '{{ \session()->pull('success') }}',
-            type: 'success',
-        }).show();
+    document.addEventListener('DOMContentLoaded', function () {
+        // Session Flash Messages
+        @if (session('success'))
+        showNoty('success', "{{ session('success') }}");
         @endif
-        @if(\session()->has('error'))
-        new Noty({
-            title: 'Lỗi',
-            text: {{ \session()->pull('error') }},
-            type: 'error',
-        }).show();
+
+        @if (session('error'))
+        showNoty('error', "{{ session('error') }}");
         @endif
-        @error('error')
+
+        @if (session('warning'))
+        showNoty('warning', "{{ session('warning') }}");
+        @endif
+
+        @if (session('info'))
+        showNoty('info', "{{ session('info') }}");
+        @endif
+
+        // Realtime Livewire Flash Messages
+        if (typeof Livewire !== 'undefined') {
+            Livewire.on('alert', ({ type, message }) => {
+                showNoty(type, message);
+            });
+        }
+    });
+
+    function showNoty(type, message) {
         new Noty({
-            title: 'Lỗi',
-            type: 'error',
+            type: type,
+            layout: 'topRight',
+            text: message,
+            timeout: 2000,
+            progressBar: true,
+            closeWith: ['button'],
+            callbacks: {
+                onTemplate: function() {
+                    let color = '#188251'; // Default: success green
+                    if (type === 'error') color = '#D9534F'; // Red
+                    if (type === 'warning') color = '#FFC107'; // Yellow
+                    if (type === 'info') color = '#17A2B8'; // Blue
+                    this.barDom.innerHTML = '<div class="noty_body" style="background: ' + color + '; color: #ffffff;">' + this.options.text + '</div>';
+                    this.barDom.style.backgroundColor = 'transparent';
+                }
+            }
         }).show();
-        @enderror
-    })
+    }
+
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('openModel', ({type,title,desc,confirmEvent}) => {
+            console.log(type)
+            Swal.fire({
+                title: title,
+                icon: type,
+                text: desc,
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Có!",
+                cancelButtonText: "Không!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch(confirmEvent);
+                }
+            });
+        });
+    });
 </script>
