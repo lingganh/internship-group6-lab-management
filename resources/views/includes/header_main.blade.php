@@ -33,21 +33,27 @@
                 </a>
             </li>
 
-            @if(!auth()->check())
+            @if(auth()->check())
                 <li class="nav-item nav-item-dropdown-lg dropdown ms-lg-2">
                     <a href="#" class="navbar-nav-link align-items-center rounded-pill p-1" data-bs-toggle="dropdown">
-{{--                        <div class="status-indicator-container">--}}
-{{--                            <img src="{{ Avatar::create(auth()->user()->full_name ?? auth()->user()->username)->toBase64() }}" class="w-32px h-32px rounded-pill" alt="">--}}
-{{--                            <span class="status-indicator bg-success"></span>--}}
-{{--                        </div>--}}
-{{--                        <span class="d-none d-lg-inline-block mx-lg-2">{{auth()->user()->full_name ?? auth()->user()->username}}</span>--}}
                         <div class="status-indicator-container">
-                            <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt="">
+                            <img src="{{ Avatar::create(auth()->user()->full_name ?? auth()->user()->full_name)->toBase64() }}" class="w-32px h-32px rounded-pill" alt="">
+                            <span class="status-indicator bg-success"></span>
                         </div>
-                        <span class="d-none d-lg-inline-block mx-lg-2">Phong</span>
+                        <span class="d-none d-lg-inline-block mx-lg-2">{{auth()->user()->full_name ?? auth()->user()->full_name}}</span>
+{{--                        <div class="status-indicator-container">--}}
+{{--                            <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt="">--}}
+{{--                        </div>--}}
+{{--                        <span class="d-none d-lg-inline-block mx-lg-2">Phong</span>--}}
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-end">
+                        @if(auth()->user()->hasRole('admin'))
+                            <a href="{{route('admin.dashboard')}}" class="dropdown-item">
+                                <i class="ph-wrench me-2"></i>
+                                Quản trị hệ thống
+                            </a>
+                        @endif
                         <a href="{{route('admin.coming-soon')}}" class="dropdown-item">
                             <i class="ph-calendar me-2"></i>
                             Lịch đã đăng ký
@@ -58,7 +64,7 @@
                         </a>
                         <div class="dropdown-divider"></div>
 
-                        <form action="{{route('admin.coming-soon')}}" method="POST">
+                        <form action="{{route('handleLogout')}}" method="POST">
                             @csrf
                             <button type="submit" class="dropdown-item">
                                 <i class="ph-sign-out me-2"></i>
@@ -69,7 +75,7 @@
                 </li>
             @else
                 <li class="nav-item nav-item-dropdown-lg dropdown ms-lg-2">
-                    <a href="#" class="navbar-nav-link align-items-center rounded-pill p-1">
+                    <a href="{{route('sso.redirect')}}" class="navbar-nav-link align-items-center rounded-pill p-1">
                         <div class="status-indicator-container">
                             <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt="">
                         </div>
