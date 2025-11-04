@@ -23,17 +23,17 @@
 3. Run
 
 ``` bash
-	$ composer install
-	$ php artisan key:generate
-	$ php artisan migrate
-	$ php artisan db:seed --class=DatabaseSeeder
-	$ php artisan scribe:generate
-	$ php artisan storage:link
-	$ php artisan route:clear
-	$ php artisan config:clear
+	 composer install
+	 php artisan key:generate
+	 php artisan migrate
+	 php artisan db:seed --class=DatabaseSeeder
+     php artisan scribe:generate
+	 php artisan storage:link
+	 php artisan route:clear
+	 php artisan config:clear
 	
 	
-	$ npm install
+	 npm install
 
 ```
 
@@ -43,6 +43,6 @@
 
 ``` bash
 back-end
-	$ php artisan serve
+	 php artisan serve
 	
 - Login with default admin account : admin and password: 123456aA@
