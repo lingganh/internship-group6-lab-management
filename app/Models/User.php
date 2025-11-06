@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\Role as RoleEnum;
@@ -66,6 +67,11 @@ class User extends Authenticatable
     public function hasRole(string $roleName): bool
     {
         return $this->role->name === $roleName;
+    }
+
+    public function groups():BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_user', 'group_id', 'user_id');
     }
 
     public function getRoleTextAttribute()

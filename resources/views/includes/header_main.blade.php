@@ -58,7 +58,7 @@
                             <i class="ph-calendar me-2"></i>
                             Lịch đã đăng ký
                         </a>
-                        <a href="{{route('admin.coming-soon')}}" class="dropdown-item">
+                        <a href="{{route('client.info-user')}}" class="dropdown-item">
                             <i class="ph-user me-2"></i>
                             Tài khoản
                         </a>

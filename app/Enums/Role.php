@@ -36,7 +36,6 @@ enum Role:string
             $roles[$role->name] = $role->label();
         }
         return $roles;
-
     }
 
 }
