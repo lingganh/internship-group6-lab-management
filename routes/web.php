@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\GroupController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\client\UserController as ClientController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
@@ -17,9 +18,7 @@ Route::get('/', function () {
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
 Route::middleware('checkAuth')->group(function () {
-    Route::get('/information-user', function () {
-        return view('pages.client.user.infor-user');
-    })->name('client.infor-user');
+    Route::get('/information-user',[ClientController::class,'infoUser'])->name('client.info-user');
 });
 
 Route::middleware('role:admin')->group(function () {
