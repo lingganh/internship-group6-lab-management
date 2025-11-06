@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\GroupController;
 use App\Http\Controllers\admin\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
@@ -24,6 +25,12 @@ Route::middleware('role:admin')->group(function () {
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
             Route::get('/edit/{id}', [UserController::class, 'edit'])->name('admin.users.edit');
+        });
+
+        Route::prefix('groups')->group(function () {
+            Route::get('/',[GroupController::class, 'index'] )->name('admin.groups.index');
+            Route::get('/create',[GroupController::class, 'create'] )->name('admin.groups.create');
+            Route::get('/edit/{id}',[GroupController::class, 'edit'] )->name('admin.groups.edit');
         });
     });
 });
