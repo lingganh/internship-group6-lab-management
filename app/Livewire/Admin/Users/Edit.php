@@ -78,7 +78,7 @@ class Edit extends Component
             'roleName' => 'required|string|in:'.implode(',', array_keys(Role::displayAll())),
             'phone' => 'nullable|string|min:10|max:15|regex:/^[0-9+\-\s()]*$/',
             'className' => 'nullable|string|max:100',
-            'dateOfBirdth' => 'nullable|date',
+            'dateOfBirdth' => 'nullable|date|before:today|after:1900-01-01|date_format:Y-m-d',
             'gender' => 'nullable|string|in:Nam,Nữ',
         ];
 
