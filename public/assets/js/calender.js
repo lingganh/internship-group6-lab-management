@@ -93,17 +93,23 @@ async function loadEvent() {
     const data = await response.json();
 
     events = data.map(
+
+
         event => {
             return {
                 id: event.id,
                 title: event.title,
                 start: event.start,
                 end: event.end,
+                category: event.category,
                 backgroundColor: categoryColors[event.category],
                 borderColor: categoryColors[event.category],
+
             }
+
         }
-    )
+
+)
 
     updateCalendar();
 }
@@ -113,8 +119,10 @@ function updateCalendar() {
     // xóa hết tất cả các event -> mỗi lần thêm mới render
     // tạo 1 mảng -> lọc add event
     const visibleEvents = events.filter(e => !hiddenCategories.has(e.category));
-    visibleEvents.forEach(event => {
-
+     visibleEvents.forEach(event => {
+         // const categoryKey = event.category;
+         // const color = categoryColors[categoryKey];
+         // console.log(`Event: "${event.title}", Category: "${categoryKey}", Found Color: "${color}"`);
         calendar.addEvent({
             //cấu trúc 1 e
             id: event.id,
