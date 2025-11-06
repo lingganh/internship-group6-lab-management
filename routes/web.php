@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\UserController;
+use App\Http\Livewire\LabCalendar;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
@@ -9,10 +10,10 @@ Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->nam
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
 Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleLogout');
 
-Route::get('/', function () {
-    return view('pages.client.home');
-})->name('home');
-
+//Route::get('/', function () {
+// })->name('home');
+Route::get('/', LabCalendar::class )->name('home');;
+Route::get('/api/bookings', [LabCalendar::class, 'getAllBookings']);
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
 Route::middleware('role:admin')->group(function () {
