@@ -16,6 +16,12 @@ Route::get('/', function () {
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
+Route::middleware('checkAuth')->group(function () {
+    Route::get('/information-user', function () {
+        return view('pages.client.user.infor-user');
+    })->name('client.infor-user');
+});
+
 Route::middleware('role:admin')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/', function () {
