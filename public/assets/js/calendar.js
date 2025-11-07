@@ -104,7 +104,7 @@ async function loadEvent() {
                 category: event.category,
                 backgroundColor: categoryColors[event.category],
                 borderColor: categoryColors[event.category],
-
+                description: event.description
             }
 
         }
@@ -169,8 +169,8 @@ function openCreateModal(start = null, end = null) {
 function closeModal() {
     document.getElementById('eventModal').classList.remove('active');
 }
-
-function saveEvent() {
+//create+update
+async function saveEvent() {
     const id = document.getElementById('eventId').value;
     const title = document.getElementById('eventTitle').value.trim();
     const category = document.getElementById('eventCategory').value;
@@ -184,28 +184,55 @@ function saveEvent() {
         alert('Vui lòng nhập tiêu đề sự kiện');
         return;
     }
-
-    const event = {
-        id: id || Date.now().toString(),
-        title,
+    const API_URL ='/api/bookings';
+    const eventData = {
+         title,
         start: `${startDate}T${startTime}:00`,
         end: `${endDate}T${endTime}:00`,
         category,
         description,
 
     };
+    try {
 
-    if (id) {
-        const index = events.findIndex(e => e.id === id);
-        if (index !== -1) {
-            events[index] = event;
+        let method = 'POST';
+        let url = API_URL;
+
+        if (id) {
+            method = 'PUT';
+             url = `${API_URL}/${id}`;
         }
-    } else {
-        events.push(event);
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(eventData)
+        })
+        if (!response.ok) {
+            const data = await response.json();
+            console.log(data.errors);
+            throw new Error(data.errors);
+        }
+        const savedEvent = await response.json();
+        if(id){
+            const index = events.findIndex(e => e.id == id);
+            if (index !== -1) {
+                events[index] = savedEvent;            }
+        }else{
+            events.push(savedEvent);
+        }
+        updateCalendar();
+        closeModal();
+    } catch (error) {
+        console.log(error);
     }
 
-    updateCalendar();
-    closeModal();
+
+
 }
 
 function showEventDetail(calendarEvent) {
@@ -242,7 +269,7 @@ function closeDetailModal() {
 }
 
 function editEvent() {
-    const event = events.find(e => e.id === currentEventId);
+    const event = events.find(e => e.id == currentEventId);
     if (!event) return;
 
     closeDetailModal();
@@ -251,25 +278,34 @@ function editEvent() {
     document.getElementById('eventId').value = event.id;
     document.getElementById('eventTitle').value = event.title;
     document.getElementById('eventCategory').value = event.category;
-
+    document.getElementById('eventDescription').value = event.description || '';
     const startDate = new Date(event.start);
     const endDate = new Date(event.end);
+    const startLocalDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+    const endLocalDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
 
-    document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0];
-    document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5);
-    document.getElementById('eventEndDate').value = endDate.toISOString().split('T')[0];
-    document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5);
-    document.getElementById('eventDescription').value = event.description || '';
-    document.getElementById('detailCategory').textContent = categoryNames[category] || category;
+    const startTime = startDate.toTimeString().slice(0, 5);
+    const endTime = endDate.toTimeString().slice(0, 5);
+
+    document.getElementById('eventStartDate').value = startLocalDate;
+    document.getElementById('eventStartTime').value = startTime;
+    document.getElementById('eventEndDate').value = endLocalDate;
+    document.getElementById('eventEndTime').value = endTime;
 
     document.getElementById('eventModal').classList.add('active');
 }
 
-function deleteEvent() {
+async function deleteEvent() {
     if (!confirm('Bạn có chắc muốn xóa sự kiện này?')) return;
-
-    events = events.filter(e => e.id !== currentEventId);
-    updateCalendar();
+    const response = await fetch('api/bookings/' + currentEventId,{
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    });
+    events = events.filter(e => e.id != currentEventId);
+     updateCalendar();
     closeDetailModal();
 }
 
@@ -291,3 +327,4 @@ document.getElementById('eventModal').addEventListener('click', function (e) {
 document.getElementById('detailModal').addEventListener('click', function (e) {
     if (e.target === this) closeDetailModal();
 });
+

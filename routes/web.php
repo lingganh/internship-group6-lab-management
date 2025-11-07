@@ -14,7 +14,11 @@ Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleL
 //Route::get('/', function () {
 // })->name('home');
 Route::get('/', LabCalendar::class )->name('home');;
+
 Route::get('/api/bookings', [LabCalendar::class, 'getAllBookings']);
+Route::post('/api/bookings', [LabCalendar::class, 'store']);
+Route::put('/api/bookings/{id}', [LabCalendar::class, 'update']);
+Route::delete('/api/bookings/{id}', [LabCalendar::class, 'destroy']);
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 

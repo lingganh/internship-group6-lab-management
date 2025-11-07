@@ -12,14 +12,14 @@ class LabEvent extends Model
     protected $fillable = [
         'title',
         'category',
-        'start_datetime',
-        'end_datetime',
+        'start',
+        'end',
         'description',
         'location',
     ];
 
     protected $casts = [
-        'start_datetime' => 'datetime',
-        'end_datetime' => 'datetime',
+        'start' => 'datetime',
+        'end' => 'datetime',
     ];
 }
