@@ -209,28 +209,30 @@ function saveEvent() {
 }
 
 function showEventDetail(calendarEvent) {
-    const event = events.find(e => e.id === calendarEvent.id);
-    if (!event) return;
+    const props = calendarEvent.extendedProps;
+    const title = calendarEvent.title;
+    const startDate =  calendarEvent.start;
+    const endDate =calendarEvent.end;
+    const category = props.category;
+    const description = props.description;
 
-    currentEventId = event.id;
-    document.getElementById('detailTitle').textContent = event.title;
-
-    const startDate = new Date(event.start);
-    const endDate = new Date(event.end);
+    // luu cho sua va xoa
+    currentEventId = calendarEvent.id;
+    //format time
     document.getElementById('detailTime').textContent = `${startDate.toLocaleDateString('vi-VN')} ${startDate.toLocaleTimeString('vi-VN', {
         hour: '2-digit',
         minute: '2-digit'
     })} - ${endDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}`;
 
-
-    if (event.description) {
-        document.getElementById('detailDescription').textContent = event.description;
+    if (description) {
+        document.getElementById('detailDescription').textContent = description;
         document.getElementById('detailDescriptionRow').style.display = 'flex';
     } else {
         document.getElementById('detailDescriptionRow').style.display = 'none';
     }
 
-    document.getElementById('detailCategory').textContent = categoryNames[event.category];
+    document.getElementById('detailTitle').textContent = title;
+    document.getElementById('detailCategory').textContent = categoryNames[category];
     document.getElementById('detailModal').classList.add('active');
 }
 
@@ -258,7 +260,7 @@ function editEvent() {
     document.getElementById('eventEndDate').value = endDate.toISOString().split('T')[0];
     document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5);
     document.getElementById('eventDescription').value = event.description || '';
-
+    document.getElementById('detailCategory').textContent = categoryNames[category] || category;
 
     document.getElementById('eventModal').classList.add('active');
 }

@@ -353,6 +353,6 @@
             </div>
         </div>
     </div>
-    <script src="{{ asset('assets/js/calender.js') }}"></script>
+    <script src="{{ asset('assets/js/calendar.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 </div>
