@@ -226,6 +226,7 @@ async function saveEvent() {
             events.push(savedEvent);
         }
         updateCalendar();
+        calendar.refetchEvents();
         closeModal();
     } catch (error) {
         console.log(error);

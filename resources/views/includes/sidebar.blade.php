@@ -79,7 +79,7 @@
                     <a href="{{route('admin.coming-soon')}}"
                        class="nav-link">
                         <i class="ph-note-blank"></i>
-                        <span>Nhật ký - Phản ánh</span>
+                        <span>Nhật ký sử dụng</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -110,6 +110,13 @@
                        class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
                         <i class="ph-user"></i>
                         <span>Người dùng</span>
+                    </a>
+                </li>
+                                <li class="nav-item">
+                    <a href="{{route('admin.coming-soon')}}"
+                       class="nav-link {{ request()->routeIs('admin.coming-soon') ? 'active' : '' }}">
+                        <i class="ph-chart-bar"></i>
+                        <span>Thiết bị</span>
                     </a>
                 </li>
             </ul>

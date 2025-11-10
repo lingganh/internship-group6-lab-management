@@ -21,7 +21,7 @@
                     <div class="status-indicator-container">
                         <i class="ph-newspaper "></i>
                     </div>
-                    <span class="d-none d-lg-inline-block mx-lg-2">Lịch hoạt động - Seminar</span>
+                    <span class="d-none d-lg-inline-block mx-lg-2">Sự kiện</span>
                 </a>
             </li>
             <li class="nav-item ms-lg-2">
@@ -29,7 +29,7 @@
                     <div class="status-indicator-container">
                         <i class="ph-calendar "></i>
                     </div>
-                    <span class="d-none d-lg-inline-block mx-lg-2">Thời khoá biểu</span>
+                    <span class="d-none d-lg-inline-block mx-lg-2">Lịch phòng LAB</span>
                 </a>
             </li>
 
