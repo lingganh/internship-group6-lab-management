@@ -1,6 +1,6 @@
 <x-client-layout>
     <x-slot name="custom_js">
-        <script src="{{ asset('assets/js/client-calender.js') }}"></script>
+        <script src="{{ asset('assets/js/client-calendar.js') }}"></script>
     </x-slot>
     <div class="content">
         <!-- Basic view -->

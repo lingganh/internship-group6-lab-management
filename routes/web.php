@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\GroupController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\client\UserController as ClientController;
+use App\Http\Livewire\LabCalendar;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
@@ -12,16 +13,17 @@ Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->nam
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
 Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleLogout');
 
-//login manual
 Route::get('login', [AuthenticateController::class, 'showLoginForm'])->name('login');
 Route::get('register', [AuthenticateController::class, 'showRegisterForm'])->name('register');
 Route::get('forgot-password', [AuthenticateController::class, 'forgotPassword'])->name('forgotPassword');
 Route::get('set-password/{token}', [AuthenticateController::class, 'setPassword'])->name('setPassword');
 
+Route::get('/', LabCalendar::class )->name('home');;
 
-Route::get('/', function () {
-    return view('pages.client.home');
-})->name('home');
+Route::get('/api/bookings', [LabCalendar::class, 'getAllBookings']);
+Route::post('/api/bookings', [LabCalendar::class, 'store']);
+Route::put('/api/bookings/{id}', [LabCalendar::class, 'update']);
+Route::delete('/api/bookings/{id}', [LabCalendar::class, 'destroy']);
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
