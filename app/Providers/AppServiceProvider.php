@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\View\Components\layouts\AdminLayout;
+use App\View\Components\layouts\AuthLayout;
 use App\View\Components\layouts\ClientLayout;
 use App\View\Components\madals\QuickView;
 use App\View\Components\tables\TableEmpty;
@@ -29,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::component('client-layout', ClientLayout::class);
         Blade::component('table-empty', TableEmpty::class);
         Blade::component('quick-view', QuickView::class);
+        Blade::component('auth-layout', AuthLayout::class);
+
+//dd(env('APP_ENV'));
         if (env('APP_ENV') !== 'local') {
             URL::forceScheme('https');
         }

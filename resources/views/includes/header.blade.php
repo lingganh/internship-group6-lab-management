@@ -49,6 +49,10 @@
                             <i class="ph-gear me-2"></i>
                             Tài khoản
                         </a>
+                        <a href="{{route('client.change-password')}}" class="dropdown-item">
+                            <i class="ph-lock-key me-2"></i>
+                            Đổi mật khẩu
+                        </a>
                         <div class="dropdown-divider"></div>
 
                         <form action="{{route('handleLogout')}}" method="POST">

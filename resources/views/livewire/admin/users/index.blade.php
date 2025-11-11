@@ -29,7 +29,7 @@
                     <th>MÃ SV/GV</th>
                     <th>EMAIL</th>
                     <th>VAI TRÒ</th>
-                    <th>NGÀY TẠO</th>
+                    <th>TRẠNG THÁI</th>
                     <th class="text-center">HÀNH ĐỘNG</th>
                 </tr>
                 </thead>
@@ -43,7 +43,7 @@
                     <td>{{$user->email!=null?$user->email:''}}</td>
 {{--                    <td>{{$user->role->name}}</td>--}}
                     <td>{!! $user->role_text !!}</td>
-                    <td>{{ $user->created_at ? $user->created_at->format('d-m-Y') : '' }}</td>
+                    <td>@if($user->email_verified_at===null && $user->sso_id === null) Chưa xác minh email @elseif($user->email_verified_at===null && $user->sso_id !== null) Chưa thiết lập mật khẩu @elseif($user->email_verified_at!==null && $user->sso_id === null) Chưa thiết lập SSO @else Bình thường  @endif</td>
                     <td class="text-center">
                         <div class="dropdown ">
                             <a href="#" class="text-body" data-bs-toggle="dropdown">
@@ -54,10 +54,13 @@
                                     <i class="ph-note-pencil px-1"></i>
                                     Chỉnh sửa
                                 </a>
-{{--                                <a type="button" @click="$wire.openDeleteModal({{ $user->id }})" href="#" class="dropdown-item">--}}
-{{--                                    <i class="ph-trash px-1"></i>--}}
-{{--                                    Xóa--}}
-{{--                                </a>--}}
+                                @if($user->email_verified_at===null && $user->sso_id === null)
+                                    <a type="button" @click="$wire.openDeleteModal({{ $user->id }})" href="#" class="dropdown-item">
+                                        <i class="ph-trash px-1"></i>
+                                        Xóa
+                                    </a>
+                                @endif
+
                             </div>
                         </div>
                     </td>

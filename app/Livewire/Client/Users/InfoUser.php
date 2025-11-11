@@ -57,7 +57,7 @@ class InfoUser extends Component
     {
         return [
             'fullName' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:users,email,'. auth()->id(),
             'phone' => 'nullable|string|min:10|max:15|regex:/^[0-9+\-\s()]*$/',
             'className' => 'nullable|string|max:100',
             'dateOfBirdth' => 'nullable|date|before:today|after:1900-01-01|date_format:Y-m-d',
@@ -75,7 +75,6 @@ class InfoUser extends Component
         try {
             $user = auth()->user()->update([
                 'full_name' => $this->fullName,
-                'email' => $this->email,
                 'phone' => $this->phone,
                 'class_name' => $this->className,
                 'date_of_birth' => $this->dateOfBirdth?:null,

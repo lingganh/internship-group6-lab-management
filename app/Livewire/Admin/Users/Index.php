@@ -9,8 +9,13 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
+    protected $listeners = [
+        'confirmDeleteUser' => 'deleteUser',
+    ];
+
     use WithPagination;
     public $search='';
+    public $deleteId=null;
 
     public function render()
     {
@@ -23,5 +28,17 @@ class Index extends Component
         return view('livewire.admin.users.index',[
             'users' => $users,
         ]);
+    }
+
+    public function openDeleteModal($id)
+    {
+        $this->deleteId = $id;
+        $this->dispatch('openModel', type:'warning',title:'Bạn có chắc chắn muốn xóa người dùng này không?',confirmEvent:'confirmDeleteUser' );
+
+    }
+
+    public function deleteUser(){
+        User::find($this->deleteId)->delete();
+        $this->dispatch('alert', type:'success', message:'Xóa người dùng thành công!');
     }
 }

@@ -8,6 +8,22 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-6">
+                        <label for="lastLoginAt" class="col-form-label" wire:ignore>
+                            Trạng thái tài khoản:
+                            @if($user->email_verified_at===null && $user->sso_id === null)
+                                <span class="badge fs-14 text-danger">Chưa xác minh email</span>
+                            @elseif($user->email_verified_at===null && $user->sso_id !== null)
+                                <span class="badge fs-14 text-info">Chưa thiết lập mật khẩu</span>
+                            @elseif($user->email_verified_at!==null && $user->sso_id === null)
+                                <span class="badge fs-14 text-info">Chưa thiết lập SSO</span>
+                            @else
+                                <span class="badge fs-14 text-success ">Bình thường</span>
+                            @endif
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
                         <label for="fullName" class="col-form-label" wire:ignore>
                             Họ và Tên: <span class="required">*</span>
                         </label>
@@ -134,6 +150,7 @@
                         @enderror
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -143,11 +160,22 @@
                 <i class="ph-gear-six"></i>
                 Hành động
             </div>
-            <div class="card-body d-flex align-items-center gap-1">
-                <button class="btn btn-primary" @click="$wire.update"><i class="ph-floppy-disk"></i> Cập nhật</button>
+            <div class="card-body d-flex align-items-center gap-1 flex-wrap">
+                <button wire:loading.remove wire:target="update" class="btn btn-primary" @click="$wire.update"><i class="ph-floppy-disk"></i> Cập nhật</button>
+                <button wire:loading wire:target="update" class="btn btn-primary" @click="$wire.update"><i class="ph-spinner-gap animate-spin"></i> Cập nhật</button>
                 <a href="{{route('admin.users.index')}}" type="button" class="btn btn-warning"><i class="ph-arrow-counter-clockwise"></i> Trở lại</a>
+                @if($user->email_verified_at===null && $user->sso_id === null)
+                    <button wire:loading.remove wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-trash"></i> Xóa</button>
+                    <button wire:loading wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-spinner-gap animate-spin"></i> Xóa</button>
+                @else
+                    <a wire:loading.remove wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-lock"></i> Đổi mật khẩu </a>
+                    <a wire:loading wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-spinner-gap animate-spin"></i> Đổi mật khẩu </a>
+                @endif
             </div>
         </div>
     </div>
+    <x-quick-view keyId="change-password" title="Đổi mật khẩu">
+        <livewire:admin.users.change-password :userId="$userId"/>
+    </x-quick-view>
 </div>
 
