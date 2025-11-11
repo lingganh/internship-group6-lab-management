@@ -7,9 +7,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
 
+//login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
 Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleLogout');
+
+//login manual
+Route::get('login', [AuthenticateController::class, 'showLoginForm'])->name('login');
+Route::get('register', [AuthenticateController::class, 'showRegisterForm'])->name('register');
+Route::get('forgot-password', [AuthenticateController::class, 'forgotPassword'])->name('forgotPassword');
+Route::get('set-password/{token}', [AuthenticateController::class, 'setPassword'])->name('setPassword');
+
 
 Route::get('/', function () {
     return view('pages.client.home');
@@ -18,7 +26,8 @@ Route::get('/', function () {
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
 Route::middleware('checkAuth')->group(function () {
-    Route::get('/information-user',[ClientController::class,'infoUser'])->name('client.info-user');
+    Route::get('/thong-tin-tai-khoan',[ClientController::class,'infoUser'])->name('client.info-user');
+    Route::get('/doi-mat-khau',[ClientController::class,'changePassword'])->name('client.change-password');
 });
 
 Route::middleware('role:admin')->group(function () {

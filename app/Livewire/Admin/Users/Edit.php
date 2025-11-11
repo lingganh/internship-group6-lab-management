@@ -14,7 +14,8 @@ use Livewire\Attributes\Validate;
 class Edit extends Component
 {
     protected $listeners = [
-        'confirmUpdateUser' => 'confirmUpdateUser'
+        'confirmUpdateUser' => 'confirmUpdateUser',
+        'delete' => 'delete',
     ];
 
     public $userId;
@@ -49,8 +50,10 @@ class Edit extends Component
 
     public function render()
     {
+        $user = User::find($this->userId);
         return view('livewire.admin.users.edit',[
-            'roles' => Role::displayAll()
+            'roles' => Role::displayAll(),
+            'user' => $user,
         ]);
     }
 
@@ -73,8 +76,8 @@ class Edit extends Component
     {
         return [
             'fullName' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'code' => 'required|string|max:10',
+            'email' => 'required|email|max:255|unique:users,email,'.$this->userId,
+            'code' => 'required|string|max:10|unique:users,code,'.$this->userId,
             'roleName' => 'required|string|in:'.implode(',', array_keys(Role::displayAll())),
             'phone' => 'nullable|string|min:10|max:15|regex:/^[0-9+\-\s()]*$/',
             'className' => 'nullable|string|max:100',
@@ -125,5 +128,22 @@ class Edit extends Component
         return collect($attributes)
             ->map(fn($value) => $value === '' ? null : $value)
             ->toArray();
+    }
+
+    public function openModelDelete()
+    {
+        $this->dispatch('openModel', type:'warning',title:'Bạn có chắc chắn muốn xóa người dùng này không?',confirmEvent:'delete' );
+    }
+
+    public function delete()
+    {
+        User::find($this->userId)->delete();
+        session()->flash('success', 'Xóa người dùng thành công!');
+        return redirect()->route('admin.users.index');
+    }
+
+    public function changePassword()
+    {
+
     }
 }

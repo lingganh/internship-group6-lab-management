@@ -64,9 +64,9 @@
                         @enderror
                     </div>
                     <div class="col-3 d-flex align-items-end">
-                        <button class="btn btn-success @if($groupMemberId===0) disabled @endif" @click="$wire.addUser({{$groupMemberId}})">
-                            <span wire:loading.remove><i class="ph-plus-circle"></i> Thêm</span>
-                            <span wire:loading wire:target="addUser"><i class="ph-spinner-gap"></i> Đang lưu...</span>
+                        <button class="btn btn-success @if($groupMemberId==0) disabled @endif" @click="$wire.addUser({{$groupMemberId}})">
+                            <span wire:loading.remove wire:target="addUser"><i class="ph-plus-circle"></i> Thêm</span>
+                            <span wire:loading wire:target="addUser"><i class="ph-spinner-gap animate-spin"></i> Đang lưu...</span>
                         </button>
                     </div>
                 </div>
@@ -94,10 +94,11 @@
                                         <td>{{$groupMember->code}}</td>
                                         <td>@if($groupMember->id === $leaderId) Trưởng nhóm @else Thành viên @endif</td>
                                         <td>
-                                            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change_president" type="button" class="btn btn-warning"  @click="$wire.QuickView({{$groupMember->id}})"><i class="ph-eye"></i> Xem </a>
+                                            <a wire:loading.remove wire:target="QuickView({{$groupMember->id}})" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#quick-view" type="button" class="btn btn-warning"  @click="$wire.QuickView({{$groupMember->id}})"><i class="ph-eye"></i> Xem </a>
+                                            <a wire:loading wire:target="QuickView({{$groupMember->id}})" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#quick-view" type="button" class="btn btn-warning"  @click="$wire.QuickView({{$groupMember->id}})"><i class="ph-spinner-gap animate-spin"></i> Xem </a>
                                             <button type="button" class="btn btn-danger @if($groupMember->id === $leaderId) disabled @endif" @click="$wire.removeUser({{ $groupMember->id }})">
-                                                <span wire:loading.remove><i class="ph-trash"></i> Xóa</span>
-                                                <span wire:loading wire:target="removeUser({{ $groupMember->id }})"><i class="ph-spinner-gap"></i> Đang xóa ...</span>
+                                                <span wire:loading.remove wire:target="removeUser({{ $groupMember->id }})"><i class="ph-trash"></i> Xóa</span>
+                                                <span wire:loading wire:target="removeUser({{ $groupMember->id }})"><i class="ph-spinner-gap animate-spin"></i> Đang xóa ...</span>
                                             </button>
                                         </td>
                                     </tr>
@@ -123,12 +124,13 @@
                 Hành động
             </div>
             <div class="card-body d-flex align-items-center gap-1">
-                <button class="btn btn-primary" @click="$wire.save"><i class="ph-floppy-disk"></i> Lưu</button>
+                <button wire:loading.remove wire:target="save" class="btn btn-primary" @click="$wire.save"><i class="ph-floppy-disk"></i> Lưu</button>
+                <button wire:loading wire:target="save" class="btn btn-primary" @click="$wire.save"><i class="ph-spinner-gap animate-spin"></i> Lưu</button>
                 <a href="{{route('admin.groups.index')}}" type="button" class="btn btn-warning"><i class="ph-arrow-counter-clockwise"></i> Trở lại</a>
             </div>
         </div>
     </div>
-    <x-quick-view keyId="change_president" title="Thông tin người dùng">
+    <x-quick-view keyId="quick-view" title="Thông tin người dùng">
         <livewire:admin.groups.quick-view :userId="$quickViewUserId" :key="$quickViewUserId"/>
     </x-quick-view>
 </div>

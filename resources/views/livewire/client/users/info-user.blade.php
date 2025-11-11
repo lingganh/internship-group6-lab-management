@@ -63,7 +63,7 @@
                             </label>
                             <div class="input-group">
                                 <input wire:model.live="email" type="text" id="email"
-                                       class="form-control">
+                                       class="form-control" disabled>
                             </div>
                             @error('email')
                             <label id="error-username" class="validation-error-label text-danger"
@@ -99,7 +99,13 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center mb-3 me-3">
-                    <button class="btn btn-primary" @click="$wire.openModel"><i class="ph-floppy-disk"></i> Cập nhật</button>
+                    <button class="btn btn-primary" @click="$wire.openModel" wire:loading.remove wire:target="openModel">
+                        <i class="ph-floppy-disk"></i> Cập nhật
+                    </button>
+                    <button class="btn btn-primary" @click="$wire.openModel" wire:loading wire:target="openModel">
+                        <i class="ph-spinner-gap animate-spin"></i>
+                        Cập nhật
+                    </button>
 
                 </div>
             </div>
