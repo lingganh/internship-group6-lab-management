@@ -95,9 +95,9 @@ class AuthenticateController extends Controller
             //tao moi tai khoan
             else{
                 $userType = $this->determineUserType($userData['role']);
-                if($userData['code']==='CN01' or $userData['code']==='CNP02'){
-                    $userType = Role::Admin->value;
-                }
+//                if($userData['code']==='CN01' or $userData['code']==='CNP02'){
+//                    $userType = Role::Admin->value;
+//                }
                 $roleId = ModelsRole::where('name', $userType)->first()->id;
                 $user = User::create([
                     'full_name' => $userData['full_name'],
