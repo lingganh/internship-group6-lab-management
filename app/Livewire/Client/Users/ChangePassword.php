@@ -52,7 +52,7 @@ class ChangePassword extends Component
                 $user->password = bcrypt($this->newPassword);
                 $user->save();
                 Auth::logout();
-                $this->dispatch('alert',type:'success',message:'Đổi mật khẩu thành công!');
+                session()->flash('success','Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
                 return redirect()->route('login')  ;
             }
         }
