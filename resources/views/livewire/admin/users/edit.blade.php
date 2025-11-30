@@ -150,7 +150,22 @@
                         @enderror
                     </div>
                 </div>
-
+                @if($user->two_factor_confirmed_at)
+                    <div class="row">
+                        <label for="lastLoginAt" class="col-form-label" wire:ignore>
+                            Mã khôi phục tài khoản:
+                        </label>
+                        <div class="alert shadow-sm border-info">
+                            <div class="row g-2 fw-bold text-dark">
+                                @foreach($user->recoveryCodes() as $code)
+                                    <div class="col-6">
+                                        {{ $code }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
