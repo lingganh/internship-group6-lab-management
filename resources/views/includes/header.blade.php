@@ -53,6 +53,10 @@
                             <i class="ph-lock-key me-2"></i>
                             Đổi mật khẩu
                         </a>
+                        <a href="{{route('client.two-factor')}}" class="dropdown-item">
+                            <i class="ph-key me-2"></i>
+                            Xác thực 2 yếu tố
+                        </a>
                         <div class="dropdown-divider"></div>
 
                         <form action="{{route('handleLogout')}}" method="POST">

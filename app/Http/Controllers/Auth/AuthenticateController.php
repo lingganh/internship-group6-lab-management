@@ -134,6 +134,8 @@ class AuthenticateController extends Controller
     public function logout()
     {
         Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
         session()->flash('warning', 'Đăng xuất thành công!');
 
         return redirect()->route('login');

@@ -40,10 +40,10 @@
             </div>
         </div>
         <div class="d-flex align-items-center mb-3">
-            {{--                                <label class="form-check">--}}
-            {{--                                    <input type="checkbox" name="remember" class="form-check-input" value="1">--}}
-            {{--                                    <span class="form-check-label">Nhớ mật khẩu</span>--}}
-            {{--                                </label>--}}
+            <label class="form-check">
+                <input type="checkbox" name="remember" class="form-check-input" value="1" wire:model="remember">
+                <span class="form-check-label">Nhớ mật khẩu</span>
+            </label>
             <a href="{{route('forgotPassword')}}" class="ms-auto">Quên mật khẩu</a>
         </div>
         <div class="mb-3">
