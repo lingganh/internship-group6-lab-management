@@ -24,7 +24,7 @@
                         <img src="{{asset('assets/images/2SV_scene_authenticator_v2_light_7c96b78219755e04538db62d7523eca7.svg')}}" alt="">
                     </div>
                     @if($this->user->two_factor_confirmed_at)
-                        <div class="border p-3 mb-3 rounded">
+                        <div class="border p-3 pb-0 mb-3 rounded">
                             <strong>Mã khôi phục 2FA:</strong>
                             <p>Mã khôi phục cho phép bạn lấy lại quyền truy cập nếu bị mất thiết bị 2FA. Hãy lưu trữ chúng trong trình quản lý mật khẩu an toàn.</p>
 
@@ -52,9 +52,9 @@
                                         class="alert alert-info mt-2 shadow-sm border-info"
                                     >
                                         {{-- Hiển thị dạng lưới 2 cột, font chữ monospace (như code) --}}
-                                        <div class="row g-2 mb-3 font-monospace fw-bold text-dark">
+                                        <div class="row g-2 mb-3 fw-bold text-dark">
                                             @foreach($this->user->recoveryCodes() as $code)
-                                                <div class="col-6">
+                                                <div class="col-sm-12 col-md-6">
                                                     {{ $code }}
                                                 </div>
                                             @endforeach
