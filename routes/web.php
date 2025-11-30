@@ -7,7 +7,8 @@ use App\Http\Livewire\LabCalendar;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
-
+use Livewire\Volt\Volt;
+use Laravel\Fortify\Features;
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
@@ -30,6 +31,14 @@ Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('e
 Route::middleware('checkAuth')->group(function () {
     Route::get('/thong-tin-tai-khoan',[ClientController::class,'infoUser'])->name('client.info-user');
     Route::get('/doi-mat-khau',[ClientController::class,'changePassword'])->name('client.change-password');
+    Route::get('/xac-thuc-2-lop',[ClientController::class,'twoFactor'])->middleware(
+        when(
+            Features::canManageTwoFactorAuthentication()
+            && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+            ['password.confirm'],
+            [],
+        ),
+    )->name('client.two-factor');
 });
 
 Route::middleware('role:admin')->group(function () {

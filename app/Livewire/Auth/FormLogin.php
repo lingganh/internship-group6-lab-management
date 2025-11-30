@@ -15,6 +15,8 @@ class FormLogin extends Component
     #[validate(as: 'Mật khẩu')]
     public string $password='';
 
+    public $remember=false;
+
     public function render()
     {
         return view('livewire.auth.form-login');
@@ -53,8 +55,20 @@ class FormLogin extends Component
             $this->password='';
             return;
         }
+
+        if ($user->two_factor_confirmed_at) {
+            session([
+                'login.id' => $user->id,
+                'login.remember' => $this->remember ?? false // Nếu bạn có checkbox "Ghi nhớ", thay false bằng biến đó
+            ]);
+
+            // Chuyển hướng người dùng sang trang nhập mã OTP
+            return redirect()->to('/two-factor-challenge');
+        }
+
+
         //dang nhap thanh cong
-        Auth::login($user);
+        Auth::login($user, $this->remember ?? false);
         $user->last_login_at = now();
         $user->save();
         session()->flash('success', 'Đăng nhập thành công!');

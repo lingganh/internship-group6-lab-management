@@ -15,4 +15,9 @@ class UserController extends Controller
         return view('pages.client.user.change-password');
 
     }
+
+    public function twoFactor()
+    {
+        return view('pages.auth.two-factor');
+    }
 }
