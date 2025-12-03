@@ -21,10 +21,14 @@ Route::get('set-password/{token}', [AuthenticateController::class, 'setPassword'
 
 Route::get('/', LabCalendar::class )->name('home');;
 
-Route::get('/api/bookings', [LabCalendar::class, 'getAllBookings']);
-Route::post('/api/bookings', [LabCalendar::class, 'store']);
-Route::put('/api/bookings/{id}', [LabCalendar::class, 'update']);
-Route::delete('/api/bookings/{id}', [LabCalendar::class, 'destroy']);
+Route::get('bookings', [LabCalendar::class, 'getAllBookings']);
+
+Route::middleware('auth')->group(function () {
+    Route::post('bookings', [LabCalendar::class, 'store']);
+    Route::put('bookings/{id}', [LabCalendar::class, 'update']);
+    Route::delete('bookings/{id}', [LabCalendar::class, 'destroy']);
+    Route::patch('bookings/{id}/approve', [LabCalendar::class, 'approve']);
+});
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 

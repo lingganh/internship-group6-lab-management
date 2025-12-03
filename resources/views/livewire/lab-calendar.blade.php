@@ -262,10 +262,42 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
+
+        .status-legend {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-dot-pending {
+            background: #ffc107;
+        }
+
+        .status-dot-approved {
+            background: #28a745;
+        }
     </style>
-        <div class="main-content">
-            <div id="calendar"></div>
+
+    <div class="main-content">
+        {{--  trạng thái --}}
+        <div class="status-legend">
+            <span><span class="status-dot status-dot-pending"></span>Chờ duyệt</span>
+            <span><span class="status-dot status-dot-approved"></span>Đã duyệt</span>
         </div>
+
+        <div id="calendar"></div>
+    </div>
+
     <div id="eventModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -315,8 +347,6 @@
                         <label>Mô tả</label>
                         <textarea id="eventDescription" rows="3" placeholder="Thêm mô tả (tùy chọn)"></textarea>
                     </div>
-
-
                 </form>
             </div>
             <div class="modal-footer">
@@ -325,10 +355,12 @@
             </div>
         </div>
     </div>
+
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="event-details">
                 <h2 id="detailTitle"></h2>
+
                 <div class="detail-row">
                     <span class="detail-icon">🕒</span>
                     <span id="detailTime"></span>
@@ -345,6 +377,11 @@
                     <span class="detail-icon">🏷️</span>
                     <span id="detailCategory"></span>
                 </div>
+
+                <div class="detail-row">
+                    <span class="detail-icon">✅</span>
+                    <span id="detailStatus"></span>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" onclick="deleteEvent()">Xóa</button>
@@ -353,6 +390,12 @@
             </div>
         </div>
     </div>
-    <script src="{{ asset('assets/js/calendar.js') }}"></script>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="{{ asset('assets/js/calendar.js') }}"></script>
 </div>

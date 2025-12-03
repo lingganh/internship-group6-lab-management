@@ -22,6 +22,12 @@ class LabCalendar extends Component
 
     public function store(Request $request)
     {
+         if (!auth()->check()) {
+            return response()->json([
+                'type' => 'error',
+                'message' => 'Bạn cần đăng nhập để đăng ký sự kiện.'
+            ], 401);
+        }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'required|string',

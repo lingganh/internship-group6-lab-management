@@ -9,6 +9,12 @@ const categoryColors = {
     other: '#8baf7e'
 };
 
+// màu theo trạng thái
+const statusColors = {
+    pending: '#ffc107',  // vàng: chờ duyệt
+    approved: '#28a745', // xanh: đã duyệt
+};
+
 const categoryNames = {
     work: 'Làm việc - nghiên cứu',
     seminar: 'Hội thảo - Seminar',
@@ -17,6 +23,8 @@ const categoryNames = {
 
 function initCalendar() {
     const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',
         locale: 'vi',
@@ -55,91 +63,80 @@ function initCalendar() {
             updateEventTime(info.event);
         }
     });
-    loadEvent();
 
-    // loadSampleEvents();
+    loadEvent();
     calendar.render();
 }
 
-function loadSampleEvents() {
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-
-//     events = [
-// {
-//     id: '1',
-//     title: 'Nghiên cứu AI',
-//     start: `${today}T09:00:00`,
-//     end: `${today}T11:30:00`,
-//     category: 'work',
-//     description: 'Nghiên cứu về machine learning',
-//     location: 'Phòng LAB 1'
-// },
-// {
-//     id: '2',
-//     title: 'Hội thảo Blockchain',
-//     start: `${today}T14:00:00`,
-//     end: `${today}T17:00:00`,
-//     category: 'seminar',
-//     description: 'Hội thảo về công nghệ blockchain',
-//     location: 'Hội trường A'
-// }
-//     ];
-    updateCalendar();
-}
+// ================== LOAD EVENTS ==================
 
 async function loadEvent() {
-    const response = await fetch('api/bookings');
-    const data = await response.json();
+    try {
+        const response = await fetch('/bookings', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
 
-    events = data.map(
+        const data = await response.json();
+        const raw = Array.isArray(data) ? data : (data.data || []);
 
+        events = raw.map(event => {
+            const isApproved = event.status === 'approved';
+            const bgColor = isApproved
+                ? (categoryColors[event.category] || statusColors.approved)
+                : statusColors.pending;
 
-        event => {
             return {
                 id: event.id,
                 title: event.title,
                 start: event.start,
                 end: event.end,
                 category: event.category,
-                backgroundColor: categoryColors[event.category],
-                borderColor: categoryColors[event.category],
-                description: event.description
-            }
+                description: event.description,
+                status: event.status,
+                backgroundColor: bgColor,
+                borderColor: bgColor
+            };
+        });
 
+        updateCalendar();
+    } catch (err) {
+        console.error(err);
+        if (window.toastr) {
+            toastr.error('Không tải được dữ liệu lịch.');
+        } else {
+            alert('Không tải được dữ liệu lịch.');
         }
-
-)
-
-    updateCalendar();
+    }
 }
 
 function updateCalendar() {
+    if (!calendar) return;
+
     calendar.removeAllEvents();
-    // xóa hết tất cả các event -> mỗi lần thêm mới render
-    // tạo 1 mảng -> lọc add event
+
     const visibleEvents = events.filter(e => !hiddenCategories.has(e.category));
-     visibleEvents.forEach(event => {
-         // const categoryKey = event.category;
-         // const color = categoryColors[categoryKey];
-         // console.log(`Event: "${event.title}", Category: "${categoryKey}", Found Color: "${color}"`);
+
+    visibleEvents.forEach(event => {
         calendar.addEvent({
-            //cấu trúc 1 e
             id: event.id,
             title: event.title,
             start: event.start,
             end: event.end,
-            backgroundColor: categoryColors[event.category],
-            borderColor: categoryColors[event.category],
+            backgroundColor: event.backgroundColor || categoryColors[event.category],
+            borderColor: event.borderColor || categoryColors[event.category],
             extendedProps: {
                 category: event.category,
                 description: event.description,
+                status: event.status
             }
         });
     });
 }
 
-// modal
+// ================== MODAL CREATE / EDIT ==================
+
 function openCreateModal(start = null, end = null) {
     document.getElementById('modalTitle').textContent = 'Tạo sự kiện mới';
     document.getElementById('eventForm').reset();
@@ -169,7 +166,8 @@ function openCreateModal(start = null, end = null) {
 function closeModal() {
     document.getElementById('eventModal').classList.remove('active');
 }
-//create+update
+
+// create + update
 async function saveEvent() {
     const id = document.getElementById('eventId').value;
     const title = document.getElementById('eventTitle').value.trim();
@@ -181,26 +179,26 @@ async function saveEvent() {
     const description = document.getElementById('eventDescription').value.trim();
 
     if (!title) {
-        alert('Vui lòng nhập tiêu đề sự kiện');
+        toastr && toastr.error('Vui lòng nhập tiêu đề sự kiện');
         return;
     }
-    const API_URL ='/api/bookings';
+
+    const API_URL = '/bookings';
     const eventData = {
-         title,
+        title,
         start: `${startDate}T${startTime}:00`,
         end: `${endDate}T${endTime}:00`,
         category,
-        description,
-
+        description
     };
-    try {
 
+    try {
         let method = 'POST';
         let url = API_URL;
 
         if (id) {
             method = 'PUT';
-             url = `${API_URL}/${id}`;
+            url = `${API_URL}/${id}`;
         }
 
         const response = await fetch(url, {
@@ -208,49 +206,73 @@ async function saveEvent() {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content')
             },
             body: JSON.stringify(eventData)
-        })
+        });
+
+        const result = await response.json().catch(() => ({}));
+
         if (!response.ok) {
-            const data = await response.json();
-            console.log(data.errors);
-            throw new Error(data.errors);
+            if (response.status === 401) {
+                toastr && toastr.error(result.message || 'Bạn cần đăng nhập để đăng ký sự kiện.');
+                return;
+            }
+
+            const msg =
+                (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
+                'Có lỗi xảy ra, vui lòng thử lại.';
+            toastr && toastr.error(msg);
+            console.error('Save event error: ', result);
+            return;
         }
-        const savedEvent = await response.json();
-        if(id){
+
+        // backend: { type, message, data } hoặc trả thẳng event
+        const savedEvent = result.data || result;
+        const msg = result.message || (id ? 'Cập nhật sự kiện thành công.' : 'Tạo sự kiện thành công.');
+
+        toastr && toastr.success(msg);
+
+        if (id) {
             const index = events.findIndex(e => e.id == id);
             if (index !== -1) {
-                events[index] = savedEvent;            }
-        }else{
+                events[index] = {
+                    ...events[index],
+                    ...savedEvent
+                };
+            }
+        } else {
             events.push(savedEvent);
         }
+
         updateCalendar();
-        calendar.refetchEvents();
         closeModal();
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        toastr && toastr.error('Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
     }
-
-
-
 }
+
+// ================== MODAL DETAIL ==================
 
 function showEventDetail(calendarEvent) {
     const props = calendarEvent.extendedProps;
     const title = calendarEvent.title;
-    const startDate =  calendarEvent.start;
-    const endDate =calendarEvent.end;
+    const startDate = calendarEvent.start;
+    const endDate = calendarEvent.end;
     const category = props.category;
     const description = props.description;
+    const status = props.status;
 
-    // luu cho sua va xoa
     currentEventId = calendarEvent.id;
-    //format time
-    document.getElementById('detailTime').textContent = `${startDate.toLocaleDateString('vi-VN')} ${startDate.toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit'
-    })} - ${endDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}`;
+
+    document.getElementById('detailTime').textContent =
+        `${startDate.toLocaleDateString('vi-VN')} ${startDate.toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })} - ${endDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}`;
 
     if (description) {
         document.getElementById('detailDescription').textContent = description;
@@ -260,7 +282,13 @@ function showEventDetail(calendarEvent) {
     }
 
     document.getElementById('detailTitle').textContent = title;
-    document.getElementById('detailCategory').textContent = categoryNames[category];
+    document.getElementById('detailCategory').textContent = categoryNames[category] || category;
+
+    const statusEl = document.getElementById('detailStatus');
+    if (statusEl) {
+        statusEl.textContent = status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt';
+    }
+
     document.getElementById('detailModal').classList.add('active');
 }
 
@@ -280,8 +308,10 @@ function editEvent() {
     document.getElementById('eventTitle').value = event.title;
     document.getElementById('eventCategory').value = event.category;
     document.getElementById('eventDescription').value = event.description || '';
+
     const startDate = new Date(event.start);
     const endDate = new Date(event.end);
+
     const startLocalDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
     const endLocalDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
 
@@ -296,36 +326,66 @@ function editEvent() {
     document.getElementById('eventModal').classList.add('active');
 }
 
+// ================== DELETE ==================
+
 async function deleteEvent() {
     if (!confirm('Bạn có chắc muốn xóa sự kiện này?')) return;
-    const response = await fetch('api/bookings/' + currentEventId,{
-        method: 'DELETE',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+
+    try {
+        const response = await fetch('/bookings/' + currentEventId, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content')
+            }
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            const msg = result.message || 'Không thể xóa sự kiện.';
+            toastr && toastr.error(msg);
+            return;
         }
-    });
-    events = events.filter(e => e.id != currentEventId);
-     updateCalendar();
-    closeDetailModal();
+
+        toastr && toastr.success(result.message || 'Đã xóa sự kiện.');
+
+        events = events.filter(e => e.id != currentEventId);
+        updateCalendar();
+        closeDetailModal();
+    } catch (err) {
+        console.error(err);
+        toastr && toastr.error('Lỗi kết nối máy chủ.');
+    }
 }
+
+// ================== UPDATE TIME (DRAG/RESIZE) ==================
 
 function updateEventTime(calendarEvent) {
     const event = events.find(e => e.id === calendarEvent.id);
     if (event) {
         event.start = calendarEvent.start.toISOString();
         event.end = calendarEvent.end.toISOString();
+        // nếu muốn gửi lên server khi kéo thả thì viết thêm fetch PUT ở đây
     }
 }
 
+// ================== INIT & CLICK OUTSIDE ==================
 
 document.addEventListener('DOMContentLoaded', initCalendar);
 
-document.getElementById('eventModal').addEventListener('click', function (e) {
-    if (e.target === this) closeModal();
-});
+const eventModalEl = document.getElementById('eventModal');
+if (eventModalEl) {
+    eventModalEl.addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+}
 
-document.getElementById('detailModal').addEventListener('click', function (e) {
-    if (e.target === this) closeDetailModal();
-});
-
+const detailModalEl = document.getElementById('detailModal');
+if (detailModalEl) {
+    detailModalEl.addEventListener('click', function (e) {
+        if (e.target === this) closeDetailModal();
+    });
+}
