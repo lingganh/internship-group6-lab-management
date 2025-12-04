@@ -9,10 +9,10 @@ const categoryColors = {
     other: '#8baf7e'
 };
 
-// màu theo trạng thái
+
 const statusColors = {
-    pending: '#ffc107',  // vàng: chờ duyệt
-    approved: '#28a745', // xanh: đã duyệt
+    pending: '#ffc107',  
+    approved: '#28a745', 
 };
 
 const categoryNames = {
@@ -50,6 +50,32 @@ function initCalendar() {
         dayMaxEvents: true,
         weekends: true,
         height: 'auto',
+        eventContent: function(arg) {
+    const event = arg.event;
+    const status = event.extendedProps.status;
+
+    const isApproved = status === 'approved';
+
+    const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt';
+    const statusClass = isApproved ? 'fc-status-approved' : 'fc-status-pending';
+     const statusIcon = isApproved
+        ? '<i class="fa-solid fa-circle-check"></i>'
+        : '<i class="fa-solid fa-clock"></i>';
+
+    const html = `
+        <div class="fc-event-main-custom">
+            <div class="fc-event-time">${arg.timeText}</div>
+            <div class="fc-event-title">${event.title}</div>
+            <div class="fc-event-status ${statusClass}">
+                <span class="fc-status-icon">${statusIcon}</span>
+                <span>${statusText}</span>
+            </div>
+        </div>
+    `;
+
+    return { html };
+},
+
         eventClick: function (info) {
             showEventDetail(info.event);
         },
@@ -68,7 +94,6 @@ function initCalendar() {
     calendar.render();
 }
 
-// ================== LOAD EVENTS ==================
 
 async function loadEvent() {
     try {
@@ -82,10 +107,9 @@ async function loadEvent() {
         const raw = Array.isArray(data) ? data : (data.data || []);
 
         events = raw.map(event => {
-            const isApproved = event.status === 'approved';
-            const bgColor = isApproved
-                ? (categoryColors[event.category] || statusColors.approved)
-                : statusColors.pending;
+            // const isApproved = event.status === 'approved';
+               const bgColor = categoryColors[event.category] || '#3788d8';
+
 
             return {
                 id: event.id,
@@ -135,7 +159,6 @@ function updateCalendar() {
     });
 }
 
-// ================== MODAL CREATE / EDIT ==================
 
 function openCreateModal(start = null, end = null) {
     document.getElementById('modalTitle').textContent = 'Tạo sự kiện mới';
@@ -229,7 +252,6 @@ async function saveEvent() {
             return;
         }
 
-        // backend: { type, message, data } hoặc trả thẳng event
         const savedEvent = result.data || result;
         const msg = result.message || (id ? 'Cập nhật sự kiện thành công.' : 'Tạo sự kiện thành công.');
 
@@ -255,7 +277,6 @@ async function saveEvent() {
     }
 }
 
-// ================== MODAL DETAIL ==================
 
 function showEventDetail(calendarEvent) {
     const props = calendarEvent.extendedProps;
@@ -283,10 +304,21 @@ function showEventDetail(calendarEvent) {
 
     document.getElementById('detailTitle').textContent = title;
     document.getElementById('detailCategory').textContent = categoryNames[category] || category;
+    
+     const statusTextEl = document.getElementById('detailStatus');
+    const pendingIcon = document.getElementById('statusPendingIcon');
+    const approvedIcon = document.getElementById('statusApprovedIcon');
 
-    const statusEl = document.getElementById('detailStatus');
-    if (statusEl) {
-        statusEl.textContent = status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt';
+    // reset
+    pendingIcon.style.display = 'none';
+    approvedIcon.style.display = 'none';
+
+    if (status === 'approved') {
+        approvedIcon.style.display = 'inline-block';
+        statusTextEl.textContent = 'Đã duyệt';
+    } else {
+        pendingIcon.style.display = 'inline-block';
+        statusTextEl.textContent = 'Chờ duyệt';
     }
 
     document.getElementById('detailModal').classList.add('active');
@@ -326,7 +358,6 @@ function editEvent() {
     document.getElementById('eventModal').classList.add('active');
 }
 
-// ================== DELETE ==================
 
 async function deleteEvent() {
     if (!confirm('Bạn có chắc muốn xóa sự kiện này?')) return;
@@ -361,7 +392,6 @@ async function deleteEvent() {
     }
 }
 
-// ================== UPDATE TIME (DRAG/RESIZE) ==================
 
 function updateEventTime(calendarEvent) {
     const event = events.find(e => e.id === calendarEvent.id);
@@ -372,7 +402,6 @@ function updateEventTime(calendarEvent) {
     }
 }
 
-// ================== INIT & CLICK OUTSIDE ==================
 
 document.addEventListener('DOMContentLoaded', initCalendar);
 

@@ -12,13 +12,13 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+            box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
             transition: all 0.2s;
         }
 
         .create-btn:hover {
             background: #1765cc;
-            box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+            box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
         }
 
         .container {
@@ -127,7 +127,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -144,7 +144,7 @@
             max-width: 720px;
             max-height: 90vh;
             overflow: auto;
-            box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
         }
 
         .modal-header {
@@ -184,7 +184,7 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #1a73e8;
-            box-shadow: 0 0 0 2px rgba(26,115,232,0.1);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
         }
 
         .modal-footer {
@@ -286,10 +286,51 @@
         .status-dot-approved {
             background: #28a745;
         }
+
+        .fc-event-main-custom {
+            font-size: 11px;
+            line-height: 1.3;
+            color: #fff;
+        }
+
+        .fc-event-main-custom .fc-event-time {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .fc-event-main-custom .fc-event-title {
+            font-weight: 500;
+        }
+
+        .fc-event-main-custom .fc-event-status {
+            font-size: 10px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.95;
+        }
+
+        .fc-event-main-custom .fa-solid {
+            font-size: 11px;
+        }
+
+        .fc-status-pending {
+            color: #fff3cd;
+        }
+
+        .fc-status-approved {
+            color: #d4edda;
+        }
+
+        .fc-timegrid-event .fc-event-main,
+        .fc-timegrid-event .fc-event-main-frame {
+            background: transparent;
+        }
     </style>
 
     <div class="main-content">
-        {{--  trạng thái --}}
+        {{-- trạng thái --}}
         <div class="status-legend">
             <span><span class="status-dot status-dot-pending"></span>Chờ duyệt</span>
             <span><span class="status-dot status-dot-approved"></span>Đã duyệt</span>
@@ -377,11 +418,15 @@
                     <span class="detail-icon">🏷️</span>
                     <span id="detailCategory"></span>
                 </div>
-
-                <div class="detail-row">
-                    <span class="detail-icon">✅</span>
+                <div class="detail-row" id="detailStatusRow">
+                    <span class="detail-icon">
+                        <i id="statusPendingIcon" class="fa-solid fa-clock" style="color:#ffc107; display:none;"></i>
+                        <i id="statusApprovedIcon" class="fa-solid fa-circle-check"
+                            style="color:#28a745; display:none;"></i>
+                    </span>
                     <span id="detailStatus"></span>
                 </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" onclick="deleteEvent()">Xóa</button>
@@ -391,11 +436,15 @@
         </div>
     </div>
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     <script src="{{ asset('assets/js/calendar.js') }}"></script>
+
+
 </div>
