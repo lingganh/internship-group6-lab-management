@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SettingPassword;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Throwable;
 use App\Enums\Role;
 use App\Models\Role as ModelsRole;
@@ -75,20 +80,44 @@ class AuthenticateController extends Controller
             ]);
         }
         else{
-            $userType = $this->determineUserType($userData['role']);
-            if($userData['code']==='CN01' or $userData['code']==='CNP02'){
-                $userType = Role::Admin->value;
+            $user = User::where('code',$userData['code'])->first();
+            if($user){
+                //cap nhat sso_id neu da co tai khoan truoc do
+                $user->update([
+                    'sso_id' => $userData['id'],
+                    'access_token' => $userData['access_token'],
+                    'full_name' => $userData['full_name'],
+                    'email' => $userData['email'],
+                    'last_login_at'=> now(),
+                ]);
+                return User::where('sso_id',$userData['id'])->first();
             }
-            $roleId = ModelsRole::where('name', $userType)->first()->id;
-            $user = User::create([
-                'full_name' => $userData['full_name'],
-                'email' => $userData['email'],
-                'sso_id' => $userData['id'],
-                'code' => $userData['code'] ?? null,
-                'last_login_at' => now(),
-                'access_token' => $userData['access_token'],
-                'role_id' => $roleId,
-            ]);
+            //tao moi tai khoan
+            else{
+                $userType = $this->determineUserType($userData['role']);
+//                if($userData['code']==='CN01' or $userData['code']==='CNP02'){
+//                    $userType = Role::Admin->value;
+//                }
+                $roleId = ModelsRole::where('name', $userType)->first()->id;
+                $user = User::create([
+                    'full_name' => $userData['full_name'],
+                    'email' => $userData['email'],
+                    'sso_id' => $userData['id'],
+                    'code' => $userData['code'] ?? null,
+                    'last_login_at' => now(),
+                    'access_token' => $userData['access_token'],
+                    'role_id' => $roleId,
+                ]);
+                $token = Str::random(64);
+                DB::table('password_reset_tokens')->updateOrInsert(
+                    [   'email' => $user->email,],
+                    [
+                        'token' => $token,
+                        'created_at' => Carbon::now()
+                    ]);
+
+                Mail::to($user->email)->queue(new SettingPassword($user, $token));
+            }
         }
         return $user;
     }
@@ -105,8 +134,56 @@ class AuthenticateController extends Controller
     public function logout()
     {
         Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
         session()->flash('warning', 'Đăng xuất thành công!');
 
-        return redirect()->route('home');
+        return redirect()->route('login');
     }
+
+    public function showLoginForm()
+    {
+        if(auth()->check()){
+            return redirect()->route('home');
+        }
+        return view('pages.auth.login');
+    }
+
+    public function showRegisterForm()
+    {
+        if(auth()->check()){
+            return redirect()->route('home');
+        }
+        return view('pages.auth.register');
+
+    }
+
+    public function setPassword($token)
+    {
+        $verifyToken = DB::table('password_reset_tokens')
+            ->where('token', $token)
+            ->first();
+        if (!$verifyToken) {
+            return redirect()->route('home')->with('error', 'Liên kết không hợp lệ.');
+        }
+        elseif (Carbon::parse($verifyToken->created_at)->addMinutes(60)->isPast()) {
+            return redirect()->route('home')->with('error', 'Liên kết đã hết hạn.');
+        }
+        $hasUser = User::where('email', $verifyToken->email)->first();
+        if(!$hasUser){
+            return redirect()->route('home')->with('error', 'Người dùng không tồn tại.');
+        }
+
+        session()->flash('success', 'Xác minh thành công! Vui lòng thiết lập mật khẩu.');
+        return view('pages.auth.set-password', [
+            'token' => $token,
+            'email' => $verifyToken->email,
+        ]);
+    }
+
+    public function forgotPassword()
+    {
+        return view('pages.auth.forgot-password');
+    }
+
 }

@@ -34,7 +34,9 @@ class Edit extends Component
 
     public function render()
     {
-        $users = User::all();
+        $users = User::where('sso_id' , '!=', null)
+            ->orWhere('email_verified_at', '!=', null)
+            ->orderBy('full_name')->get();
         $status= GroupStatus::displayAll();
         return view('livewire.admin.groups.edit',
         [

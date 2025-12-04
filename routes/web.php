@@ -3,22 +3,42 @@
 use App\Http\Controllers\admin\GroupController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\client\UserController as ClientController;
+use App\Http\Livewire\LabCalendar;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
-
+use Livewire\Volt\Volt;
+use Laravel\Fortify\Features;
+//login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
 Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleLogout');
 
-Route::get('/', function () {
-    return view('pages.client.home');
-})->name('home');
+Route::get('login', [AuthenticateController::class, 'showLoginForm'])->name('login');
+Route::get('register', [AuthenticateController::class, 'showRegisterForm'])->name('register');
+Route::get('forgot-password', [AuthenticateController::class, 'forgotPassword'])->name('forgotPassword');
+Route::get('set-password/{token}', [AuthenticateController::class, 'setPassword'])->name('setPassword');
+
+Route::get('/', LabCalendar::class )->name('home');;
+
+Route::get('/api/bookings', [LabCalendar::class, 'getAllBookings']);
+Route::post('/api/bookings', [LabCalendar::class, 'store']);
+Route::put('/api/bookings/{id}', [LabCalendar::class, 'update']);
+Route::delete('/api/bookings/{id}', [LabCalendar::class, 'destroy']);
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
 Route::middleware('checkAuth')->group(function () {
-    Route::get('/information-user',[ClientController::class,'infoUser'])->name('client.info-user');
+    Route::get('/thong-tin-tai-khoan',[ClientController::class,'infoUser'])->name('client.info-user');
+    Route::get('/doi-mat-khau',[ClientController::class,'changePassword'])->name('client.change-password');
+    Route::get('/xac-thuc-2-lop',[ClientController::class,'twoFactor'])->middleware(
+        when(
+            Features::canManageTwoFactorAuthentication()
+            && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+            ['password.confirm'],
+            [],
+        ),
+    )->name('client.two-factor');
 });
 
 Route::middleware('role:admin')->group(function () {

@@ -32,7 +32,9 @@ class Create extends Component
 
     public function render()
     {
-        $users = User::all();
+        $users = User::where('sso_id' , '!=', null)
+            ->orWhere('email_verified_at', '!=', null)
+            ->orderBy('full_name')->get();
         return view('livewire.admin.groups.create',
         [
             'users' => $users,

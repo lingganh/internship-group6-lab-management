@@ -21,7 +21,7 @@
                     <div class="status-indicator-container">
                         <i class="ph-newspaper "></i>
                     </div>
-                    <span class="d-none d-lg-inline-block mx-lg-2">Lịch hoạt động - Seminar</span>
+                    <span class="d-none d-lg-inline-block mx-lg-2">Sự kiện</span>
                 </a>
             </li>
             <li class="nav-item ms-lg-2">
@@ -29,7 +29,7 @@
                     <div class="status-indicator-container">
                         <i class="ph-calendar "></i>
                     </div>
-                    <span class="d-none d-lg-inline-block mx-lg-2">Thời khoá biểu</span>
+                    <span class="d-none d-lg-inline-block mx-lg-2">Lịch phòng LAB</span>
                 </a>
             </li>
 
@@ -62,6 +62,14 @@
                             <i class="ph-user me-2"></i>
                             Tài khoản
                         </a>
+                        <a href="{{route('client.change-password')}}" class="dropdown-item">
+                            <i class="ph-lock-key me-2"></i>
+                            Đổi mật khẩu
+                        </a>
+                        <a href="{{route('client.two-factor')}}" class="dropdown-item">
+                            <i class="ph-key me-2"></i>
+                            Xác thực 2 yếu tố
+                        </a>
                         <div class="dropdown-divider"></div>
 
                         <form action="{{route('handleLogout')}}" method="POST">
@@ -75,7 +83,7 @@
                 </li>
             @else
                 <li class="nav-item nav-item-dropdown-lg dropdown ms-lg-2">
-                    <a href="{{route('sso.redirect')}}" class="navbar-nav-link align-items-center rounded-pill p-1">
+                    <a href="{{route('login')}}" class="navbar-nav-link align-items-center rounded-pill p-1">
                         <div class="status-indicator-container">
                             <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt="">
                         </div>

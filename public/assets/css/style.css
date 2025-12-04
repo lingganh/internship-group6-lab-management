@@ -103,3 +103,62 @@ div:where(.swal2-icon) .swal2-icon-content{
     align-items: center;
 }
 
+.forget-pass-arrow{
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    font-size: 2em;
+    color: #1376bc;
+}
+
+.btn{
+    position: relative;
+}
+
+.btn-loading{
+    /*position: absolute;*/
+    /*top: 50%;*/
+    /*left: 50%;*/
+    /*transform: translate(-50%, -50%);*/
+}
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.fs-14{
+    font-size: 14px !important;
+}
+
+.modal-custom{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+    border-radius: 8px;
+
+}
+.modal-custom .modal-dialog{
+
+}
+.modal-custom .modal-dialog .modal-header{
+    padding: 20px;
+    border-bottom: 1px solid #D1D5DB;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
