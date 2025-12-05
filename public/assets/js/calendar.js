@@ -12,8 +12,8 @@ const categoryColors = {
 
 
 const statusColors = {
-    pending: '#ffc107',  
-    approved: '#28a745', 
+    pending: '#ffc107',
+    approved: '#28a745',
 };
 
 const categoryNames = {
@@ -55,19 +55,19 @@ function initCalendar() {
         dayMaxEvents: true,
         weekends: true,
         height: 'auto',
-        eventContent: function(arg) {
-    const event = arg.event;
-    const status = event.extendedProps.status;
+        eventContent: function (arg) {
+            const event = arg.event;
+            const status = event.extendedProps.status;
 
-    const isApproved = status === 'approved';
+            const isApproved = status === 'approved';
 
-    const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt';
-    const statusClass = isApproved ? 'fc-status-approved' : 'fc-status-pending';
-     const statusIcon = isApproved
-        ? '<i class="fa-solid fa-circle-check"></i>'
-        : '<i class="fa-solid fa-clock"></i>';
+            const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt';
+            const statusClass = isApproved ? 'fc-status-approved' : 'fc-status-pending';
+            const statusIcon = isApproved
+                ? '<i class="fa-solid fa-circle-check"></i>'
+                : '<i class="fa-solid fa-clock"></i>';
 
-    const html = `
+            const html = `
         <div class="fc-event-main-custom">
             <div class="fc-event-time">${arg.timeText}</div>
             <div class="fc-event-title">${event.title}</div>
@@ -78,8 +78,8 @@ function initCalendar() {
         </div>
     `;
 
-    return { html };
-},
+            return { html };
+        },
 
         eventClick: function (info) {
             showEventDetail(info.event);
@@ -145,7 +145,7 @@ function initFiltersAndButtons() {
     const createBtn = document.querySelector('.js-open-create-event');
     if (createBtn) {
         createBtn.addEventListener('click', function () {
-            openCreateModal(); 
+            openCreateModal();
         });
     }
 }
@@ -163,7 +163,7 @@ async function loadEvent() {
 
         events = raw.map(event => {
             // const isApproved = event.status === 'approved';
-               const bgColor = categoryColors[event.category] || '#3788d8';
+            const bgColor = categoryColors[event.category] || '#3788d8';
 
 
             return {
@@ -195,7 +195,7 @@ function updateCalendar() {
 
     calendar.removeAllEvents();
 
-      const visibleEvents = events.filter(e =>
+    const visibleEvents = events.filter(e =>
         !hiddenCategories.has(e.category) &&
         !hiddenStatuses.has(e.status)
     );
@@ -297,7 +297,7 @@ async function saveEvent() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                toastr && toastr.error( 'Bạn cần đăng nhập để đăng ký sự kiện.');
+                toastr && toastr.error('Bạn cần đăng nhập để đăng ký sự kiện.');
                 return;
             }
 
@@ -350,7 +350,7 @@ function showEventDetail(calendarEvent) {
         `${startDate.toLocaleDateString('vi-VN')} ${startDate.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit'
-        })} - ${endDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}`;
+        })} - ${endDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
 
     if (description) {
         document.getElementById('detailDescription').textContent = description;
@@ -361,8 +361,8 @@ function showEventDetail(calendarEvent) {
 
     document.getElementById('detailTitle').textContent = title;
     document.getElementById('detailCategory').textContent = categoryNames[category] || category;
-    
-     const statusTextEl = document.getElementById('detailStatus');
+
+    const statusTextEl = document.getElementById('detailStatus');
     const pendingIcon = document.getElementById('statusPendingIcon');
     const approvedIcon = document.getElementById('statusApprovedIcon');
 
@@ -417,7 +417,7 @@ function editEvent() {
 
 
 function deleteEvent() {
-     document.getElementById('confirmDeleteModal').classList.add('active');
+    document.getElementById('confirmDeleteModal').classList.add('active');
 }
 
 function closeConfirmDelete() {
@@ -426,7 +426,7 @@ function closeConfirmDelete() {
 
 async function confirmDelete() {
     closeConfirmDelete();
-    
+
     try {
         const response = await fetch('/bookings/' + currentEventId, {
             method: 'DELETE',
@@ -448,7 +448,7 @@ async function confirmDelete() {
 
         toastr && toastr.success(result.message || 'Đã xóa sự kiện.');
 
-         await loadEvent();
+        await loadEvent();
         closeDetailModal();
     } catch (err) {
         console.error(err);
@@ -481,7 +481,7 @@ async function updateEventTime(calendarEvent) {
                 (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
                 'Không thể cập nhật thời gian.';
             toastr && toastr.error(msg);
-            calendarEvent.revert(); 
+            calendarEvent.revert();
             return;
         }
 
@@ -528,7 +528,7 @@ function initMiniCalendar() {
     const mini = new FullCalendar.Calendar(miniEl, {
         initialView: 'dayGridMonth',
         locale: 'vi',
-        firstDay: 0,  
+        firstDay: 0,
         headerToolbar: {
             left: 'prev',
             center: 'title',
@@ -538,7 +538,7 @@ function initMiniCalendar() {
             prev: '‹',
             next: '›'
         },
-        height: 'auto',           
+        height: 'auto',
         contentHeight: 'auto',
         expandRows: true,
         fixedWeekCount: false,
@@ -547,7 +547,7 @@ function initMiniCalendar() {
         dayMaxEvents: false,
         navLinks: false,
         dateClick: function (info) {
-             if (calendar) {
+            if (calendar) {
                 calendar.gotoDate(info.date);
             }
         }
