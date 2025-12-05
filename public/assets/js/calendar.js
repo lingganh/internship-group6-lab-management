@@ -2,6 +2,7 @@ let calendar;
 let events = [];
 let currentEventId = null;
 let hiddenCategories = new Set();
+let hiddenStatuses = new Set();
 
 const categoryColors = {
     work: '#c6006a',
@@ -93,11 +94,61 @@ function initCalendar() {
             updateEventTime(info.event);
         }
     });
+    // GAN CHO TAO SK 
+    initFiltersAndButtons();
 
     loadEvent();
     calendar.render();
 }
 
+// checkbox va tao su kien
+function initFiltersAndButtons() {
+    // status
+    const statusCheckboxes = document.querySelectorAll('[data-filter-status]');
+    statusCheckboxes.forEach(cb => {
+        const status = cb.getAttribute('data-filter-status');
+
+        if (!cb.checked) {
+            hiddenStatuses.add(status);
+        }
+
+        cb.addEventListener('change', function () {
+            if (this.checked) {
+                hiddenStatuses.delete(status);
+            } else {
+                hiddenStatuses.add(status);
+            }
+            updateCalendar();
+        });
+    });
+
+    //filter theo loai sk 
+    const categoryCheckboxes = document.querySelectorAll('[data-filter-category]');
+    categoryCheckboxes.forEach(cb => {
+        const cat = cb.getAttribute('data-filter-category');
+
+        if (!cb.checked) {
+            hiddenCategories.add(cat);
+        }
+
+        cb.addEventListener('change', function () {
+            if (this.checked) {
+                hiddenCategories.delete(cat);
+            } else {
+                hiddenCategories.add(cat);
+            }
+            updateCalendar();
+        });
+    });
+
+    // tao sk 
+    const createBtn = document.querySelector('.js-open-create-event');
+    if (createBtn) {
+        createBtn.addEventListener('click', function () {
+            openCreateModal(); 
+        });
+    }
+}
 
 async function loadEvent() {
     try {
@@ -144,8 +195,10 @@ function updateCalendar() {
 
     calendar.removeAllEvents();
 
-    const visibleEvents = events.filter(e => !hiddenCategories.has(e.category));
-
+      const visibleEvents = events.filter(e =>
+        !hiddenCategories.has(e.category) &&
+        !hiddenStatuses.has(e.status)
+    );
     visibleEvents.forEach(event => {
         calendar.addEvent({
             id: event.id,
