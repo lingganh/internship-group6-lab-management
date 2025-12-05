@@ -22,8 +22,12 @@ const categoryNames = {
 };
 
 function initCalendar() {
+
+    initMiniCalendar();
+
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
+    const canCreate = window.LAB_USER && window.LAB_USER.logged_in;
 
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',
@@ -41,12 +45,12 @@ function initCalendar() {
             day: 'Ngày'
         },
         slotMinTime: '07:00:00',
-        slotMaxTime: '19:00:00',
+        slotMaxTime: '24:00:00',
         allDaySlot: false,
         nowIndicator: true,
         editable: true,
-        selectable: true,
         selectMirror: true,
+        selectable: canCreate,
         dayMaxEvents: true,
         weekends: true,
         height: 'auto',
@@ -240,7 +244,7 @@ async function saveEvent() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                toastr && toastr.error(result.message || 'Bạn cần đăng nhập để đăng ký sự kiện.');
+                toastr && toastr.error( 'Bạn cần đăng nhập để đăng ký sự kiện.');
                 return;
             }
 
@@ -359,9 +363,17 @@ function editEvent() {
 }
 
 
-async function deleteEvent() {
-    if (!confirm('Bạn có chắc muốn xóa sự kiện này?')) return;
+function deleteEvent() {
+     document.getElementById('confirmDeleteModal').classList.add('active');
+}
 
+function closeConfirmDelete() {
+    document.getElementById('confirmDeleteModal').classList.remove('active');
+}
+
+async function confirmDelete() {
+    closeConfirmDelete();
+    
     try {
         const response = await fetch('/bookings/' + currentEventId, {
             method: 'DELETE',
@@ -383,24 +395,61 @@ async function deleteEvent() {
 
         toastr && toastr.success(result.message || 'Đã xóa sự kiện.');
 
-        events = events.filter(e => e.id != currentEventId);
-        updateCalendar();
+         await loadEvent();
         closeDetailModal();
     } catch (err) {
         console.error(err);
         toastr && toastr.error('Lỗi kết nối máy chủ.');
     }
 }
+async function updateEventTime(calendarEvent) {
+    const id = calendarEvent.id;
 
+    const start = calendarEvent.start.toISOString();
+    const end = calendarEvent.end.toISOString();
 
-function updateEventTime(calendarEvent) {
-    const event = events.find(e => e.id === calendarEvent.id);
-    if (event) {
-        event.start = calendarEvent.start.toISOString();
-        event.end = calendarEvent.end.toISOString();
-        // nếu muốn gửi lên server khi kéo thả thì viết thêm fetch PUT ở đây
+    try {
+        const response = await fetch(`/bookings/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content')
+            },
+            body: JSON.stringify({ start, end })
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            const msg =
+                (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
+                'Không thể cập nhật thời gian.';
+            toastr && toastr.error(msg);
+            calendarEvent.revert(); 
+            return;
+        }
+
+        // update  mảng events local
+        const index = events.findIndex(e => e.id == id);
+        if (index !== -1) {
+            events[index] = {
+                ...events[index],
+                ...result.data
+            };
+        }
+
+        toastr && toastr.success(result.message || 'Đã cập nhật thời gian sự kiện.');
+        updateCalendar();
+    } catch (err) {
+        console.error(err);
+        toastr && toastr.error('Lỗi kết nối khi cập nhật.');
+        calendarEvent.revert();
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', initCalendar);
@@ -417,4 +466,39 @@ if (detailModalEl) {
     detailModalEl.addEventListener('click', function (e) {
         if (e.target === this) closeDetailModal();
     });
+}
+// mini calendar
+function initMiniCalendar() {
+    const miniEl = document.getElementById('miniCalendar');
+    if (!miniEl) return;
+
+    const mini = new FullCalendar.Calendar(miniEl, {
+        initialView: 'dayGridMonth',
+        locale: 'vi',
+        firstDay: 0,  
+        headerToolbar: {
+            left: 'prev',
+            center: 'title',
+            right: 'next'
+        },
+        buttonText: {
+            prev: '‹',
+            next: '›'
+        },
+        height: 'auto',           
+        contentHeight: 'auto',
+        expandRows: true,
+        fixedWeekCount: false,
+        showNonCurrentDates: true,
+        selectable: false,
+        dayMaxEvents: false,
+        navLinks: false,
+        dateClick: function (info) {
+             if (calendar) {
+                calendar.gotoDate(info.date);
+            }
+        }
+    });
+
+    mini.render();
 }
