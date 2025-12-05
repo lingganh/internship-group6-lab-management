@@ -45,7 +45,7 @@ function initCalendar() {
             day: 'Ngày'
         },
         slotMinTime: '07:00:00',
-        slotMaxTime: '24:00:00',
+        slotMaxTime: '19:00:00',
         allDaySlot: false,
         nowIndicator: true,
         editable: true,
