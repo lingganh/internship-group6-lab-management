@@ -27,7 +27,6 @@
 	 php artisan key:generate
 	 php artisan migrate
 	 php artisan db:seed --class=DatabaseSeeder
-     php artisan scribe:generate
 	 php artisan storage:link
 	 php artisan route:clear
 	 php artisan config:clear
