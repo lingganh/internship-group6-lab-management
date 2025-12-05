@@ -9,6 +9,9 @@ use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
 use Livewire\Volt\Volt;
 use Laravel\Fortify\Features;
+use App\Livewire\Admin\Equipment\Index;
+use App\Livewire\Admin\Equipment\Create;
+use App\Livewire\Admin\Equipment\Edit;
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
@@ -60,7 +63,11 @@ Route::middleware('role:admin')->group(function () {
     });
 });
 
-
+Route::prefix('admin')->group(function () {
+    Route::get('/equipment', Index::class)->name('equipment.index');
+    Route::get('/equipment/create', Create::class)->name('equipment.create');
+    Route::get('/equipment/{id}/edit', Edit::class)->name('equipment.edit');
+});
 
 
 Route::get('coming-soon', fn () => view('coming-soon'))->name('admin.coming-soon');
