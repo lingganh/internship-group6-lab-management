@@ -5,9 +5,9 @@ let hiddenCategories = new Set();
 let hiddenStatuses = new Set();
 
 const categoryColors = {
-    work: '#c6006a',
-    seminar: '#5b11ab',
-    other: '#8baf7e'
+    work: '#bc307bff',
+    seminar: '#c4b517ff',
+    other: '#4d6d41ff'
 };
 
 
@@ -163,7 +163,7 @@ async function loadEvent() {
 
         events = raw.map(event => {
             // const isApproved = event.status === 'approved';
-            const bgColor = categoryColors[event.category] || '#3788d8';
+            const bgColor = categoryColors[event.category] || '#e4f1c4ff';
 
 
             return {
@@ -216,7 +216,9 @@ function updateCalendar() {
     });
 }
 
-
+//  <!-- self-note
+//         fullcalender -> truyền sẵn start và end 
+//     -->
 function openCreateModal(start = null, end = null) {
     document.getElementById('modalTitle').textContent = 'Tạo sự kiện mới';
     document.getElementById('eventForm').reset();
@@ -224,8 +226,8 @@ function openCreateModal(start = null, end = null) {
 
     if (start) {
         const startDate = new Date(start);
-        document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0];
-        document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5);
+        document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]; // validate 2025-12-06T13:00:00.000Z --> tách trc chữ T 
+        document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5); // validate 13:00:00 GMT+0700 --> 13:00 --> lấy ký tự từ 0 đến 4 
 
         if (end) {
             const endDate = new Date(end);
