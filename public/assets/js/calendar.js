@@ -259,6 +259,7 @@ async function saveEvent() {
     const endDate = document.getElementById('eventEndDate').value;
     const endTime = document.getElementById('eventEndTime').value;
     const description = document.getElementById('eventDescription').value.trim();
+    const filesInput = document.getElementById('eventFiles');
 
     if (!title) {
         toastr && toastr.error('Vui lòng nhập tiêu đề sự kiện');
@@ -266,14 +267,25 @@ async function saveEvent() {
     }
 
     const API_URL = '/bookings';
-    const eventData = {
-        title,
-        start: `${startDate}T${startTime}:00`,
-        end: `${endDate}T${endTime}:00`,
-        category,
-        description
-    };
-
+    // const eventData = {
+    //     title,
+    //     start: `${startDate}T${startTime}:00`,
+    //     end: `${endDate}T${endTime}:00`,
+    //     category,
+    //     description
+        
+    // };
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('category', category);
+    formData.append('start', `${startDate}T${startTime}:00`);
+    formData.append('end', `${endDate}T${endTime}:00`);
+    formData.append('description', description);
+      if (filesInput && filesInput.files.length > 0) {
+        Array.from(filesInput.files).forEach(file => {
+            formData.append('files[]', file);
+        });
+    }
     try {
         let method = 'POST';
         let url = API_URL;
@@ -286,13 +298,12 @@ async function saveEvent() {
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document
                     .querySelector('meta[name="csrf-token"]')
                     .getAttribute('content')
             },
-            body: JSON.stringify(eventData)
+            body: formData
         });
 
         const result = await response.json().catch(() => ({}));
@@ -360,7 +371,7 @@ function showEventDetail(calendarEvent) {
     } else {
         document.getElementById('detailDescriptionRow').style.display = 'none';
     }
-
+    document.getElementById('detailFile').
     document.getElementById('detailTitle').textContent = title;
     document.getElementById('detailCategory').textContent = categoryNames[category] || category;
 
