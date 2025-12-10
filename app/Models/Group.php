@@ -15,9 +15,9 @@ class Group extends Model
         'leader_id',
     ];
 
-    public function users():BelongsToMany
+    public function students():BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'group_user', 'group_id', 'user_id');
+        return $this->belongsToMany(Student::class, 'group_student', 'group_id', 'student_id');
     }
 
     public function leader():BelongsTo

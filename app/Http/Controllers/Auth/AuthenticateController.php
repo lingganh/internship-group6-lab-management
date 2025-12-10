@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Mail\SettingPassword;
 use App\Models\User;
@@ -35,7 +36,24 @@ class AuthenticateController extends Controller
                 return abort(401);
             }
             $userData = $this->getUserData($data['access_token']);
+
+            if(!str_contains($userData['email'], '@vnua.edu.vn')){
+                session()->flash('error', 'Hệ thống chỉ cho phép đăng nhập từ tài khoản Giảng Viên VNUA.');
+                return redirect()->route('login');
+            }
+
             $user = $this->findOrCreateUser($userData, $data['access_token']);
+
+            if($user->status === UserStatus::Pending->value){
+                session()->flash('warning', 'Tài khoản của bạn đang chờ phê duyệt. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+                return 0;
+            }
+
+            if($user->status === UserStatus::Archived->value){
+                session()->flash('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+                return 0;
+            }
+
             Auth::login($user);
             session()->flash('success', 'Đăng nhập thành công!');
             return redirect()->route('home');
@@ -104,6 +122,7 @@ class AuthenticateController extends Controller
                     'email' => $userData['email'],
                     'sso_id' => $userData['id'],
                     'code' => $userData['code'] ?? null,
+                    'status' => UserStatus::Pending->value,
                     'last_login_at' => now(),
                     'access_token' => $userData['access_token'],
                     'role_id' => $roleId,

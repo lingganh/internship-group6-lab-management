@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,6 +21,7 @@ class UserSeeder extends Seeder
             'email' => 'superadmin@st.vn',
             'role_id' => 1,
             'password' => '123456aA@',
+            'status' => UserStatus::Approved->value,
             'email_verified_at' => now(),
         ]);
     }

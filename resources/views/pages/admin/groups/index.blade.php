@@ -4,7 +4,7 @@
             <div class="page-header-content d-lg-flex">
                 <div class="d-flex">
                     <h4 class="page-title mb-0">
-                        Danh sách nhóm
+                        Danh sách nhóm NCKH
                     </h4>
 
                     <a href="#page_header" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
@@ -19,7 +19,7 @@
                     <div class="breadcrumb py-2">
                         <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
                         {{--                        <a href="{{route('admin.users.index')}}" class="breadcrumb-item">Người dùng</a>--}}
-                        <span class="breadcrumb-item active">Danh sách nhóm người dùng</span>
+                        <span class="breadcrumb-item active">Danh sách nhóm NCKH</span>
                     </div>
 
                     <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">

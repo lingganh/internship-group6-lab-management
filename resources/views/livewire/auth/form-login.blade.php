@@ -15,9 +15,9 @@
         @enderror
 
         <div class="mb-3">
-            <label class="form-label">Mã SV-GV/Email</label>
+            <label class="form-label">Mã GV/Email</label>
             <div class="form-control-feedback form-control-feedback-start">
-                <input wire:model.live="username" type="text" class="form-control @error('username') is-invalid @enderror" placeholder=" Mã SV/GV hoặc Email " name="username" id="username" value="{{ old('username') }}"/>
+                <input wire:model.live="username" type="text" class="form-control @error('username') is-invalid @enderror" placeholder=" Mã GV hoặc Email " name="username" id="username" value="{{ old('username') }}"/>
                 <div class="form-control-feedback-icon">
                     <i class="ph-user-circle text-muted"></i>
                 </div>
@@ -56,7 +56,7 @@
             <span class="px-2">Hoặc đăng nhập với</span>
         </div>
         <div class="text-center mb-3">
-            <a href="{{route('sso.redirect')}}" class="btn btn-outline-primary btn-icon border-width-2 w-100">
+            <a href="{{route('sso.redirect')}}" class="btn btn-outline-primary btn-icon border-width-2 w-100 disabled">
                 Hệ thống ST Single Sign-On
             </a>
         </div>
