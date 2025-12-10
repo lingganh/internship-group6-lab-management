@@ -182,3 +182,8 @@ input[type=number] {
 .table-group-custom td{
     padding: 8px 4px;
 }
+
+.navbar-footer {
+    margin-top: auto;   
+}
+
