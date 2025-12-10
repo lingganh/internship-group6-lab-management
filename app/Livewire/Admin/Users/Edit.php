@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Users;
 
 use App\Enums\Role;
+use App\Enums\UserStatus;
+use App\Models\Department;
 use App\Models\Role as ModelsRole;
 use App\Models\User;
 use Carbon\Carbon;
@@ -16,6 +18,9 @@ class Edit extends Component
     protected $listeners = [
         'confirmUpdateUser' => 'confirmUpdateUser',
         'delete' => 'delete',
+        'confirmArchiveUsers' => 'archiveUsers',
+        'confirmRearchiveUsers' => 'rearchiveUsers',
+        'confirmApproveUser' => 'approveUser',
     ];
 
     public $userId;
@@ -35,8 +40,8 @@ class Edit extends Component
     #[validate(as: 'Số điện thoại')]
     public string $phone='';
 
-    #[validate(as: 'Lớp')]
-    public string $className='';
+    #[validate(as: 'Bộ môn')]
+    public $department='';
 
     #[validate(as: 'Ngày sinh')]
     public $dateOfBirdth;
@@ -51,9 +56,11 @@ class Edit extends Component
     public function render()
     {
         $user = User::find($this->userId);
+        $departments = Department::all();
         return view('livewire.admin.users.edit',[
             'roles' => Role::displayAll(),
             'user' => $user,
+            'departments' => $departments
         ]);
     }
 
@@ -65,7 +72,7 @@ class Edit extends Component
         $this->code = $user->code;
         $this->roleName = $user->role_value??'';
         $this->phone = $user->phone??'';
-        $this->className = $user->class_name??'';
+        $this->department = $user->department_id??'';
         $this->dateOfBirdth = $user->date_of_birth??'';
         $this->gender = $user->gender??'';
         $this->lastLoginAt = $user->last_login_at ? Carbon::parse($user->last_login_at)->format('d/m/Y - H:i') : 'Chưa đăng nhập';
@@ -80,7 +87,7 @@ class Edit extends Component
             'code' => 'required|string|max:10|unique:users,code,'.$this->userId,
             'roleName' => 'required|string|in:'.implode(',', array_keys(Role::displayAll())),
             'phone' => 'nullable|string|min:10|max:15|regex:/^[0-9+\-\s()]*$/',
-            'className' => 'nullable|string|max:100',
+            'department' => 'nullable|integer|exists:departments,id',
             'dateOfBirdth' => 'nullable|date|before:today|after:1900-01-01|date_format:Y-m-d',
             'gender' => 'nullable|string|in:Nam,Nữ',
         ];
@@ -120,7 +127,7 @@ class Edit extends Component
             'code' => $this->code,
             'role_id' => $roleId,
             'phone' => $this->phone,
-            'class_name' => $this->className,
+            'department_id' => $this->department,
             'date_of_birth' => $this->dateOfBirdth,
             'gender' => $this->gender
         ];
@@ -142,6 +149,42 @@ class Edit extends Component
         return redirect()->route('admin.users.index');
     }
 
+    public function openApproveModal()
+    {
+        $this->dispatch('openModel', type:'warning',title:'Bạn có chắc chắn muốn duyệt tài khoản này không',confirmEvent:'confirmApproveUser' );
+    }
+
+    public function approveUser(){
+        $user = User::find($this->userId);
+        $user->status = UserStatus::Approved->value;
+        $user->save();
+        $this->dispatch('alert', type:'success', message:'Duyệt tài khoản thành công!');
+    }
+
+    public function openArchiveModal(){
+        $this->dispatch('openModel', type:'warning',title:'Bạn có chắc chắn muốn lưu trữ người dùng này không?',confirmEvent:'confirmArchiveUsers' );
+    }
+
+    public function archiveUsers()
+    {
+        $user = User::find($this->userId);
+        $user->status = UserStatus::Archived->value;
+        $user->save();
+        session()->flash('success', 'Lưu trữ tài khoản thành công!');
+        return redirect()->route('admin.users.index');
+    }
+
+    public function openRearchiveModal(){
+        $this->dispatch('openModel', type:'warning',title:'Bạn có chắc chắn muốn khôi phục người dùng này không?',confirmEvent:'confirmRearchiveUsers' );
+    }
+
+    public function rearchiveUsers()
+    {
+        $user = User::find($this->userId);
+        $user->status = UserStatus::Approved->value;
+        $user->save();
+        $this->dispatch('alert', type:'success', message:'Khôi phục tài khoản thành công!');
+    }
     public function changePassword()
     {
 

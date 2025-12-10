@@ -17,11 +17,11 @@ class RoleSeeder extends Seeder
         if(!DB::table('roles')->where('name', 'admin')->exists()){
             DB::table('roles')->insert(['name' => 'admin']);
         }
-        if(!DB::table('roles')->where('name', 'officer')->exists()){
-            DB::table('roles')->insert(['name' => 'officer']);
-        }
         if(!DB::table('roles')->where('name', 'teacher')->exists()){
             DB::table('roles')->insert(['name' => 'teacher']);
+        }
+        if(!DB::table('roles')->where('name', 'officer')->exists()){
+            DB::table('roles')->insert(['name' => 'officer']);
         }
         if(!DB::table('roles')->where('name', 'student')->exists()){
             DB::table('roles')->insert(['name' => 'student']);

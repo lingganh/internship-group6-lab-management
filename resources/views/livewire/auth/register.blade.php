@@ -21,9 +21,9 @@
             </div>
         </div>
         <div class="mb-3">
-            <label class="form-label">Mã SV-GV:</label>
+            <label class="form-label">Mã GV:</label>
             <div class="form-control-feedback form-control-feedback-start">
-                <input wire:model.live="code" type="text" class="form-control @error('code') is-invalid @enderror" placeholder="Nhập Mã SV/GV" name="code" id="code"/>
+                <input wire:model.live="code" type="text" class="form-control @error('code') is-invalid @enderror" placeholder="Nhập Mã GV" name="code" id="code"/>
                 <div class="form-control-feedback-icon">
                     <i class="ph-lock-simple text-muted"></i>
                 </div>
@@ -34,12 +34,17 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Email:</label>
+            <label class="form-label">Tên email:</label>
             <div class="form-control-feedback form-control-feedback-start">
-                <input wire:model.live="email" type="email" class="form-control @error('email') is-invalid @enderror" placeholder="Nhập email SV/GV" id="email" name="email"/>
-                <div class="form-control-feedback-icon">
-                    <i class="ph-at text-muted"></i>
+                <div class="input-group">
+                    <input wire:model.live="email" type="text" class="form-control @error('email') is-invalid @enderror" placeholder="Nhập tên email GV" id="email" name="email"/>
+                    <div class="form-control-feedback-icon">
+                        <i class="ph-at text-muted"></i>
+                    </div>
+                    <span class="input-group-text">@vnua.edu.vn</span>
                 </div>
+                <div class="form-text fs-14">VD: fita1010@vnua.edu.vn → fita1010 </div>
+
                 @error('email')
                 <label id="error-email" class="validation-error-label text-danger" for="email">{{ $message }}</label>
                 @enderror

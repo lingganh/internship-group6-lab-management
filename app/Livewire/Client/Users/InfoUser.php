@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Client\Users;
 
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
@@ -27,8 +28,8 @@ class InfoUser extends Component
     #[validate(as: 'Số điện thoại')]
     public string $phone='';
 
-    #[validate(as: 'Lớp')]
-    public string $className='';
+    #[validate(as: 'Bộ môn')]
+    public string $department='';
 
     #[validate(as: 'Ngày sinh')]
     public $dateOfBirdth;
@@ -38,7 +39,10 @@ class InfoUser extends Component
 
     public function render()
     {
-        return view('livewire.client.users.info-user');
+        $departments = Department::all();
+        return view('livewire.client.users.info-user',[
+            'departments' => $departments,
+        ]);
     }
     public function mount()
     {
@@ -48,7 +52,7 @@ class InfoUser extends Component
         $this->code = $user->code;
         $this->roleId = $user->role_id;
         $this->phone = $user->phone??'';
-        $this->className = $user->class_name??'';
+        $this->department = $user->department_id??'';
         $this->dateOfBirdth = $user->date_of_birth??'';
         $this->gender = $user->gender??'';
     }
@@ -59,7 +63,7 @@ class InfoUser extends Component
             'fullName' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'. auth()->id(),
             'phone' => 'nullable|string|min:10|max:15|regex:/^[0-9+\-\s()]*$/',
-            'className' => 'nullable|string|max:100',
+            'department' => 'nullable|integer|exists:departments,id',
             'dateOfBirdth' => 'nullable|date|before:today|after:1900-01-01|date_format:Y-m-d',
             'gender' => 'nullable|string|in:Nam,Nữ',
         ];
@@ -76,12 +80,11 @@ class InfoUser extends Component
             $user = auth()->user()->update([
                 'full_name' => $this->fullName,
                 'phone' => $this->phone,
-                'class_name' => $this->className,
+                'department_id' => $this->department,
                 'date_of_birth' => $this->dateOfBirdth?:null,
                 'gender' => $this->gender,
             ]);
-            session()->flash('success', 'Cập nhật người dùng thành công!');
-            return redirect()->route('home');
+            $this->dispatch('alert', message: 'Cập nhật người dùng thành công!', type: 'success');
         }
         catch (\Exception $e) {
             Log::error('Error update user', [

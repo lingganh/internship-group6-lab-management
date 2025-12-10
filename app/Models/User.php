@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,7 +29,7 @@ class User extends Authenticatable
         'sso_id',
         'code',
         'phone',
-        'class_name',
+        'department_id',
         'gender',
         'date_of_birth',
         'thumbnail',
@@ -37,7 +38,9 @@ class User extends Authenticatable
         'remember_token',
         'role_id',
         'password',
-        'token'
+        'token',
+        'status',
+        'email_verified_at',
     ];
 
     /**
@@ -73,9 +76,10 @@ class User extends Authenticatable
         return $this->role->name === $roleName;
     }
 
-    public function groups():BelongsToMany
+
+    public function department(): BelongsTo
     {
-        return $this->belongsToMany(Group::class, 'group_user', 'group_id', 'user_id');
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
     public function getRoleTextAttribute()
@@ -113,5 +117,25 @@ class User extends Authenticatable
             return  RoleEnum::Teacher->name;
         }
         return RoleEnum::Student->name;
+    }
+    public function getUserStatusAttribute(): string
+    {
+        if($this->status === UserStatus::Pending->value)
+        {
+            return '<span class="badge bg-info bg-opacity-10 text-warning"> Chờ duyệt </span>';
+        }
+
+        if($this->status === UserStatus::Approved->value)
+        {
+            return '<span class="badge bg-info bg-opacity-10 text-success"> Đã duyệt </span>';
+        }
+
+        if($this->status === UserStatus::Archived->value)
+        {
+            return '<span class="badge bg-info bg-opacity-10 text-danger"> Lưu trữ </span>';
+        }
+
+
+        return '';
     }
 }

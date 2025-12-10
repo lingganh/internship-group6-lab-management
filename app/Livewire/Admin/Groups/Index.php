@@ -17,6 +17,8 @@ class Index extends Component
     public $search = '';
     public $deleteGroupId = null;
 
+    public $perPage = Constants::PER_PAGE_ADMIN;
+
 
     public function render()
     {
@@ -30,7 +32,7 @@ class Index extends Component
                         });
                 });
             })
-            ->paginate(Constants::PER_PAGE_ADMIN);
+            ->paginate($this->perPage);
         return view('livewire.admin.groups.index',
             ['groups' => $groups]
         );

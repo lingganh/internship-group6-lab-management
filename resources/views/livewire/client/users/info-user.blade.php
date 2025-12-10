@@ -34,9 +34,14 @@
                         </div>
                         <div class="col-6">
                             <label for="className" class="col-form-label" wire:ignore>
-                                Lớp:
+                                Bộ môn:
                             </label>
-                            <input wire:model.live="className" type="text" id="className" class="form-control">
+                            <select id="selectDepartment" class="form-control select" wire:model.live="department">
+                                <option value="" @if($department!=null) disabled @endif >Chọn bộ môn...</option>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            </select>
                             @error('className')
                             <label id="error-className" class="validation-error-label text-danger"
                                    for="className">{{ $message }}</label>
