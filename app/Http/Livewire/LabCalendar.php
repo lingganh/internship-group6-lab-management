@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Models\LabEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\LabEventFile;
 
 class LabCalendar extends Component
 {
@@ -43,12 +43,23 @@ class LabCalendar extends Component
         $isAdmin = $user->code === 'admin';
         $status = $isAdmin ? 'approved' : 'pending';
 
-        $event = LabEvent::create([
-            ...$validated,
-            'user_id' => $user->id,
-            'status' => $status,
-        ]);
+    
+        $event = LabEvent::create($validated);
 
+    if ($request->hasFile('files')) {
+    foreach ($request->file('files') as $file) {
+
+        $path = $file->store('lab_files', 'public');
+
+        LabEventFile::create([
+            'lab_event_id' => $event->id,
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'file_type' => $file->getClientMimeType(),
+            'file_size' => $file->getSize(),
+        ]);
+    }
+}
 
         return response()->json([
             'message' => $isAdmin

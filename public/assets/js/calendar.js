@@ -2,17 +2,18 @@ let calendar;
 let events = [];
 let currentEventId = null;
 let hiddenCategories = new Set();
+let hiddenStatuses = new Set();
 
 const categoryColors = {
-    work: '#c6006a',
-    seminar: '#5b11ab',
-    other: '#8baf7e'
+    work: '#bc307bff',
+    seminar: '#c4b517ff',
+    other: '#4d6d41ff'
 };
 
 
 const statusColors = {
-    pending: '#ffc107',  
-    approved: '#28a745', 
+    pending: '#ffc107',
+    approved: '#28a745',
 };
 
 const categoryNames = {
@@ -54,19 +55,19 @@ function initCalendar() {
         dayMaxEvents: true,
         weekends: true,
         height: 'auto',
-        eventContent: function(arg) {
-    const event = arg.event;
-    const status = event.extendedProps.status;
+        eventContent: function (arg) {
+            const event = arg.event;
+            const status = event.extendedProps.status;
 
-    const isApproved = status === 'approved';
+            const isApproved = status === 'approved';
 
-    const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt';
-    const statusClass = isApproved ? 'fc-status-approved' : 'fc-status-pending';
-     const statusIcon = isApproved
-        ? '<i class="fa-solid fa-circle-check"></i>'
-        : '<i class="fa-solid fa-clock"></i>';
+            const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt';
+            const statusClass = isApproved ? 'fc-status-approved' : 'fc-status-pending';
+            const statusIcon = isApproved
+                ? '<i class="fa-solid fa-circle-check"></i>'
+                : '<i class="fa-solid fa-clock"></i>';
 
-    const html = `
+            const html = `
         <div class="fc-event-main-custom">
             <div class="fc-event-time">${arg.timeText}</div>
             <div class="fc-event-title">${event.title}</div>
@@ -77,8 +78,8 @@ function initCalendar() {
         </div>
     `;
 
-    return { html };
-},
+            return { html };
+        },
 
         eventClick: function (info) {
             showEventDetail(info.event);
@@ -93,11 +94,61 @@ function initCalendar() {
             updateEventTime(info.event);
         }
     });
+    // GAN CHO TAO SK 
+    initFiltersAndButtons();
 
     loadEvent();
     calendar.render();
 }
 
+// checkbox va tao su kien
+function initFiltersAndButtons() {
+    // status
+    const statusCheckboxes = document.querySelectorAll('[data-filter-status]');
+    statusCheckboxes.forEach(cb => {
+        const status = cb.getAttribute('data-filter-status');
+
+        if (!cb.checked) {
+            hiddenStatuses.add(status);
+        }
+
+        cb.addEventListener('change', function () {
+            if (this.checked) {
+                hiddenStatuses.delete(status);
+            } else {
+                hiddenStatuses.add(status);
+            }
+            updateCalendar();
+        });
+    });
+
+    //filter theo loai sk 
+    const categoryCheckboxes = document.querySelectorAll('[data-filter-category]');
+    categoryCheckboxes.forEach(cb => {
+        const cat = cb.getAttribute('data-filter-category');
+
+        if (!cb.checked) {
+            hiddenCategories.add(cat);
+        }
+
+        cb.addEventListener('change', function () {
+            if (this.checked) {
+                hiddenCategories.delete(cat);
+            } else {
+                hiddenCategories.add(cat);
+            }
+            updateCalendar();
+        });
+    });
+
+    // tao sk 
+    const createBtn = document.querySelector('.js-open-create-event');
+    if (createBtn) {
+        createBtn.addEventListener('click', function () {
+            openCreateModal();
+        });
+    }
+}
 
 async function loadEvent() {
     try {
@@ -112,7 +163,7 @@ async function loadEvent() {
 
         events = raw.map(event => {
             // const isApproved = event.status === 'approved';
-               const bgColor = categoryColors[event.category] || '#3788d8';
+            const bgColor = categoryColors[event.category] || '#e4f1c4ff';
 
 
             return {
@@ -144,8 +195,10 @@ function updateCalendar() {
 
     calendar.removeAllEvents();
 
-    const visibleEvents = events.filter(e => !hiddenCategories.has(e.category));
-
+    const visibleEvents = events.filter(e =>
+        !hiddenCategories.has(e.category) &&
+        !hiddenStatuses.has(e.status)
+    );
     visibleEvents.forEach(event => {
         calendar.addEvent({
             id: event.id,
@@ -163,7 +216,9 @@ function updateCalendar() {
     });
 }
 
-
+//  <!-- self-note
+//         fullcalender -> truyền sẵn start và end 
+//     -->
 function openCreateModal(start = null, end = null) {
     document.getElementById('modalTitle').textContent = 'Tạo sự kiện mới';
     document.getElementById('eventForm').reset();
@@ -171,8 +226,8 @@ function openCreateModal(start = null, end = null) {
 
     if (start) {
         const startDate = new Date(start);
-        document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0];
-        document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5);
+        document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]; // validate 2025-12-06T13:00:00.000Z --> tách trc chữ T 
+        document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5); // validate 13:00:00 GMT+0700 --> 13:00 --> lấy ký tự từ 0 đến 4 
 
         if (end) {
             const endDate = new Date(end);
@@ -204,6 +259,7 @@ async function saveEvent() {
     const endDate = document.getElementById('eventEndDate').value;
     const endTime = document.getElementById('eventEndTime').value;
     const description = document.getElementById('eventDescription').value.trim();
+    const filesInput = document.getElementById('eventFiles');
 
     if (!title) {
         toastr && toastr.error('Vui lòng nhập tiêu đề sự kiện');
@@ -211,14 +267,25 @@ async function saveEvent() {
     }
 
     const API_URL = '/bookings';
-    const eventData = {
-        title,
-        start: `${startDate}T${startTime}:00`,
-        end: `${endDate}T${endTime}:00`,
-        category,
-        description
-    };
-
+    // const eventData = {
+    //     title,
+    //     start: `${startDate}T${startTime}:00`,
+    //     end: `${endDate}T${endTime}:00`,
+    //     category,
+    //     description
+        
+    // };
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('category', category);
+    formData.append('start', `${startDate}T${startTime}:00`);
+    formData.append('end', `${endDate}T${endTime}:00`);
+    formData.append('description', description);
+      if (filesInput && filesInput.files.length > 0) {
+        Array.from(filesInput.files).forEach(file => {
+            formData.append('files[]', file);
+        });
+    }
     try {
         let method = 'POST';
         let url = API_URL;
@@ -231,20 +298,19 @@ async function saveEvent() {
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document
                     .querySelector('meta[name="csrf-token"]')
                     .getAttribute('content')
             },
-            body: JSON.stringify(eventData)
+            body: formData
         });
 
         const result = await response.json().catch(() => ({}));
 
         if (!response.ok) {
             if (response.status === 401) {
-                toastr && toastr.error( 'Bạn cần đăng nhập để đăng ký sự kiện.');
+                toastr && toastr.error('Bạn cần đăng nhập để đăng ký sự kiện.');
                 return;
             }
 
@@ -297,7 +363,7 @@ function showEventDetail(calendarEvent) {
         `${startDate.toLocaleDateString('vi-VN')} ${startDate.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit'
-        })} - ${endDate.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}`;
+        })} - ${endDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
 
     if (description) {
         document.getElementById('detailDescription').textContent = description;
@@ -305,11 +371,11 @@ function showEventDetail(calendarEvent) {
     } else {
         document.getElementById('detailDescriptionRow').style.display = 'none';
     }
-
+    document.getElementById('detailFile').
     document.getElementById('detailTitle').textContent = title;
     document.getElementById('detailCategory').textContent = categoryNames[category] || category;
-    
-     const statusTextEl = document.getElementById('detailStatus');
+
+    const statusTextEl = document.getElementById('detailStatus');
     const pendingIcon = document.getElementById('statusPendingIcon');
     const approvedIcon = document.getElementById('statusApprovedIcon');
 
@@ -364,7 +430,7 @@ function editEvent() {
 
 
 function deleteEvent() {
-     document.getElementById('confirmDeleteModal').classList.add('active');
+    document.getElementById('confirmDeleteModal').classList.add('active');
 }
 
 function closeConfirmDelete() {
@@ -373,7 +439,7 @@ function closeConfirmDelete() {
 
 async function confirmDelete() {
     closeConfirmDelete();
-    
+
     try {
         const response = await fetch('/bookings/' + currentEventId, {
             method: 'DELETE',
@@ -395,7 +461,7 @@ async function confirmDelete() {
 
         toastr && toastr.success(result.message || 'Đã xóa sự kiện.');
 
-         await loadEvent();
+        await loadEvent();
         closeDetailModal();
     } catch (err) {
         console.error(err);
@@ -428,7 +494,7 @@ async function updateEventTime(calendarEvent) {
                 (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
                 'Không thể cập nhật thời gian.';
             toastr && toastr.error(msg);
-            calendarEvent.revert(); 
+            calendarEvent.revert();
             return;
         }
 
@@ -475,7 +541,7 @@ function initMiniCalendar() {
     const mini = new FullCalendar.Calendar(miniEl, {
         initialView: 'dayGridMonth',
         locale: 'vi',
-        firstDay: 0,  
+        firstDay: 0,
         headerToolbar: {
             left: 'prev',
             center: 'title',
@@ -485,7 +551,7 @@ function initMiniCalendar() {
             prev: '‹',
             next: '›'
         },
-        height: 'auto',           
+        height: 'auto',
         contentHeight: 'auto',
         expandRows: true,
         fixedWeekCount: false,
@@ -494,7 +560,7 @@ function initMiniCalendar() {
         dayMaxEvents: false,
         navLinks: false,
         dateClick: function (info) {
-             if (calendar) {
+            if (calendar) {
                 calendar.gotoDate(info.date);
             }
         }

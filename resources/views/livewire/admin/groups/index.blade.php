@@ -8,6 +8,16 @@
             </div>
             <div class="d-flex gap-2">
                 <div>
+                    Số hàng mỗi trang:
+                    <select wire:model.live="perPage" class="form-select d-inline-block w-auto" style="padding: 8px 24px 8px 10px;">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div>
                     <a href="{{route('admin.groups.create')}}" type="button" class="btn btn-primary btn-icon px-2">
                         <i class="ph-plus-circle px-1"></i><span>Thêm mới</span>
                     </a>
@@ -26,7 +36,7 @@
                 <tr class="table-light">
                     <th>STT</th>
                     <th>TÊN NHÓM</th>
-                    <th>TRƯỞNG NHÓM</th>
+                    <th> GIÁO VIÊN HƯỚNG DẪN </th>
                     <th>SỐ THÀNH VIÊN</th>
                     <th>NGÀY TẠO</th>
                     <th>TRẠNG THÁI </th>
@@ -39,7 +49,7 @@
                         <th>{{$loop->index+1 + $groups->perPage()* ($groups->currentPage()-1)}}</th>
                         <th>{{$group->name}}</th>
                         <th>{{$group->leader->full_name}}</th>
-                        <th>{{$group->users()->count()}}</th>
+                        <th>{{$group->students()->count()}}</th>
                         <th>{{$group->created_at ? $group->created_at->format('d-m-Y') : ''}}</th>
                         <th>{!! $group->group_status !!}</th>
                         <td class="text-center">

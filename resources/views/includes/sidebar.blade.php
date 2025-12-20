@@ -72,7 +72,7 @@
                     <a href="{{route('admin.groups.index')}}"
                        class="nav-link">
                         <i class="ph-users-three"></i>
-                        <span>Nhóm</span>
+                        <span>Nhóm NCKH</span>
                     </a>
                 </li>
                 <li class="nav-item">

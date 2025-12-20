@@ -7,7 +7,7 @@
                 <img src="{{asset('assets/images/logoST.jpg')}}" class="h-64px" alt="">
             </div>
             <h5 class="mb-0">Quên mật khẩu</h5>
-            <span class="d-block text-muted">Nhập email SV/GV đã xác thực tài khoản của bạn</span>
+            <span class="d-block text-muted">Nhập email GV đã xác thực tài khoản</span>
             <div class="forget-pass-arrow"><a href="{{route('login')}}"><i class="ph-arrow-bend-up-left"></i></a></div>
         </div>
 

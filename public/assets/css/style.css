@@ -162,3 +162,28 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
     -moz-appearance: textfield;
 }
+
+.error-icon-container {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    z-index: 5;
+    cursor: pointer;
+    color: #dc3545; /* Màu đỏ danger */
+}
+.input-group:not(.has-validation)>:not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.form-floating){
+    border-top-right-radius: var(--input-border-radius);
+    border-bottom-right-radius: var(--input-border-radius);
+}
+.table-group-custom .form-control.is-invalid{
+    background-image: none;
+}
+.table-group-custom td{
+    padding: 8px 4px;
+}
+
+.navbar-footer {
+    margin-top: auto;   
+}
+

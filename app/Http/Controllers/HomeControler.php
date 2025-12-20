@@ -11,13 +11,11 @@ class HomeControler extends Controller
 
          $upcomingEvents = (clone $query)
             ->where('start', '>=', now())
-            ->where('category', 'seminar')  
             ->orderBy('start', 'asc')
             ->get();
  
         $pastQuery = (clone $query)
-            ->where('start', '<', now())
-            ->where('category', 'seminar');
+            ->where('start', '<', now());
 
          if ($request->has('year') && $request->year != '') {
             $pastQuery->whereYear('start', $request->year);

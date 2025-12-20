@@ -10,6 +10,8 @@
                     <div class="col-6">
                         <label for="lastLoginAt" class="col-form-label" wire:ignore>
                             Trạng thái tài khoản:
+                            {!! str_replace('class="', 'class="fs-14 ', $user->user_status) !!}
+                            -
                             @if($user->email_verified_at===null && $user->sso_id === null)
                                 <span class="badge fs-14 text-danger">Chưa xác minh email</span>
                             @elseif($user->email_verified_at===null && $user->sso_id !== null)
@@ -52,7 +54,7 @@
                 <div class="row">
                     <div class="col-6">
                         <label for="code" class="col-form-label" wire:ignore>
-                            Mã SV/GV <span class="required">*</span>
+                            Mã GV: <span class="required">*</span>
                         </label>
                         <input wire:model.live="code" type="text" id="code" class="form-control">
                         @error('code')
@@ -77,9 +79,14 @@
                 <div class="row">
                     <div class="col-6">
                         <label for="className" class="col-form-label" wire:ignore>
-                            Lớp:
+                            Bộ môn:
                         </label>
-                        <input wire:model.live="className" type="text" id="className" class="form-control">
+                        <select id="selectDepartment" class="form-control select" wire:model.live="department">
+                            <option value="" @if($department!=null) disabled @endif >Chọn bộ môn...</option>
+                            @foreach($departments as $department)
+                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                            @endforeach
+                        </select>
                         @error('className')
                         <label id="error-className" class="validation-error-label text-danger"
                                for="className">{{ $message }}</label>
@@ -178,14 +185,33 @@
             <div class="card-body d-flex align-items-center gap-1 flex-wrap">
                 <button wire:loading.remove wire:target="update" class="btn btn-primary" @click="$wire.update"><i class="ph-floppy-disk"></i> Cập nhật</button>
                 <button wire:loading wire:target="update" class="btn btn-primary" @click="$wire.update"><i class="ph-spinner-gap animate-spin"></i> Cập nhật</button>
-                <a href="{{route('admin.users.index')}}" type="button" class="btn btn-warning"><i class="ph-arrow-counter-clockwise"></i> Trở lại</a>
-                @if($user->email_verified_at===null && $user->sso_id === null)
-                    <button wire:loading.remove wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-trash"></i> Xóa</button>
-                    <button wire:loading wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-spinner-gap animate-spin"></i> Xóa</button>
+{{--                @if($user->email_verified_at===null && $user->sso_id === null)--}}
+{{--                    <button wire:loading.remove wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-trash"></i> Xóa</button>--}}
+{{--                    <button wire:loading wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-spinner-gap animate-spin"></i> Xóa</button>--}}
+{{--                @else--}}
+    {{--                    <a wire:loading.remove wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-lock"></i> Đổi mật khẩu </a>--}}
+    {{--                    <a wire:loading wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-spinner-gap animate-spin"></i> Đổi mật khẩu </a>--}}
+{{--                @endif--}}
+                @if($user->status===\App\Enums\UserStatus::Archived->value)
+                    <button wire:loading.remove wire:target="openRearchiveModal" @click="$wire.openRearchiveModal" class="btn btn-info"><i class="ph-arrow-arc-left"></i> Khôi phục tài khoản </button>
+                    <button wire:loading wire:target="openRearchiveModal" class="btn btn-info"><i class="ph-spinner-gap animate-spin"></i> Khôi phục tài khoản </button>
                 @else
-                    <a wire:loading.remove wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-lock"></i> Đổi mật khẩu </a>
-                    <a wire:loading wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-spinner-gap animate-spin"></i> Đổi mật khẩu </a>
+                    @if($user->status===\App\Enums\UserStatus::Pending->value)
+                        <button wire:loading.remove wire:target="openApproveModal" @click="$wire.openApproveModal" class="btn btn-info"><i class="ph-checks"></i> Duyệt tài khoản </button>
+                        <button wire:loading wire:target="openApproveModal" class="btn btn-info"><i class="ph-spinner-gap animate-spin"></i> Duyệt tài khoản </button>
+                    @endif
+                    @if($user->status===\App\Enums\UserStatus::Approved->value && $user->id !== auth()->id())
+                        <button wire:loading.remove wire:target="openArchiveModal" @click="$wire.openArchiveModal" class="btn btn-secondary"><i class="ph-archive"></i> Lưu trữ </button>
+                        <button wire:loading wire:target="openArchiveModal" class="btn btn-secondary"><i class="ph-spinner-gap animate-spin"></i> Lưu trữ </button>
+                        <a wire:loading.remove wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-lock"></i> Đổi mật khẩu </a>
+                        <a wire:loading wire:target="changePassword" @click="$wire.changePassword" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#change-password" type="button" class="btn btn-info"><i class="ph-spinner-gap animate-spin"></i> Đổi mật khẩu </a>
+                    @endif
+                    @if($user->email_verified_at===null && $user->sso_id === null)
+                        <button wire:loading.remove wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-trash"></i> Xóa</button>
+                        <button wire:loading wire:target="openModelDelete" class="btn btn-danger" @click="$wire.openModelDelete"><i class="ph-spinner-gap animate-spin"></i> Xóa</button>
+                    @endif
                 @endif
+                <a href="{{route('admin.users.index')}}" type="button" class="btn btn-warning"><i class="ph-arrow-counter-clockwise"></i> Trở lại</a>
             </div>
         </div>
     </div>

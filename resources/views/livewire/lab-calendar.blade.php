@@ -1,4 +1,3 @@
-
 <div>
     <style>
         :root {
@@ -56,7 +55,7 @@
             margin-bottom: 8px;
         }
 
-         .create-btn {
+        .create-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -152,7 +151,7 @@
             flex: 1;
         }
 
-      
+
         .lab-calendar-card {
             background: #ffffff;
             border-radius: var(--lab-radius-lg);
@@ -162,7 +161,7 @@
                 0 0 0 1px rgba(221, 225, 230, 0.9);
         }
 
-       
+
         #calendar {
             background: white;
             border-radius: 12px;
@@ -241,7 +240,7 @@
             background-clip: padding-box;
         }
 
-        
+
         .fc-timegrid-event,
         .fc-timegrid-event-harness,
         .fc-timegrid-event .fc-event-main,
@@ -294,7 +293,7 @@
             position: fixed;
             inset: 0;
             background: radial-gradient(circle at top, rgba(26, 115, 232, 0.10), transparent 45%),
-                        rgba(15, 23, 42, 0.45);
+                rgba(15, 23, 42, 0.45);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -487,178 +486,181 @@
             line-height: 1.5;
             font-size: 13px;
         }
- 
- .lab-mini-calendar {
-    width: 100%;
-    background: transparent;           
-    padding: 4px 4px 10px;
-    font-family: 'Google Sans', Roboto, Arial, sans-serif;
-    margin-bottom: 10px;               
-    border-bottom: 1px solid #e5e7eb;  
-}
 
- .lab-mini-calendar .fc-theme-standard td,
-.lab-mini-calendar .fc-theme-standard th,
-.lab-mini-calendar .fc-theme-standard .fc-scrollgrid {
-    border: none !important;
-}
+        .lab-mini-calendar {
+            width: 100%;
+            background: transparent;
+            padding: 4px 4px 10px;
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
 
- .lab-mini-calendar .fc-toolbar {
-    margin-bottom: 8px !important;
-    padding: 0 2px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .lab-mini-calendar .fc-theme-standard td,
+        .lab-mini-calendar .fc-theme-standard th,
+        .lab-mini-calendar .fc-theme-standard .fc-scrollgrid {
+            border: none !important;
+        }
 
-.lab-mini-calendar .fc-toolbar-title {
-    font-size: 14px !important;
-    font-weight: 500;
-    color: #3c4043;
-    letter-spacing: 0.25px;
-}
+        .lab-mini-calendar .fc-toolbar {
+            margin-bottom: 8px !important;
+            padding: 0 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
- .lab-mini-calendar .fc-button-group {
-    gap: 0;
-}
+        .lab-mini-calendar .fc-toolbar-title {
+            font-size: 14px !important;
+            font-weight: 500;
+            color: #3c4043;
+            letter-spacing: 0.25px;
+        }
 
-.lab-mini-calendar .fc-button {
-    background: transparent !important;
-    border: none !important;
-    color: #5f6368 !important;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
+        .lab-mini-calendar .fc-button-group {
+            gap: 0;
+        }
 
-.lab-mini-calendar .fc-button:hover {
-    background-color: #f1f3f4 !important;
-    color: #3c4043 !important;
-}
+        .lab-mini-calendar .fc-button {
+            background: transparent !important;
+            border: none !important;
+            color: #5f6368 !important;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
 
- .lab-mini-calendar .fc-col-header {
-    background: transparent;
-}
+        .lab-mini-calendar .fc-button:hover {
+            background-color: #f1f3f4 !important;
+            color: #3c4043 !important;
+        }
 
-.lab-mini-calendar th {
-    text-align: center;
-    padding: 4px 0 !important;
-    font-weight: 500;
-}
+        .lab-mini-calendar .fc-col-header {
+            background: transparent;
+        }
 
-.lab-mini-calendar .fc-col-header-cell-cushion {
-    font-size: 11px;
-    color: #70757a;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    padding: 0;
-    text-decoration: none;
-}
+        .lab-mini-calendar th {
+            text-align: center;
+            padding: 4px 0 !important;
+            font-weight: 500;
+        }
 
- .lab-mini-calendar .fc-daygrid-body {
-    border: none !important;
-}
+        .lab-mini-calendar .fc-col-header-cell-cushion {
+            font-size: 11px;
+            color: #70757a;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 0;
+            text-decoration: none;
+        }
 
-.lab-mini-calendar .fc-daygrid-day {
-    padding: 0 !important;
-}
+        .lab-mini-calendar .fc-daygrid-body {
+            border: none !important;
+        }
 
-.lab-mini-calendar .fc-daygrid-day-frame {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 30px;
-    padding: 2px;
-}
+        .lab-mini-calendar .fc-daygrid-day {
+            padding: 0 !important;
+        }
 
- .lab-mini-calendar .fc-daygrid-day-top {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
+        .lab-mini-calendar .fc-daygrid-day-frame {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 30px;
+            padding: 2px;
+        }
 
-.lab-mini-calendar .fc-daygrid-day-number {
-    width: 26px;
-    height: 26px;
-    line-height: 26px;
-    text-align: center;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 400;
-    color: #3c4043;
-    padding: 0 !important;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.12s ease, color 0.12s ease;
-}
+        .lab-mini-calendar .fc-daygrid-day-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
 
- .lab-mini-calendar .fc-day-other .fc-daygrid-day-number {
-    color: #dadce0;
-}
+        .lab-mini-calendar .fc-daygrid-day-number {
+            width: 26px;
+            height: 26px;
+            line-height: 26px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 400;
+            color: #3c4043;
+            padding: 0 !important;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.12s ease, color 0.12s ease;
+        }
 
- .lab-mini-calendar .fc-daygrid-day:not(.fc-day-today):not(.fc-day-other):hover .fc-daygrid-day-number {
-    background-color: #f1f3f4;
-}
+        .lab-mini-calendar .fc-day-other .fc-daygrid-day-number {
+            color: #dadce0;
+        }
 
- .lab-mini-calendar .fc-daygrid-day.fc-day-today {
-    background: transparent !important;
-}
-.lab-mini-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-    background-color: #e8f0fe;
-    color: #1967d2;
-    font-weight: 500;
-}
+        .lab-mini-calendar .fc-daygrid-day:not(.fc-day-today):not(.fc-day-other):hover .fc-daygrid-day-number {
+            background-color: #f1f3f4;
+        }
 
- .lab-mini-calendar .fc-daygrid-day.is-selected .fc-daygrid-day-number {
-    background-color: #1a73e8;
-    color: #ffffff;
-    font-weight: 500;
-}
+        .lab-mini-calendar .fc-daygrid-day.fc-day-today {
+            background: transparent !important;
+        }
 
- .lab-mini-calendar .fc-daygrid-day.fc-day-today.is-selected .fc-daygrid-day-number {
-    background-color: #1a73e8;
-    color: #ffffff;
-}
+        .lab-mini-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+            background-color: #e8f0fe;
+            color: #1967d2;
+            font-weight: 500;
+        }
 
- .lab-mini-calendar .fc-daygrid-day-events,
-.lab-mini-calendar .fc-daygrid-event-harness,
-.lab-mini-calendar .fc-event,
-.lab-mini-calendar .fc-daygrid-day-bg {
-    display: none !important;
-}
+        .lab-mini-calendar .fc-daygrid-day.is-selected .fc-daygrid-day-number {
+            background-color: #1a73e8;
+            color: #ffffff;
+            font-weight: 500;
+        }
 
- .lab-mini-calendar .fc-day-sun .fc-daygrid-day-number {
-    color: #d93025;
-}
-.lab-mini-calendar .fc-day-sun.fc-day-other .fc-daygrid-day-number {
-    color: #fce8e6;
-}
-.lab-mini-calendar .fc-scrollgrid,
-.lab-mini-calendar .fc-scrollgrid table,
-.lab-mini-calendar .fc-scrollgrid thead,
-.lab-mini-calendar .fc-scrollgrid tbody,
-.lab-mini-calendar .fc-scrollgrid td,
-.lab-mini-calendar .fc-scrollgrid th {
-    border: none !important;
-}
+        .lab-mini-calendar .fc-daygrid-day.fc-day-today.is-selected .fc-daygrid-day-number {
+            background-color: #1a73e8;
+            color: #ffffff;
+        }
 
-.lab-mini-calendar .fc-scrollgrid {
-    box-shadow: none !important;
-    outline: none !important;
-}
- 
+        .lab-mini-calendar .fc-daygrid-day-events,
+        .lab-mini-calendar .fc-daygrid-event-harness,
+        .lab-mini-calendar .fc-event,
+        .lab-mini-calendar .fc-daygrid-day-bg {
+            display: none !important;
+        }
 
- 
+        .lab-mini-calendar .fc-day-sun .fc-daygrid-day-number {
+            color: #d93025;
+        }
+
+        .lab-mini-calendar .fc-day-sun.fc-day-other .fc-daygrid-day-number {
+            color: #fce8e6;
+        }
+
+        .lab-mini-calendar .fc-scrollgrid,
+        .lab-mini-calendar .fc-scrollgrid table,
+        .lab-mini-calendar .fc-scrollgrid thead,
+        .lab-mini-calendar .fc-scrollgrid tbody,
+        .lab-mini-calendar .fc-scrollgrid td,
+        .lab-mini-calendar .fc-scrollgrid th {
+            border: none !important;
+        }
+
+        .lab-mini-calendar .fc-scrollgrid {
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+
+
         @media (max-width: 992px) {
             .lab-layout {
                 flex-direction: column;
@@ -695,15 +697,15 @@
     <div class="lab-calendar-page">
         <div class="lab-calendar-shell">
             <div class="lab-layout">
-                
+
                 <aside class="lab-sidebar">
                     @auth
-        <button type="button" class="create-btn js-open-create-event">
-            <i class="fa-solid fa-plus"></i>
-            <span>Tạo sự kiện</span>
-        </button>
-    @endauth
-                        <div class="lab-mini-calendar" id="miniCalendar"></div>
+                        <button type="button" class="create-btn js-open-create-event">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Tạo sự kiện</span>
+                        </button>
+                    @endauth
+                    <div class="lab-mini-calendar" id="miniCalendar"></div>
 
                     <div class="lab-sidebar-section">
                         <div class="lab-sidebar-section-title">Trạng thái sự kiện</div>
@@ -765,8 +767,7 @@
                         <div class="form-layout-grid">
                             <div class="form-group full-width">
                                 <label>Tiêu đề sự kiện <span style="color:#d93025">*</span></label>
-                                <input type="text" id="eventTitle" required
-                                       placeholder="Ví dụ: Họp Lab, Seminar...">
+                                <input type="text" id="eventTitle" required placeholder="Ví dụ: Họp Lab, Seminar...">
                             </div>
 
                             <div class="form-group">
@@ -793,11 +794,18 @@
                                     <input type="time" id="eventEndTime" required>
                                 </div>
                             </div>
+                            <div class="form-group full-width">
+                                <label>Tài liệu đính kèm (slide / PDF / docs)</label>
+                                <div class="file-upload-row">
+                                    <input type="file" id="eventFiles" name="files[]" multiple
+                                        accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
 
+                                </div>
+                            </div>
                             <div class="form-group full-width">
                                 <label>Mô tả</label>
                                 <textarea id="eventDescription" rows="3"
-                                          placeholder="Thêm mô tả chi tiết (không bắt buộc)"></textarea>
+                                    placeholder="Thêm mô tả chi tiết (không bắt buộc)"></textarea>
                             </div>
                         </div>
                     </form>
@@ -812,7 +820,6 @@
             </div>
         </div>
     @endauth
-
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="event-details">
@@ -837,7 +844,7 @@
                     <span class="detail-icon">
                         <i id="statusPendingIcon" class="fa-solid fa-clock" style="color:#ffc107; display:none;"></i>
                         <i id="statusApprovedIcon" class="fa-solid fa-circle-check"
-                           style="color:#28a745; display:none;"></i>
+                            style="color:#28a745; display:none;"></i>
                     </span>
                     <span id="detailStatus"></span>
                 </div>
@@ -879,7 +886,8 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
