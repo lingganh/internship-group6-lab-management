@@ -63,6 +63,6 @@ class Index extends Component
         return view('livewire.admin.equipment.index',[
             'labs' => Lab::orderBy('name')->get(),
             'equipments' => $equipments
-        ]);
+        ])->layout('components.layouts.admin-layout');
     }
 }

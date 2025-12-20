@@ -113,8 +113,8 @@
                     </a>
                 </li>
                                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
-                       class="nav-link {{ request()->routeIs('admin.coming-soon') ? 'active' : '' }}">
+                    <a href="{{route('equipment.index')}}"
+                       class="nav-link {{ request()->routeIs('equipment.index') ? 'active' : '' }}">
                         <i class="ph-chart-bar"></i>
                         <span>Thiết bị</span>
                     </a>
