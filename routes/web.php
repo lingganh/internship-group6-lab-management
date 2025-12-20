@@ -65,14 +65,12 @@ Route::middleware('role:admin')->group(function () {
             Route::get('/create',[GroupController::class, 'create'] )->name('admin.groups.create');
             Route::get('/edit/{id}',[GroupController::class, 'edit'] )->name('admin.groups.edit');
         });
+        Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
+        Route::get('/equipment', Index::class)->name('equipment.index');
+
     });
 });
 
-Route::prefix('admin')->group(function () {
-    Route::get('/equipment', Index::class)->name('equipment.index');
-    Route::get('/equipment/create', Create::class)->name('equipment.create');
-    Route::get('/equipment/{id}/edit', Edit::class)->name('equipment.edit');
-});
 
 
 Route::get('coming-soon', fn () => view('coming-soon'))->name('admin.coming-soon');
