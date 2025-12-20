@@ -76,7 +76,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
+                    <a href="{{route('admin.lab-diary')}}"
                        class="nav-link">
                         <i class="ph-note-blank"></i>
                         <span>Nhật ký sử dụng</span>
