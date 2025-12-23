@@ -30,7 +30,7 @@
         </div>
     </div>
     <br><br><br>
-    <div class="card">
+    <div class="card" style="margin: 2% 2%">
         <div class="card-header py-3 d-flex justify-content-between">
             <div class="d-flex gap-2">
                 <div>
