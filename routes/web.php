@@ -12,6 +12,9 @@ use Laravel\Fortify\Features;
 use App\Livewire\Admin\Equipment\Index;
 use App\Livewire\Admin\Equipment\Create;
 use App\Livewire\Admin\Equipment\Edit;
+use App\Livewire\Approval;
+use App\Livewire\UserSchedules;
+
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
@@ -31,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::put('bookings/{id}', [LabCalendar::class, 'update']);
     Route::delete('bookings/{id}', [LabCalendar::class, 'destroy']);
     Route::patch('bookings/{id}/approve', [LabCalendar::class, 'approve']);
+    Route::get('/my-schedules', UserSchedules::class)->name('user.schedules');
 });
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
@@ -46,6 +50,7 @@ Route::middleware('checkAuth')->group(function () {
             [],
         ),
     )->name('client.two-factor');
+
 });
 
 Route::middleware('role:admin')->group(function () {
@@ -66,6 +71,7 @@ Route::middleware('role:admin')->group(function () {
             Route::get('/edit/{id}',[GroupController::class, 'edit'] )->name('admin.groups.edit');
         });
         Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
+        Route::get('/approval', Approval::class)->name('admin.approval');
         Route::get('/equipment', Index::class)->name('equipment.index');
 
     });

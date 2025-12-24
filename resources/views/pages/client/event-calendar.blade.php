@@ -253,6 +253,20 @@
                     <i class="fa-regular fa-calendar-check"></i>
                     <span>Sắp diễn ra</span>
                 </div>
+                <form action="{{ url()->current() }}" method="GET" class="d-flex gap-2">
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" class="custom-select"
+                        placeholder="Nhập tên sự kiện..." onchange="this.form.submit()">
+
+                    <select name="category" class="custom-select" onchange="this.form.submit()">
+                        <option value="">Tất cả loại</option>
+                        @foreach($categories as $c)
+                            <option value="{{ $c }}" {{ request('category') == $c ? 'selected' : '' }}>
+                                {{ ucfirst($c) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+
             </div>
 
             <div class="event-grid">

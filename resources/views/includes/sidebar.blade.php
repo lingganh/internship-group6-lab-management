@@ -57,8 +57,8 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
-                       class="nav-link {{ request()->routeIs('admin.coming-soon') ? 'active' : '' }}">
+                    <a href="{{route('admin.approval')}}"
+                       class="nav-link ">
                         <i class="ph-calendar-check"></i>
                         <span>Duyệt lịch đăng ký</span>
                     </a>

@@ -27,6 +27,7 @@ class LabEventSeeder extends Seeder
                 'description' => 'Nghiên cứu về thuật toán machine learning mới. Cần chuẩn bị slide.',
                  'created_at' => $now,
                 'updated_at' => $now,
+                'user_id' =>1
             ],
             [
                 'title' => 'Hội thảo Blockchain',
@@ -36,6 +37,7 @@ class LabEventSeeder extends Seeder
                 'description' => 'Hội thảo về ứng dụng công nghệ blockchain trong tài chính.',
                  'created_at' => $now,
                 'updated_at' => $now,
+                'user_id' =>1
             ],
             [
                 'title' => 'Họp nhóm dự án',
@@ -45,6 +47,7 @@ class LabEventSeeder extends Seeder
                 'description' => 'Họp nhanh 1 tiếng chốt deadline tuần.',
                  'created_at' => $now,
                 'updated_at' => $now,
+                'user_id' =>1
             ],
             [
                 'title' => 'Bảo trì thiết bị Lab 2',
@@ -54,6 +57,7 @@ class LabEventSeeder extends Seeder
                 'description' => 'Bảo trì định kỳ máy chủ GPU.',
                  'created_at' => $now,
                 'updated_at' => $now,
+                'user_id' =>1
             ],
             [
                 'title' => 'Seminar: An toàn thông tin',
@@ -63,6 +67,7 @@ class LabEventSeeder extends Seeder
                 'description' => 'Chuyên gia từ Viettel trình bày.',
                  'created_at' => $now,
                 'updated_at' => $now,
+                'user_id' =>1
             ],
         ]);
     }

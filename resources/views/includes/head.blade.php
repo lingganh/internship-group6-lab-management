@@ -3,6 +3,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <title>{{ config('app.name', 'Hệ thống quản lý lịch phòng lab') }}</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/login.png') }}">

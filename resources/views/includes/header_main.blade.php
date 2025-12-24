@@ -54,7 +54,7 @@
                                 Quản trị hệ thống
                             </a>
                         @endif
-                        <a href="{{route('admin.coming-soon')}}" class="dropdown-item">
+                        <a href="{{route('user.schedules')}}" class="dropdown-item">
                             <i class="ph-calendar me-2"></i>
                             Lịch đã đăng ký
                         </a>
