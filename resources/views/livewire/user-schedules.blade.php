@@ -29,14 +29,12 @@
                 </thead>
 
                 <tbody>
-
                 @forelse($schedules as $item)
                     @php
                         $start = \Carbon\Carbon::parse($item->start);
                         $end = \Carbon\Carbon::parse($item->end);
                         $canCancel = \Carbon\Carbon::now()->addHour()->lt($start) && $item->status !== 'cancelled';
                         $isEnded = $end->isPast();
-
                         $statusLabel = [
                             'pending' => 'Chờ duyệt',
                             'approved' => 'Đã duyệt',
@@ -63,35 +61,35 @@
                         </td>
 
                         <td class="text-end">
-                            <div class="d-inline-flex gap-2 align-items-center">
+                            <div class="d-inline-flex gap-1 align-items-center">
 
-                                <button wire:click="viewSchedule({{ $item->id }})" class="icon-btn text-primary" data-bs-toggle="tooltip" title="Xem chi tiết">
-                                    <i class="bi bi-eye"></i>
+                                 <button
+                                    wire:click="viewSchedule({{ $item->id }})"
+                                    class="icon-pill icon-view active-icon"
+                                    data-bs-toggle="tooltip"
+                                    title="Xem chi tiết">
+                                    <i class="bi bi-eye-fill"></i>
                                 </button>
 
-                                @if($canCancel)
-                                    <button wire:click="cancelSchedule({{ $item->id }})"
-                                            onclick="confirm('Hủy lịch này?') || event.stopImmediatePropagation()"
-                                            class="icon-btn text-danger"
-                                            data-bs-toggle="tooltip"
-                                            title="Hủy lịch">
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
-                                @endif
+                                 <button
+                                    wire:click="cancelSchedule({{ $item->id }})"
+                                    class="icon-pill icon-cancel {{ $canCancel ? 'active-icon' : 'disabled-icon' }}"
+                                    data-bs-toggle="tooltip"
+                                    title="{{ $canCancel ? 'Hủy lịch' : 'Không thể hủy (chỉ hủy trước giờ bắt đầu tối thiểu 1 giờ)' }}">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
 
-                                @if($isEnded && $item->status !== 'cancelled')
-                                    <button wire:click="openFeedback({{ $item->id }})"
-                                            class="icon-btn text-primary"
-                                            data-bs-toggle="tooltip"
-                                            title="Phản hồi">
-                                        <i class="bi bi-chat-dots"></i>
-                                    </button>
-                                @endif
+                                 <button
+                                    wire:click="openFeedback({{ $item->id }})"
+                                    class="icon-pill icon-feedback {{ ($isEnded && $item->status !== 'cancelled') ? 'active-icon' : 'disabled-icon' }}"
+                                    data-bs-toggle="tooltip"
+                                    title="{{ ($isEnded && $item->status !== 'cancelled') ? 'Gửi phản hồi' : 'Chưa thể phản hồi' }}">
+                                    <i class="bi bi-chat-dots-fill"></i>
+                                </button>
 
                             </div>
                         </td>
                     </tr>
-
                 @empty
                     <tr>
                         <td colspan="4" class="text-center py-5 text-muted small">
@@ -99,7 +97,6 @@
                         </td>
                     </tr>
                 @endforelse
-
                 </tbody>
             </table>
         </div>
@@ -112,7 +109,6 @@
     <div wire:ignore.self class="modal fade" id="detailModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-clean">
-
                 <div class="modal-header border-0">
                     <h6 class="fw-semibold m-0">Chi tiết đăng ký</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -132,7 +128,6 @@
                                     {{ \Carbon\Carbon::parse($selectedSchedule->start)->format('H:i d/m/Y') }}
                                 </div>
                             </div>
-
                             <div class="col-6">
                                 <label>Kết thúc</label>
                                 <div class="small fw-medium">
@@ -157,15 +152,13 @@
     <div wire:ignore.self class="modal fade" id="feedbackModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-clean">
-
                 <div class="modal-header border-0">
                     <h6 class="fw-semibold m-0">Gửi phản hồi</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-
-                    <label class="small fw-semibold mb-1">Góp ý</label>
+                    <label class="small fw-semibold mb-1">Chi tiết góp ý</label>
                     <textarea wire:model="comment" rows="4" class="form-control feedback-input" placeholder="Nhập ý kiến của bạn..."></textarea>
                 </div>
 
@@ -190,101 +183,100 @@
 </div>
 
 <style>
+.clean-card{border:1px solid #ececec;border-radius:16px;background:#fff}
+.table thead th{font-size:.75rem;color:#6b7280;text-transform:uppercase;font-weight:600;border:none;background:#fafafa}
+.table tbody tr{transition:background .2s}
+.table tbody tr:hover{background:#fafafa}
+.filter-control{background:#f7f7f7;border-radius:10px;border:1px solid #e6e6e6}
 
-.clean-card{
-    border:1px solid #ececec;
-    border-radius:16px;
-    background:#fff;
-}
+.status-chip{padding:6px 12px;border-radius:999px;font-size:.7rem;font-weight:600;border:1px solid #e6e6e6}
+.status-approved{color:#15803d;background:#ecfdf3;border-color:#bbf7d0}
+.status-pending{color:#b45309;background:#fffbeb;border-color:#fed7aa}
+.status-completed{color:#1d4ed8;background:#eef2ff;border-color:#c7d2fe}
+.status-cancelled{color:#b91c1c;background:#fef2f2;border-color:#fecaca}
 
-.table thead th{
-    font-size:.75rem;
-    color:#6b7280;
-    text-transform:uppercase;
-    font-weight:600;
-    border:none;
-    background:#fafafa;
-}
+.icon-pill{border:none;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;font-size:1rem;transition:.2s}
+.icon-pill i{line-height:1}
+.active-icon:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(15,23,42,.08)}
 
-.table tbody tr{transition:background .2s;}
-.table tbody tr:hover{background:#fafafa;}
+.icon-view{background:#f3f4f6;color:#111}
+.icon-view.active-icon{background:#eff6ff;color:#1d4ed8}
+.icon-cancel.active-icon{background:#fef2f2;color:#b91c1c}
+.icon-feedback.active-icon{background:#ecfdf3;color:#15803d}
 
-.filter-control{
-    background:#f7f7f7;
-    border-radius:10px;
-    border:1px solid #e6e6e6;
-}
+.disabled-icon{
+    background:#f5f5f5;
+    color:#9ca3af;
+    cursor:not-allowed;
+    filter:grayscale(100%);
+ }
 
-.status-chip{
-    padding:6px 12px;
-    border-radius:999px;
-    font-size:.7rem;
-    font-weight:600;
-    border:1px solid #e6e6e6;
-}
-
-.status-approved{ color:#16794d;background:#f3fbf7;border-color:#cfe9dd; }
-.status-pending{ color:#9b6b00;background:#fff9e8;border-color:#ffe7b0; }
-.status-completed{ color:#1d4ed8;background:#eef4ff;border-color:#c7d6ff; }
-.status-cancelled{ color:#a61d24;background:#fff1f0;border-color:#ffccc7; }
-
-.icon-btn{
-    background:none;
-    border:none;
-    font-size:1.2rem;
-    padding:6px;
-    border-radius:8px;
-    transition:.2s;
-}
-.icon-btn:hover{background:#f2f4f5;}
-
-.modal-clean{
-    border-radius:18px;
-    border:1px solid #ececec;
-}
-
-.info-box{
-    background:#f9fafb;
-    border-radius:10px;
-    padding:10px 12px;
-    margin-bottom:12px;
-}
-
-.info-box label{
-    font-size:.7rem;
-    text-transform:uppercase;
-    color:#6c757d;
-    font-weight:600;
-}
-
-.feedback-input{
-    border-radius:10px;
-    border:1px solid #e5e7eb;
-    background:#f9fafb;
-}
-
+.modal-clean{border-radius:18px;border:1px solid #ececec}
+.info-box{background:#f9fafb;border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.info-box label{font-size:.7rem;text-transform:uppercase;color:#6c757d;font-weight:600}
+.feedback-input{border-radius:10px;border:1px solid #e5e7eb;background:#f9fafb}
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-})
-
 document.addEventListener('livewire:init', () => {
-    Livewire.on('open-modal', (event) => {
-        const modalElement = document.getElementById(event.id);
+    console.log('[UserSchedules] livewire:init');
+
+    const initTooltips = () => {
+        const tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+    };
+
+     initTooltips();
+
+    Livewire.on('open-modal', (payload) => {
+        console.log('[UserSchedules] open-modal', payload);
+
+        const id = typeof payload === 'string' ? payload : payload?.id;
+        if (!id) return;
+
+        const modalElement = document.getElementById(id);
         if (!modalElement) return;
-        const modal = new bootstrap.Modal(modalElement);
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
         modal.show();
     });
 
-    Livewire.on('notify', e => {
-        document.getElementById('toastMessage').innerText = e.message;
-        const toast = new bootstrap.Toast(document.getElementById('appToast'));
+    Livewire.on('close-modal', (payload) => {
+        console.log('[UserSchedules] close-modal', payload);
+
+        const id = typeof payload === 'string' ? payload : payload?.id;
+        if (!id) return;
+
+        const modalElement = document.getElementById(id);
+        if (!modalElement) return;
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modal.hide();
+    });
+
+    Livewire.on('toaster', (payload) => {
+        console.log('[UserSchedules] toaster', payload);
+
+        const msg = typeof payload === 'string'
+            ? payload
+            : (payload?.message ?? '');
+
+        if (!msg) return;
+
+        const toastEl = document.getElementById('appToast');
+        const toastMsgEl = document.getElementById('toastMessage');
+        if (!toastEl || !toastMsgEl) return;
+
+        toastMsgEl.innerText = msg;
+
+        const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
         toast.show();
+    });
+
+    Livewire.hook('message.processed', () => {
+        initTooltips();
     });
 });
 </script>

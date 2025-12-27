@@ -3,13 +3,13 @@ let events = [];
 let currentEventId = null;
 let hiddenCategories = new Set();
 let hiddenStatuses = new Set();
+let selectedRoomFilter = ''; // lọc theo mã phòng
 
 const categoryColors = {
     work: '#bc307bff',
     seminar: '#c4b517ff',
     other: '#4d6d41ff'
 };
-
 
 const statusColors = {
     pending: '#ffc107',
@@ -21,6 +21,15 @@ const categoryNames = {
     seminar: 'Hội thảo - Seminar',
     other: 'Khác'
 };
+
+ const roomMap = {};
+if (window.LAB_ROOMS && Array.isArray(window.LAB_ROOMS)) {
+    window.LAB_ROOMS.forEach(r => {
+        if (r.code) {
+            roomMap[r.code] = r.name || r.code;
+        }
+    });
+}
 
 function initCalendar() {
 
@@ -58,6 +67,7 @@ function initCalendar() {
         eventContent: function (arg) {
             const event = arg.event;
             const status = event.extendedProps.status;
+            const roomName = event.extendedProps.roomName || '';
 
             const isApproved = status === 'approved';
 
@@ -71,6 +81,7 @@ function initCalendar() {
         <div class="fc-event-main-custom">
             <div class="fc-event-time">${arg.timeText}</div>
             <div class="fc-event-title">${event.title}</div>
+            ${roomName ? `<div class="fc-event-room">${roomName}</div>` : ''}
             <div class="fc-event-status ${statusClass}">
                 <span class="fc-status-icon">${statusIcon}</span>
                 <span>${statusText}</span>
@@ -94,16 +105,14 @@ function initCalendar() {
             updateEventTime(info.event);
         }
     });
-    // GAN CHO TAO SK 
-    initFiltersAndButtons();
 
+    initFiltersAndButtons();
     loadEvent();
     calendar.render();
 }
 
-// checkbox va tao su kien
 function initFiltersAndButtons() {
-    // status
+    // trạng thái
     const statusCheckboxes = document.querySelectorAll('[data-filter-status]');
     statusCheckboxes.forEach(cb => {
         const status = cb.getAttribute('data-filter-status');
@@ -122,7 +131,7 @@ function initFiltersAndButtons() {
         });
     });
 
-    //filter theo loai sk 
+    // loại sự kiện
     const categoryCheckboxes = document.querySelectorAll('[data-filter-category]');
     categoryCheckboxes.forEach(cb => {
         const cat = cb.getAttribute('data-filter-category');
@@ -141,7 +150,16 @@ function initFiltersAndButtons() {
         });
     });
 
-    // tao sk 
+    // lọc phòng
+    const roomFilterSelect = document.getElementById('labRoomFilter');
+    if (roomFilterSelect) {
+        roomFilterSelect.addEventListener('change', function () {
+            selectedRoomFilter = this.value || '';
+            updateCalendar();
+        });
+    }
+
+    // tạo sự kiện
     const createBtn = document.querySelector('.js-open-create-event');
     if (createBtn) {
         createBtn.addEventListener('click', function () {
@@ -162,9 +180,10 @@ async function loadEvent() {
         const raw = Array.isArray(data) ? data : (data.data || []);
 
         events = raw.map(event => {
-            // const isApproved = event.status === 'approved';
             const bgColor = categoryColors[event.category] || '#e4f1c4ff';
 
+            const roomCode = event.lab_code || null;  
+            const roomName = roomCode ? (roomMap[roomCode] || roomCode) : null;
 
             return {
                 id: event.id,
@@ -174,6 +193,8 @@ async function loadEvent() {
                 category: event.category,
                 description: event.description,
                 status: event.status,
+                roomCode: roomCode,
+                roomName: roomName,
                 backgroundColor: bgColor,
                 borderColor: bgColor
             };
@@ -197,8 +218,10 @@ function updateCalendar() {
 
     const visibleEvents = events.filter(e =>
         !hiddenCategories.has(e.category) &&
-        !hiddenStatuses.has(e.status)
+        !hiddenStatuses.has(e.status) &&
+        (!selectedRoomFilter || e.roomCode === selectedRoomFilter)
     );
+
     visibleEvents.forEach(event => {
         calendar.addEvent({
             id: event.id,
@@ -210,15 +233,14 @@ function updateCalendar() {
             extendedProps: {
                 category: event.category,
                 description: event.description,
-                status: event.status
+                status: event.status,
+                roomCode: event.roomCode,
+                roomName: event.roomName
             }
         });
     });
 }
 
-//  <!-- self-note
-//         fullcalender -> truyền sẵn start và end 
-//     -->
 function openCreateModal(start = null, end = null) {
     document.getElementById('modalTitle').textContent = 'Tạo sự kiện mới';
     document.getElementById('eventForm').reset();
@@ -226,8 +248,8 @@ function openCreateModal(start = null, end = null) {
 
     if (start) {
         const startDate = new Date(start);
-        document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]; // validate 2025-12-06T13:00:00.000Z --> tách trc chữ T 
-        document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5); // validate 13:00:00 GMT+0700 --> 13:00 --> lấy ký tự từ 0 đến 4 
+        document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5);
 
         if (end) {
             const endDate = new Date(end);
@@ -249,11 +271,11 @@ function closeModal() {
     document.getElementById('eventModal').classList.remove('active');
 }
 
-// create + update
 async function saveEvent() {
     const id = document.getElementById('eventId').value;
     const title = document.getElementById('eventTitle').value.trim();
     const category = document.getElementById('eventCategory').value;
+    const roomCode = document.getElementById('eventRoom').value.trim();
     const startDate = document.getElementById('eventStartDate').value;
     const startTime = document.getElementById('eventStartTime').value;
     const endDate = document.getElementById('eventEndDate').value;
@@ -266,26 +288,27 @@ async function saveEvent() {
         return;
     }
 
+    if (!roomCode) {
+        toastr && toastr.error('Vui lòng chọn phòng lab / phòng sử dụng');
+        return;
+    }
+
     const API_URL = '/bookings';
-    // const eventData = {
-    //     title,
-    //     start: `${startDate}T${startTime}:00`,
-    //     end: `${endDate}T${endTime}:00`,
-    //     category,
-    //     description
-        
-    // };
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('category', category);
+    formData.append('lab_code', roomCode);  
     formData.append('start', `${startDate}T${startTime}:00`);
     formData.append('end', `${endDate}T${endTime}:00`);
     formData.append('description', description);
-      if (filesInput && filesInput.files.length > 0) {
+
+    if (filesInput && filesInput.files.length > 0) {
         Array.from(filesInput.files).forEach(file => {
             formData.append('files[]', file);
         });
     }
+
     try {
         let method = 'POST';
         let url = API_URL;
@@ -330,13 +353,23 @@ async function saveEvent() {
         if (id) {
             const index = events.findIndex(e => e.id == id);
             if (index !== -1) {
+                const roomCodeSaved = savedEvent.lab_code || roomCode;
                 events[index] = {
                     ...events[index],
-                    ...savedEvent
+                    ...savedEvent,
+                    roomCode: roomCodeSaved,
+                    roomName: roomMap[roomCodeSaved] || roomCodeSaved,
                 };
             }
         } else {
-            events.push(savedEvent);
+            const roomCodeSaved = savedEvent.lab_code || roomCode;
+            events.push({
+                ...savedEvent,
+                roomCode: roomCodeSaved,
+                roomName: roomMap[roomCodeSaved] || roomCodeSaved,
+                backgroundColor: categoryColors[savedEvent.category] || '#e4f1c4ff',
+                borderColor: categoryColors[savedEvent.category] || '#e4f1c4ff',
+            });
         }
 
         updateCalendar();
@@ -347,7 +380,6 @@ async function saveEvent() {
     }
 }
 
-
 function showEventDetail(calendarEvent) {
     const props = calendarEvent.extendedProps;
     const title = calendarEvent.title;
@@ -356,6 +388,7 @@ function showEventDetail(calendarEvent) {
     const category = props.category;
     const description = props.description;
     const status = props.status;
+    const roomName = props.roomName || (props.roomCode ? (roomMap[props.roomCode] || props.roomCode) : null);
 
     currentEventId = calendarEvent.id;
 
@@ -365,13 +398,16 @@ function showEventDetail(calendarEvent) {
             minute: '2-digit'
         })} - ${endDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
 
+    document.getElementById('detailRoom').textContent =
+        roomName || 'Phòng máy trung tâm';
+
     if (description) {
         document.getElementById('detailDescription').textContent = description;
         document.getElementById('detailDescriptionRow').style.display = 'flex';
     } else {
         document.getElementById('detailDescriptionRow').style.display = 'none';
     }
-    document.getElementById('detailFile').
+
     document.getElementById('detailTitle').textContent = title;
     document.getElementById('detailCategory').textContent = categoryNames[category] || category;
 
@@ -379,7 +415,6 @@ function showEventDetail(calendarEvent) {
     const pendingIcon = document.getElementById('statusPendingIcon');
     const approvedIcon = document.getElementById('statusApprovedIcon');
 
-    // reset
     pendingIcon.style.display = 'none';
     approvedIcon.style.display = 'none';
 
@@ -410,6 +445,7 @@ function editEvent() {
     document.getElementById('eventTitle').value = event.title;
     document.getElementById('eventCategory').value = event.category;
     document.getElementById('eventDescription').value = event.description || '';
+    document.getElementById('eventRoom').value = event.roomCode || '';
 
     const startDate = new Date(event.start);
     const endDate = new Date(event.end);
@@ -427,7 +463,6 @@ function editEvent() {
 
     document.getElementById('eventModal').classList.add('active');
 }
-
 
 function deleteEvent() {
     document.getElementById('confirmDeleteModal').classList.add('active');
@@ -468,6 +503,7 @@ async function confirmDelete() {
         toastr && toastr.error('Lỗi kết nối máy chủ.');
     }
 }
+
 async function updateEventTime(calendarEvent) {
     const id = calendarEvent.id;
 
@@ -498,7 +534,6 @@ async function updateEventTime(calendarEvent) {
             return;
         }
 
-        // update  mảng events local
         const index = events.findIndex(e => e.id == id);
         if (index !== -1) {
             events[index] = {
@@ -516,8 +551,6 @@ async function updateEventTime(calendarEvent) {
     }
 }
 
-
-
 document.addEventListener('DOMContentLoaded', initCalendar);
 
 const eventModalEl = document.getElementById('eventModal');
@@ -533,7 +566,7 @@ if (detailModalEl) {
         if (e.target === this) closeDetailModal();
     });
 }
-// mini calendar
+
 function initMiniCalendar() {
     const miniEl = document.getElementById('miniCalendar');
     if (!miniEl) return;

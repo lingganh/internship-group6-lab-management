@@ -9,16 +9,16 @@ class LabEvent extends Model
 {
     use HasFactory;
     protected $table = 'lab_events';
-    protected $fillable = [
-        'title',
-        'category',
-        'start',
-        'end',
-        'description',
-        'status',
-        'user_id',
-    ];
-
+    // protected $fillable = [
+    //     'title',
+    //     'category',
+    //     'start',
+    //     'end',
+    //     'description',
+    //     'status',
+    //     'user_id',
+    // ];
+    protected $guarded = [];
     protected $casts = [
         'start' => 'datetime',
         'end' => 'datetime',

@@ -27,7 +27,6 @@
             margin: 0;
         }
 
-        /* ===== LAYOUT: SIDEBAR + MAIN ===== */
         .lab-layout {
             display: flex;
             align-items: flex-start;
@@ -89,7 +88,6 @@
             box-shadow: 0 3px 10px rgba(26, 115, 232, 0.35);
         }
 
-        /* ===== SIDEBAR CHECKBOX LIST ===== */
         .lab-checklist {
             display: flex;
             flex-direction: column;
@@ -151,7 +149,6 @@
             flex: 1;
         }
 
-
         .lab-calendar-card {
             background: #ffffff;
             border-radius: var(--lab-radius-lg);
@@ -160,7 +157,6 @@
                 0 8px 24px rgba(15, 23, 42, 0.06),
                 0 0 0 1px rgba(221, 225, 230, 0.9);
         }
-
 
         #calendar {
             background: white;
@@ -240,7 +236,6 @@
             background-clip: padding-box;
         }
 
-
         .fc-timegrid-event,
         .fc-timegrid-event-harness,
         .fc-timegrid-event .fc-event-main,
@@ -263,6 +258,11 @@
             font-weight: 500;
         }
 
+        .fc-event-main-custom .fc-event-room {
+            font-size: 10px;
+            opacity: 0.9;
+        }
+
         .fc-event-main-custom .fc-event-status {
             font-size: 10px;
             margin-top: 2px;
@@ -279,7 +279,6 @@
             text-overflow: ellipsis;
         }
 
-        /* VIỀN NÉT ĐỨT CHO SỰ KIỆN CHỜ DUYỆT */
         .fc-event.is-pending {
             border-style: dashed;
             border-width: 2px;
@@ -287,7 +286,6 @@
             background-color: rgba(251, 191, 36, 0.12);
         }
 
-        /* ===== MODAL ===== */
         .modal {
             display: none;
             position: fixed;
@@ -659,7 +657,22 @@
             outline: none !important;
         }
 
+        /* Select lọc phòng */
+        .lab-room-filter-select {
+            width: 100%;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            font-size: 13px;
+            background: #f9fafb;
+        }
 
+        .lab-room-filter-select:focus {
+            outline: none;
+            border-color: var(--lab-primary);
+            background: #fff;
+            box-shadow: 0 0 0 1px rgba(26, 115, 232, 0.25);
+        }
 
         @media (max-width: 992px) {
             .lab-layout {
@@ -705,6 +718,7 @@
                             <span>Tạo sự kiện</span>
                         </button>
                     @endauth
+
                     <div class="lab-mini-calendar" id="miniCalendar"></div>
 
                     <div class="lab-sidebar-section">
@@ -743,6 +757,18 @@
                             </label>
                         </div>
                     </div>
+
+                     <div class="lab-sidebar-section">
+                        <div class="lab-sidebar-section-title">Phòng Lab</div>
+                        <select id="labRoomFilter" class="lab-room-filter-select">
+                            <option value="">Tất cả phòng</option>
+                            @foreach($rooms as $room)
+                                <option value="{{ $room->code }}">
+                                    {{ $room->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </aside>
 
                 <div class="lab-calendar-main">
@@ -779,6 +805,19 @@
                                 </select>
                             </div>
 
+                            {{-- Chọn phòng lab --}}
+                            <div class="form-group">
+                                <label>Phòng Lab / Phòng sử dụng <span style="color:#d93025">*</span></label>
+                                <select id="eventRoom" required>
+                                    <option value="">— Chọn phòng —</option>
+                                    @foreach($rooms as $room)
+                                        <option value="{{ $room->code }}">
+                                            {{ $room->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div class="form-group">
                                 <label>Ngày & giờ bắt đầu <span style="color:#d93025">*</span></label>
                                 <div class="time-inputs">
@@ -794,18 +833,19 @@
                                     <input type="time" id="eventEndTime" required>
                                 </div>
                             </div>
+
                             <div class="form-group full-width">
                                 <label>Tài liệu đính kèm (slide / PDF / docs)</label>
                                 <div class="file-upload-row">
                                     <input type="file" id="eventFiles" name="files[]" multiple
-                                        accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
-
+                                           accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
                                 </div>
                             </div>
+
                             <div class="form-group full-width">
                                 <label>Mô tả</label>
                                 <textarea id="eventDescription" rows="3"
-                                    placeholder="Thêm mô tả chi tiết (không bắt buộc)"></textarea>
+                                          placeholder="Thêm mô tả chi tiết (không bắt buộc)"></textarea>
                             </div>
                         </div>
                     </form>
@@ -820,6 +860,7 @@
             </div>
         </div>
     @endauth
+
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="event-details">
@@ -828,6 +869,11 @@
                 <div class="detail-row">
                     <span class="detail-icon">🕒</span>
                     <span id="detailTime"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-icon">📍</span>
+                    <span id="detailRoom"></span>
                 </div>
 
                 <div class="detail-row" id="detailDescriptionRow" style="display: none;">
@@ -844,7 +890,7 @@
                     <span class="detail-icon">
                         <i id="statusPendingIcon" class="fa-solid fa-clock" style="color:#ffc107; display:none;"></i>
                         <i id="statusApprovedIcon" class="fa-solid fa-circle-check"
-                            style="color:#28a745; display:none;"></i>
+                           style="color:#28a745; display:none;"></i>
                     </span>
                     <span id="detailStatus"></span>
                 </div>
@@ -886,18 +932,28 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          crossorigin="anonymous" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         window.LAB_USER = @json([
             'logged_in' => auth()->check(),
-            'is_admin' => auth()->check() && auth()->user()->code === 'admin',
+            'is_admin'  => auth()->check() && auth()->user()->code === 'admin',
         ]);
+
+         window.LAB_ROOMS = @json(
+            $rooms->map(fn($r) => [
+                'code' => $r->code,
+                'name' => $r->name,
+            ])->values()
+        );
     </script>
 
     <script src="{{ asset('assets/js/calendar.js') }}"></script>

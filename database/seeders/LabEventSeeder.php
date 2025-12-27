@@ -3,71 +3,75 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon; // Import Carbon
+use Illuminate\Support\Str;
+use App\Models\LabEvent;
 
 class LabEventSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
+        $mk = fn() => 'EV-' . now()->format('ymd') . '-' . Str::upper(Str::random(4));
 
-        $now = Carbon::now();
-
-        DB::table('lab_events')->insert([
+        LabEvent::insert([
             [
-                'title' => 'Nghiên cứu AI (Lab 1)',
-                'category' => 'work',
-                'start' => $now->copy()->setHour(9)->setMinute(0)->setSecond(0), // 9:00 hôm nay
-                'end' => $now->copy()->setHour(11)->setMinute(30)->setSecond(0), // 11:30 hôm nay
+                'title'       => 'Nghiên cứu AI (Lab 1)',
+                'category'    => 'work',
+                'start'       => '2025-12-27 09:00:00',
+                'end'         => '2025-12-27 11:30:00',
                 'description' => 'Nghiên cứu về thuật toán machine learning mới. Cần chuẩn bị slide.',
-                 'created_at' => $now,
-                'updated_at' => $now,
-                'user_id' =>1
+                'lab_code'    => 'LAB-001',
+                'user_id'     => 1,
+                'updated_by'  => 1,
+                'created_at'  => now(),
+                'updated_at'  => now(),
             ],
             [
-                'title' => 'Hội thảo Blockchain',
-                'category' => 'seminar',
-                'start' => $now->copy()->setHour(14)->setMinute(0)->setSecond(0),
-                'end' => $now->copy()->setHour(17)->setMinute(0)->setSecond(0),
+                'title'       => 'Hội thảo Blockchain',
+                'category'    => 'seminar',
+                'start'       => '2025-12-27 14:00:00',
+                'end'         => '2025-12-27 17:00:00',
                 'description' => 'Hội thảo về ứng dụng công nghệ blockchain trong tài chính.',
-                 'created_at' => $now,
-                'updated_at' => $now,
-                'user_id' =>1
+                'lab_code'    => 'LAB-002',
+                'user_id'     => 1,
+                'updated_by'  => 1,
+                'created_at'  => now(),
+                'updated_at'  => now(),
             ],
             [
-                'title' => 'Họp nhóm dự án',
-                'category' => 'other',
-                'start' => $now->copy()->addDay()->setHour(17)->setMinute(30)->setSecond(0),
-                'end' => $now->copy()->addDay()->setHour(18)->setMinute(30)->setSecond(0),
+                'title'       => 'Họp nhóm dự án',
+                'category'    => 'other',
+                'start'       => '2025-12-28 17:30:00',
+                'end'         => '2025-12-28 18:30:00',
                 'description' => 'Họp nhanh 1 tiếng chốt deadline tuần.',
-                 'created_at' => $now,
-                'updated_at' => $now,
-                'user_id' =>1
+                'lab_code'    => 'LAB-003',
+                'user_id'     => 1,
+                'updated_by'  => 1,
+                'created_at'  => now(),
+                'updated_at'  => now(),
             ],
             [
-                'title' => 'Bảo trì thiết bị Lab 2',
-                'category' => 'work',
-                'start' => $now->copy()->subDay()->setHour(10)->setMinute(0)->setSecond(0),
-                'end' => $now->copy()->subDay()->setHour(12)->setMinute(0)->setSecond(0),
+                'title'       => 'Bảo trì thiết bị Lab 2',
+                'category'    => 'work',
+                'start'       => '2025-12-26 10:00:00',
+                'end'         => '2025-12-26 12:00:00',
                 'description' => 'Bảo trì định kỳ máy chủ GPU.',
-                 'created_at' => $now,
-                'updated_at' => $now,
-                'user_id' =>1
+                'lab_code'    => 'LAB-002',
+                'user_id'     => 1,
+                'updated_by'  => 1,
+                'created_at'  => now(),
+                'updated_at'  => now(),
             ],
             [
-                'title' => 'Seminar: An toàn thông tin',
-                'category' => 'seminar',
-                'start' => $now->copy()->addWeek()->setHour(9)->setMinute(30)->setSecond(0),
-                'end' => $now->copy()->addWeek()->setHour(11)->setMinute(0)->setSecond(0),
+                'title'       => 'Seminar: An toàn thông tin',
+                'category'    => 'seminar',
+                'start'       => '2026-01-03 09:30:00',
+                'end'         => '2026-01-03 11:00:00',
                 'description' => 'Chuyên gia từ Viettel trình bày.',
-                 'created_at' => $now,
-                'updated_at' => $now,
-                'user_id' =>1
+                'lab_code'    => 'LAB-004',
+                'user_id'     => 1,
+                'updated_by'  => 1,
+                'created_at'  => now(),
+                'updated_at'  => now(),
             ],
         ]);
     }
