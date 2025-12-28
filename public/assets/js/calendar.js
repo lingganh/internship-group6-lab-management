@@ -22,7 +22,7 @@ const categoryNames = {
     other: 'Khác'
 };
 
- const roomMap = {};
+const roomMap = {};
 if (window.LAB_ROOMS && Array.isArray(window.LAB_ROOMS)) {
     window.LAB_ROOMS.forEach(r => {
         if (r.code) {
@@ -507,8 +507,42 @@ async function confirmDelete() {
 async function updateEventTime(calendarEvent) {
     const id = calendarEvent.id;
 
-    const start = calendarEvent.start.toISOString();
-    const end = calendarEvent.end.toISOString();
+    // Lấy dữ liệu hiện đang có trên event
+    const props = calendarEvent.extendedProps || {};
+
+    const startDate = calendarEvent.start;
+    const endDate = calendarEvent.end || new Date(startDate.getTime() + 60 * 60 * 1000); // fallback 1h
+
+    // Format datetime cho server (dùng local time thay vì UTC)
+    const formatLocalDateTime = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        const second = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+    };
+
+    const start = formatLocalDateTime(startDate);
+    const end = formatLocalDateTime(endDate);
+
+    // Lấy lại đầy đủ thông tin để gửi lên
+    const payload = {
+        title: calendarEvent.title,
+        category: props.category || 'work', // default nếu thiếu
+        lab_code: props.roomCode || props.lab_code || null,
+        description: props.description || '',
+        start,
+        end
+    };
+
+    // Nếu lab_code bị rỗng thì không cho cập nhật, revert lại luôn
+    if (!payload.lab_code) {
+        toastr && toastr.error('Sự kiện không có thông tin phòng, không thể cập nhật thời gian.');
+        calendarEvent.revert();
+        return;
+    }
 
     try {
         const response = await fetch(`/bookings/${id}`, {
@@ -520,7 +554,7 @@ async function updateEventTime(calendarEvent) {
                     .querySelector('meta[name="csrf-token"]')
                     .getAttribute('content')
             },
-            body: JSON.stringify({ start, end })
+            body: JSON.stringify(payload)
         });
 
         const result = await response.json().catch(() => ({}));
@@ -530,20 +564,29 @@ async function updateEventTime(calendarEvent) {
                 (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
                 'Không thể cập nhật thời gian.';
             toastr && toastr.error(msg);
+            // lỗi thì đưa event về chỗ cũ
             calendarEvent.revert();
             return;
         }
 
-        const index = events.findIndex(e => e.id == id);
-        if (index !== -1) {
-            events[index] = {
-                ...events[index],
-                ...result.data
-            };
-        }
-
         toastr && toastr.success(result.message || 'Đã cập nhật thời gian sự kiện.');
-        updateCalendar();
+
+        // Cập nhật lại event trong mảng events thay vì reload toàn bộ
+        const eventIndex = events.findIndex(e => e.id == id);
+        if (eventIndex !== -1) {
+            events[eventIndex] = {
+                ...events[eventIndex],
+                start: start,
+                end: end
+            };
+            
+            // Chỉ cập nhật event này trên calendar
+            const calEvent = calendar.getEventById(id);
+            if (calEvent) {
+                calEvent.setStart(startDate);
+                calEvent.setEnd(endDate);
+            }
+        }
     } catch (err) {
         console.error(err);
         toastr && toastr.error('Lỗi kết nối khi cập nhật.');
