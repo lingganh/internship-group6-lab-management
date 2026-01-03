@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\LabEvent;
 use App\Models\User;
+use App\Models\Lab;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,6 +15,7 @@ class Approval extends Component
     public $filterStatus = 'pending';
     public $filterUserId = '';
     public $filterDate = '';
+    public $filterLabCode = '';
 
     public $selectedSchedule = null;
 
@@ -29,15 +31,17 @@ class Approval extends Component
         'filterStatus' => ['except' => 'pending'],
         'filterUserId' => ['except' => ''],
         'filterDate' => ['except' => ''],
+        'filterLabCode' => ['except' => ''],
     ];
 
     public function updatingFilterStatus() { $this->resetPage(); }
     public function updatingFilterUserId() { $this->resetPage(); }
     public function updatingFilterDate() { $this->resetPage(); }
+    public function updatingFilterLabCode() { $this->resetPage(); }
 
     public function viewSchedule($scheduleId)
     {
-        $this->selectedSchedule = LabEvent::with(['user', 'files'])->findOrFail($scheduleId);
+        $this->selectedSchedule = LabEvent::with(['user', 'files', 'lab'])->findOrFail($scheduleId);
         $this->dispatch('open-details-modal');
     }
 
@@ -55,20 +59,6 @@ class Approval extends Component
         $this->dispatch('open-confirm-modal');
     }
 
-    public function confirmApprove($id = null)
-    {
-        $id = $id ?? $this->selectedSchedule?->id;
-        if (!$id) return;
-
-        $this->confirmType = 'approve';
-        $this->confirmTitle = 'Xác nhận phê duyệt';
-        $this->confirmMessage = 'Bạn chắc chắn muốn phê duyệt lịch đăng ký này?';
-        $this->confirmId = $id;
-        $this->confirmNote = '';
-
-        $this->dispatch('open-confirm-modal');
-    }
-
     public function performConfirm()
     {
         if (!$this->confirmId || !$this->confirmType) {
@@ -80,15 +70,17 @@ class Approval extends Component
             $this->rejectSchedule($this->confirmId);
         }
 
-        if ($this->confirmType === 'approve') {
-            $this->approveSchedule($this->confirmId);
-        }
-
         $this->dispatch('close-confirm-modal');
 
         $this->confirmType = '';
         $this->confirmId = null;
         $this->confirmNote = '';
+    }
+
+    // PHÊ DUYỆT THẲNG (KHÔNG CONFIRM)
+    public function approveNow($id = null)
+    {
+        $this->approveSchedule($id);
     }
 
     public function approveSchedule($id = null)
@@ -103,8 +95,10 @@ class Approval extends Component
             return;
         }
 
+        // Check trùng lịch theo CÙNG PHÒNG
         $hasConflict = LabEvent::where('status', 'approved')
             ->where('id', '!=', $schedule->id)
+            ->where('lab_code', $schedule->lab_code)
             ->where(function ($query) use ($schedule) {
                 $query->where('start', '<', $schedule->end)
                       ->where('end', '>', $schedule->start);
@@ -112,7 +106,7 @@ class Approval extends Component
             ->exists();
 
         if ($hasConflict) {
-            $this->dispatch('toast', type: 'error', message: 'Trùng lịch', sub: 'Trùng khung giờ với một lịch khác đã duyệt.');
+            $this->dispatch('toast', type: 'error', message: 'Trùng lịch', sub: 'Trùng khung giờ với một lịch khác đã duyệt (cùng phòng).');
             return;
         }
 
@@ -150,10 +144,11 @@ class Approval extends Component
 
     public function render()
     {
-        $schedules = LabEvent::with(['user'])
+        $schedules = LabEvent::with(['user', 'lab'])
             ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterUserId !== '', fn($q) => $q->where('user_id', $this->filterUserId))
             ->when($this->filterDate !== '', fn($q) => $q->whereDate('start', $this->filterDate))
+            ->when($this->filterLabCode !== '', fn($q) => $q->where('lab_code', $this->filterLabCode))
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -161,6 +156,7 @@ class Approval extends Component
             'schedules' => $schedules,
             'pendingCount' => LabEvent::where('status', 'pending')->count(),
             'users' => User::select('id', 'full_name')->orderBy('full_name')->get(),
+            'labs' => Lab::select('code', 'name')->orderBy('name')->get(),
         ])->layout('components.layouts.admin-layout');
     }
 }

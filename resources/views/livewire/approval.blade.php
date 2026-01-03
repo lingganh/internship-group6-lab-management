@@ -7,7 +7,7 @@
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
               <div>
                 <h4 class="mb-1 fw-bold text-dark">Phê duyệt lịch đăng ký</h4>
-                <div class="text-muted small">Quản lý các yêu cầu đăng ký phòng lab theo trạng thái / người dùng / ngày.</div>
+                <div class="text-muted small">Quản lý các yêu cầu đăng ký phòng lab theo trạng thái / phòng / người dùng / ngày.</div>
               </div>
 
               <div class="d-flex align-items-center gap-2">
@@ -22,7 +22,7 @@
           <div class="card-body pt-3">
             <div class="approval-filters mb-3">
               <div class="row g-2 g-md-3 align-items-end">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                   <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
                   <select wire:model.live="filterStatus" class="form-select approval-control">
                     <option value="pending">Chờ phê duyệt</option>
@@ -32,7 +32,17 @@
                   </select>
                 </div>
 
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
+                  <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
+                  <select wire:model.live="filterLabCode" class="form-select approval-control">
+                    <option value="">Tất cả phòng</option>
+                    @foreach($labs as $lab)
+                      <option value="{{ $lab->code }}">{{ $lab->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+                <div class="col-12 col-md-3">
                   <label class="form-label small fw-semibold text-dark mb-1">Người đăng ký</label>
                   <select wire:model.live="filterUserId" class="form-select approval-control">
                     <option value="">Tất cả người dùng</option>
@@ -42,7 +52,7 @@
                   </select>
                 </div>
 
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                   <label class="form-label small fw-semibold text-dark mb-1">Ngày đăng ký</label>
                   <input type="date" wire:model.live="filterDate" class="form-control approval-control">
                 </div>
@@ -54,10 +64,11 @@
                 <thead>
                   <tr>
                     <th style="min-width: 260px;">Sự kiện</th>
+                    <th style="min-width: 200px;">Phòng</th>
                     <th style="min-width: 180px;">Người đăng ký</th>
                     <th style="min-width: 190px;">Thời gian</th>
                     <th class="text-center" style="width: 150px;">Trạng thái</th>
-                    <th class="text-end" style="width: 210px;">Hành động</th>
+                    <th class="text-end" style="width: 260px;">Hành động</th>
                   </tr>
                 </thead>
 
@@ -77,13 +88,20 @@
                       </td>
 
                       <td>
+                        <div class="fw-semibold text-dark text-truncate" style="max-width: 240px;">
+                          {{ $item->lab?->name ?? ($item->lab_code ?? 'N/A') }}
+                        </div>
+                        <div class="small text-muted">Mã: {{ $item->lab_code ?? '-' }}</div>
+                      </td>
+
+                      <td>
                         <div class="fw-semibold text-dark">{{ $item->user?->full_name ?? 'N/A' }}</div>
                         <div class="small text-muted">ID: {{ $item->user_id ?? '-' }}</div>
                       </td>
 
                       <td>
-                        <div class="fw-semibold text-dark">{{ $item->start->format('d/m/Y') }}</div>
-                        <div class="small text-muted">{{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}</div>
+                        <div class="fw-semibold text-dark">{{ optional($item->start)->format('d/m/Y') }}</div>
+                        <div class="small text-muted">{{ optional($item->start)->format('H:i') }} – {{ optional($item->end)->format('H:i') }}</div>
                       </td>
 
                       <td class="text-center">
@@ -103,6 +121,9 @@
                           </button>
 
                           @if($item->status === 'pending')
+                            <button wire:click="approveNow({{ $item->id }})" class="btn btn-sm approval-btn approval-btn-success" type="button">
+                              Phê duyệt
+                            </button>
                             <button wire:click="confirmReject({{ $item->id }})" class="btn btn-sm approval-btn approval-btn-danger" type="button">
                               Từ chối
                             </button>
@@ -112,7 +133,7 @@
                     </tr>
                   @empty
                     <tr>
-                      <td colspan="5" class="text-center py-5">
+                      <td colspan="6" class="text-center py-5">
                         <div class="text-muted">Không có dữ liệu phù hợp.</div>
                       </td>
                     </tr>
@@ -166,9 +187,31 @@
 
                 <div class="col-12 col-md-6">
                   <div class="approval-info">
+                    <div class="small text-muted mb-1">Phòng lab</div>
+                    <div class="fw-semibold text-dark">
+                      {{ $selectedSchedule->lab?->name ?? ($selectedSchedule->lab_code ?? 'N/A') }}
+                    </div>
+                    <div class="small text-muted mt-1">Mã: {{ $selectedSchedule->lab_code ?? '-' }}</div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="approval-info">
                     <div class="small text-muted mb-1">Người đăng ký</div>
                     <div class="fw-semibold text-dark">{{ $selectedSchedule->user?->full_name ?? 'N/A' }}</div>
                     <div class="small text-muted mt-1">{{ $selectedSchedule->user?->email }}</div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="approval-info">
+                    <div class="small text-muted mb-1">Trạng thái</div>
+                    <div class="fw-semibold text-dark">
+                      @if($selectedSchedule->status === 'pending') Chờ duyệt
+                      @elseif($selectedSchedule->status === 'approved') Đã duyệt
+                      @else Từ chối
+                      @endif
+                    </div>
                   </div>
                 </div>
 
@@ -176,9 +219,9 @@
                   <div class="approval-info">
                     <div class="small text-muted mb-1">Thời gian</div>
                     <div class="fw-semibold text-dark">
-                      {{ $selectedSchedule->start->format('H:i d/m/Y') }}
+                      {{ optional($selectedSchedule->start)->format('H:i d/m/Y') }}
                       <span class="text-muted">—</span>
-                      {{ $selectedSchedule->end->format('H:i d/m/Y') }}
+                      {{ optional($selectedSchedule->end)->format('H:i d/m/Y') }}
                     </div>
                   </div>
                 </div>
@@ -223,7 +266,7 @@
                   <button wire:click="confirmReject({{ $selectedSchedule->id }})" type="button" class="btn approval-btn approval-btn-danger">
                     Từ chối
                   </button>
-                  <button wire:click="confirmApprove({{ $selectedSchedule->id }})" type="button" class="btn approval-btn approval-btn-success">
+                  <button wire:click="approveNow({{ $selectedSchedule->id }})" type="button" class="btn approval-btn approval-btn-success">
                     Phê duyệt
                   </button>
                 </div>
@@ -248,16 +291,9 @@
           <div class="modal-footer border-0 pt-0">
             <div class="d-flex w-100 justify-content-end gap-2">
               <button type="button" class="btn approval-btn approval-btn-ghost" data-bs-dismiss="modal">Hủy</button>
-
-              @if($confirmType === 'reject')
-                <button wire:click="performConfirm" type="button" class="btn approval-btn approval-btn-danger">
-                  Xác nhận từ chối
-                </button>
-              @elseif($confirmType === 'approve')
-                <button wire:click="performConfirm" type="button" class="btn approval-btn approval-btn-success">
-                  Xác nhận phê duyệt
-                </button>
-              @endif
+              <button wire:click="performConfirm" type="button" class="btn approval-btn approval-btn-danger">
+                Xác nhận từ chối
+              </button>
             </div>
           </div>
         </div>
@@ -539,7 +575,7 @@
     });
 
     window.addEventListener('toast', (e) => {
-      const d = (e && e.detail) ? e.detail : {};
+      const d = (e && e.detail) ? e.detail : e;
       apToast(d.type || 'info', d.message || '', d.sub || '');
     });
   </script>
