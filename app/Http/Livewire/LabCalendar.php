@@ -9,6 +9,7 @@ use App\Models\LabEventFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class LabCalendar extends Component
 {
@@ -23,9 +24,28 @@ class LabCalendar extends Component
         ])->layout('components.layouts.client-layout');
     }
 
+    private function autoCancelExpiredPending(): void
+    {
+        try {
+            LabEvent::query()
+                ->where('status', 'pending')
+                ->whereNotNull('start')
+                ->where('start', '<=', Carbon::now())
+                ->update([
+                    'status' => 'cancelled',
+                    'updated_at' => Carbon::now(),
+                ]);
+        } catch (\Throwable $e) {
+            Log::error('Auto cancel pending error: ' . $e->getMessage());
+        }
+    }
+
     public function getAllBookings()
     {
+        $this->autoCancelExpiredPending();
+
         $events = LabEvent::with('lab:code,name')
+            ->where('status', '!=', 'cancelled')
             ->orderBy('start')
             ->get()
             ->map(function ($event) {
@@ -47,6 +67,8 @@ class LabCalendar extends Component
 
     public function store(Request $request)
     {
+        $this->autoCancelExpiredPending();
+
         if (!auth()->check()) {
             return response()->json([
                 'type'    => 'error',
@@ -69,14 +91,15 @@ class LabCalendar extends Component
             'start.required'    => 'Vui lòng chọn thời gian bắt đầu.',
             'end.required'      => 'Vui lòng chọn thời gian kết thúc.',
             'end.after'         => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
-            
         ]);
 
         $user = Auth::user();
         $isAdmin = $user->code === 'admin';
+
         $validated['status'] = $isAdmin ? 'approved' : 'pending';
-        $validated['user_id'] = $user->id;       
+        $validated['user_id'] = $user->id;
         $validated['updated_by'] = $user->id;
+
         $event = LabEvent::create($validated);
 
         if ($request->hasFile('files')) {
@@ -105,6 +128,8 @@ class LabCalendar extends Component
 
     public function update(Request $request, $id)
     {
+        $this->autoCancelExpiredPending();
+
         $event = LabEvent::findOrFail($id);
 
         $validated = $request->validate([
@@ -122,7 +147,9 @@ class LabCalendar extends Component
 
         $user = auth()->user();
         $isAdmin = $user && $user->code === 'admin';
-        $validated['updated_by'] = $user->id;
+
+        $validated['updated_by'] = $user ? $user->id : null;
+
         if (!$isAdmin && $event->status === 'approved') {
             $validated['status'] = 'pending';
         }
