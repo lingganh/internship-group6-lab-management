@@ -8,7 +8,7 @@
             <div class="d-flex align-items-center justify-content-between gap-3">
               <div>
                 <h4 class="mb-0 fw-bold text-dark">Tạo lịch (Admin)</h4>
-                <div class="small text-muted mt-1">Admin tạo lịch cho người dùng và chọn trạng thái ngay.</div>
+                <div class="small text-muted mt-1">Lịch được tạo sẽ tự động duyệt.</div>
               </div>
             </div>
           </div>
