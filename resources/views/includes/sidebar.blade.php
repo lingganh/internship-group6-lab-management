@@ -42,17 +42,17 @@
                     <i class="ph-dots-three sidebar-resize-show"></i>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
-                       class="nav-link {{ request()->routeIs('admin.coming-soon') ? 'active' : '' }}">
+                    <a href="{{route('lab.register')}}"
+                       class="nav-link {{ request()->routeIs('lab.register') ? 'active' : '' }}">
                         <i class="ph-calendar-plus"></i>
                         <span>Đăng ký lịch</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
-                       class="nav-link {{ request()->routeIs('admin.coming-soon') ? 'active' : '' }}">
-                        <i class="ph-calendar"></i>
-                        <span>Lịch đã đăng ký</span>
+                  <li class="nav-item">
+                    <a href="{{route('admin.lab-diary')}}"
+                       class="nav-link">
+                        <i class="ph-note-blank"></i>
+                        <span>Nhật ký sử dụng</span>
                     </a>
                 </li>
 
@@ -75,13 +75,7 @@
                         <span>Nhóm NCKH</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{route('admin.lab-diary')}}"
-                       class="nav-link">
-                        <i class="ph-note-blank"></i>
-                        <span>Nhật ký sử dụng</span>
-                    </a>
-                </li>
+              
                 <li class="nav-item">
                     <a href="{{route('admin.coming-soon')}}"
                        class="nav-link">

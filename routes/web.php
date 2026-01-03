@@ -14,6 +14,8 @@ use App\Livewire\Admin\Equipment\Create;
 use App\Livewire\Admin\Equipment\Edit;
 use App\Livewire\Approval;
 use App\Livewire\UserSchedules;
+use App\Livewire\LabRegister;
+
 
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
@@ -35,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('bookings/{id}', [LabCalendar::class, 'destroy']);
     Route::patch('bookings/{id}/approve', [LabCalendar::class, 'approve']);
     Route::get('/my-schedules', UserSchedules::class)->name('user.schedules');
+
 });
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
@@ -73,6 +76,7 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
         Route::get('/approval', Approval::class)->name('admin.approval');
         Route::get('/equipment', Index::class)->name('equipment.index');
+        Route::get('/lab-register', LabRegister::class)->name('lab.register');
 
     });
 });
