@@ -10,7 +10,7 @@ class HomeControler extends Controller
     public function eventsCalendar(Request $request)
     {
         $query = LabEvent::query()
-            ->with(relations: 'user')
+        ->with(['user','lab',  'files'])
             ->where('status', '!=', 'cancelled');
 
         if ($request->filled('keyword')) {
