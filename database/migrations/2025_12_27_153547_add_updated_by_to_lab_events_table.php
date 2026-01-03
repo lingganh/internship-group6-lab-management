@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::table('lab_events', function (Blueprint $table) {
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('lab_code');
-            $table->foreign('lab_code')->references('code')->on('labs')->cascadeOnDelete();        });
+            $table->foreign('lab_code')->references('code')->on('labs')->cascadeOnDelete(); 
+            $table->string('color', 20)->nullable()->after('category');
+
+           });
     }
 
     /**

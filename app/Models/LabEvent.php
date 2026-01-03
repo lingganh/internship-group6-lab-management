@@ -31,4 +31,9 @@ class LabEvent extends Model
     {
         return $this->hasMany(LabEventFile::class);
     }
+
+      public function lab()
+    {
+        return $this->belongsTo(Lab::class, 'lab_code', 'code');
+    }
 }
