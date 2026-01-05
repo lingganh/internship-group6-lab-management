@@ -24,6 +24,15 @@ class UserSeeder extends Seeder
             'status' => UserStatus::Approved->value,
             'email_verified_at' => now(),
         ]);
+        self::checkIssetBeforeCreate([
+            'code' => 'test',
+            'full_name' => 'Test',
+            'email' => 'test@st.vn',
+            'password' => '123456aA@',
+            'role_id' => 2,
+            'status' => UserStatus::Approved->value,
+            'email_verified_at' => now(),
+        ]);
     }
 
     private function checkIssetBeforeCreate($data): void
