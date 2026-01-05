@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Equipment extends Model
 {
-    protected $fillable = [
+
+    protected $table = 'equipment';
+    protected $fillable  = [
         'lab_id',
         'name',
         'code',
@@ -15,12 +17,22 @@ class Equipment extends Model
         'purchased_date',
         'specifications',
         'notes',
+        'quantity',
+        'broken_quantity',
+        'actual_quantity',
     ];
     protected $casts = [
-        'specifications' => 'array',
         'purchased_date'=>'date',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function ($equipment)
+        {
+            $equipment->actual_quantity =
+                max(0, $equipment->quantity - $equipment->broken_quantity);
+        });
+    }
 
 
     public function lab()

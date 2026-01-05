@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string("code")->unique();
             $table->string("type");
             $table->enum("status", ["available", "in_use", "maintenance", "broken"])->default("available");
-            $table->date( " purchased_date")->nullable();
+            $table->date( "purchased_date")->nullable();
             $table->json("specifications")->nullable();
             $table->text("notes")->nullable();
             $table->timestamps();
