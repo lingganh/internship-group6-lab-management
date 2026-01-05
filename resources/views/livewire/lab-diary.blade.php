@@ -34,7 +34,7 @@
                   </select>
                 </div>
 
-                <div class="col-12 col-md-2">
+                {{-- <div class="col-12 col-md-2">
                   <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
                   <select wire:model.live="filterStatus" class="form-select diary-control">
                     <option value="">Tất cả</option>
@@ -42,7 +42,7 @@
                     <option value="approved">Đã duyệt</option>
                     <option value="cancelled">Đã từ chối</option>
                   </select>
-                </div>
+                </div> --}}
 
                 <div class="col-12 col-md-2">
                   <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
@@ -102,6 +102,8 @@
                           <span class="badge diary-pill diary-pill-pending">Chờ duyệt</span>
                         @elseif($item->status === 'approved')
                           <span class="badge diary-pill diary-pill-approved">Đã duyệt</span>
+                        @elseif($item->status === 'completed')
+                          <span class="badge diary-pill diary-pill-approved">Đã hoàn thành</span>  
                         @else
                           <span class="badge diary-pill diary-pill-cancelled">Từ chối</span>
                         @endif
@@ -207,6 +209,7 @@
                     <option value="pending">Chờ duyệt</option>
                     <option value="approved">Đã duyệt</option>
                     <option value="cancelled">Từ chối</option>
+                    <option value="completed">Đã hoàn thành</option>
                   </select>
                   @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                 </div>

@@ -28,6 +28,7 @@
                     <option value="pending">Chờ phê duyệt</option>
                     <option value="approved">Đã phê duyệt</option>
                     <option value="cancelled">Đã từ chối</option>
+                    <option value="completed">Đã hoàn thành</option>
                     <option value="">Tất cả</option>
                   </select>
                 </div>
@@ -109,6 +110,8 @@
                           <span class="badge approval-pill approval-pill-pending">Chờ duyệt</span>
                         @elseif($item->status === 'approved')
                           <span class="badge approval-pill approval-pill-approved">Đã duyệt</span>
+                        @elseif($item->status === 'completed')
+                          <span class="badge approval-pill approval-pill-approved">Đã hoàn thành</span>  
                         @else
                           <span class="badge approval-pill approval-pill-cancelled">Từ chối</span>
                         @endif

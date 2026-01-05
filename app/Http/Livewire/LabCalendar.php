@@ -15,6 +15,10 @@ class LabCalendar extends Component
 {
     public function render()
     {
+        LabEvent::where('status', 'approved')
+        ->where('end', '<', now())
+        ->update(['status' => 'completed']);
+        
         $rooms = Lab::select('code', 'name')
             ->orderBy('name')
             ->get();
