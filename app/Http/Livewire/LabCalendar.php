@@ -15,6 +15,8 @@ class LabCalendar extends Component
 {
     public function render()
     {
+        $this->autoUpdateStatuses();
+
         $rooms = Lab::select('code', 'name')
             ->orderBy('name')
             ->get();
@@ -24,25 +26,31 @@ class LabCalendar extends Component
         ])->layout('components.layouts.client-layout');
     }
 
-    private function autoCancelExpiredPending(): void
+    private function autoUpdateStatuses(): void
     {
         try {
+            $now = Carbon::now();
+
+            LabEvent::where('status', 'approved')
+                ->where('end', '<', $now)
+                ->update(['status' => 'completed']);
+
             LabEvent::query()
                 ->where('status', 'pending')
                 ->whereNotNull('start')
-                ->where('start', '<=', Carbon::now())
+                ->where('start', '<=', $now)
                 ->update([
                     'status' => 'cancelled',
-                    'updated_at' => Carbon::now(),
+                    'updated_at' => $now,
                 ]);
         } catch (\Throwable $e) {
-            Log::error('Auto cancel pending error: ' . $e->getMessage());
+            Log::error('Auto update status error: ' . $e->getMessage());
         }
     }
 
     public function getAllBookings()
     {
-        $this->autoCancelExpiredPending();
+        $this->autoUpdateStatuses();
 
         $events = LabEvent::with('lab:code,name')
             ->where('status', '!=', 'cancelled')
@@ -67,7 +75,7 @@ class LabCalendar extends Component
 
     public function store(Request $request)
     {
-        $this->autoCancelExpiredPending();
+        $this->autoUpdateStatuses();
 
         if (!auth()->check()) {
             return response()->json([
@@ -128,7 +136,7 @@ class LabCalendar extends Component
 
     public function update(Request $request, $id)
     {
-        $this->autoCancelExpiredPending();
+        $this->autoUpdateStatuses();
 
         $event = LabEvent::findOrFail($id);
 

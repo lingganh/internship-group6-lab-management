@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Carbon\Carbon;
 class LabEvent extends Model
 {
     use HasFactory;
@@ -36,4 +36,13 @@ class LabEvent extends Model
     {
         return $this->belongsTo(Lab::class, 'lab_code', 'code');
     }
+
+    public function getDisplayStatusAttribute()
+{
+     if ($this->status === 'approved' && Carbon::parse($this->end)->isPast()) {
+        return 'completed'; //'Đã hoàn thành'
+    }
+
+    return $this->status;
+}
 }

@@ -13,7 +13,8 @@ const categoryColors = {
 
 const statusColors = {
   pending: '#ffc107',
-  approved: '#28a745'
+  approved: '#28a745',
+  completed: '#1870bdff',
 }
 
 const categoryNames = {
@@ -124,11 +125,22 @@ function initCalendar() {
       const status = props.status || 'pending'
       const roomName = props.roomName || ''
       const isApproved = status === 'approved'
-      const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt'
-      const statusIcon = isApproved
-        ? '<i class="fa-solid fa-circle-check"></i>'
-        : '<i class="fa-solid fa-clock"></i>'
+      let statusText = 'Chờ duyệt'
+      let statusIcon = '<i class="fa-solid fa-clock"></i>'
 
+      if (status === 'approved') {
+        statusText = 'Đã duyệt'
+        statusIcon = '<i class="fa-solid fa-circle-check"></i>'
+      } 
+      else if (status === 'completed') {   
+        statusText = 'Đã hoàn thành'
+        statusIcon = '<i class="fa-solid fa-check-double"></i>'
+      } 
+      else if (status === 'cancelled') {
+        statusText = 'Đã hủy'
+        statusIcon = '<i class="fa-solid fa-ban"></i>'
+      }
+ 
       const cat = props.category || 'work'
       const catText = categoryNames[cat] || cat
 
@@ -501,15 +513,22 @@ function showEventDetail(calendarEvent) {
   const statusTextEl = document.getElementById('detailStatus')
   const pendingIcon = document.getElementById('statusPendingIcon')
   const approvedIcon = document.getElementById('statusApprovedIcon')
-
-  pendingIcon.style.display = 'none'
-  approvedIcon.style.display = 'none'
+  const completedIcon = document.getElementById('statusCompletedIcon')
+ 
+  if (pendingIcon) pendingIcon.style.display = 'none';
+  if (approvedIcon) approvedIcon.style.display = 'none';
+  if (completedIcon) completedIcon.style.display = 'none';
 
   if (status === 'approved') {
-    approvedIcon.style.display = 'inline-block'
+    if(approvedIcon) approvedIcon.style.display = 'inline-block'
     statusTextEl.textContent = 'Đã duyệt'
-  } else {
-    pendingIcon.style.display = 'inline-block'
+  } 
+  else if (status === 'completed') { 
+    if(completedIcon) completedIcon.style.display = 'inline-block'
+    statusTextEl.textContent = 'Đã hoàn thành'
+  } 
+  else {
+    if(pendingIcon) pendingIcon.style.display = 'inline-block'
     statusTextEl.textContent = 'Chờ duyệt'
   }
 

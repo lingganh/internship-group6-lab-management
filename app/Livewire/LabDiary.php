@@ -191,8 +191,10 @@ class LabDiary extends Component
     {
         $labs = Lab::select('code', 'name')->orderBy('name')->get();
 
-        $q = LabEvent::query()
+      $q = LabEvent::query()
             ->with(['user:id,full_name,email', 'lab:code,name'])
+            ->where('status', 'completed')  
+            ->where('end', '<', now())    
             ->orderByDesc('start');
 
         if ($this->filterLabCode !== '')
