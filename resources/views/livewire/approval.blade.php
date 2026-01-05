@@ -7,7 +7,8 @@
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
               <div>
                 <h4 class="mb-1 fw-bold text-dark">Phê duyệt lịch đăng ký</h4>
-                <div class="text-muted small">Quản lý các yêu cầu đăng ký phòng lab theo trạng thái / phòng / người dùng / ngày.</div>
+                <div class="text-muted small">Quản lý các yêu cầu đăng ký phòng lab theo trạng thái / phòng / người dùng
+                  / ngày.</div>
               </div>
 
               <div class="d-flex align-items-center gap-2">
@@ -102,7 +103,8 @@
 
                       <td>
                         <div class="fw-semibold text-dark">{{ optional($item->start)->format('d/m/Y') }}</div>
-                        <div class="small text-muted">{{ optional($item->start)->format('H:i') }} – {{ optional($item->end)->format('H:i') }}</div>
+                        <div class="small text-muted">{{ optional($item->start)->format('H:i') }} –
+                          {{ optional($item->end)->format('H:i') }}</div>
                       </td>
 
                       <td class="text-center">
@@ -111,7 +113,7 @@
                         @elseif($item->status === 'approved')
                           <span class="badge approval-pill approval-pill-approved">Đã duyệt</span>
                         @elseif($item->status === 'completed')
-                          <span class="badge approval-pill approval-pill-approved">Đã hoàn thành</span>  
+                          <span class="badge approval-pill approval-pill-approved">Đã hoàn thành</span>
                         @else
                           <span class="badge approval-pill approval-pill-cancelled">Từ chối</span>
                         @endif
@@ -119,15 +121,18 @@
 
                       <td class="text-end">
                         <div class="d-inline-flex gap-2">
-                          <button wire:click="viewSchedule({{ $item->id }})" class="btn btn-sm approval-btn approval-btn-primary" type="button">
+                          <button wire:click="viewSchedule({{ $item->id }})"
+                            class="btn btn-sm approval-btn approval-btn-primary" type="button">
                             Chi tiết
                           </button>
 
                           @if($item->status === 'pending')
-                            <button wire:click="approveNow({{ $item->id }})" class="btn btn-sm approval-btn approval-btn-success" type="button">
+                            <button wire:click="approveNow({{ $item->id }})"
+                              class="btn btn-sm approval-btn approval-btn-success" type="button">
                               Phê duyệt
                             </button>
-                            <button wire:click="confirmReject({{ $item->id }})" class="btn btn-sm approval-btn approval-btn-danger" type="button">
+                            <button wire:click="confirmReject({{ $item->id }})"
+                              class="btn btn-sm approval-btn approval-btn-danger" type="button">
                               Từ chối
                             </button>
                           @endif
@@ -266,10 +271,12 @@
 
               @if($selectedSchedule && $selectedSchedule->status === 'pending')
                 <div class="d-flex gap-2">
-                  <button wire:click="confirmReject({{ $selectedSchedule->id }})" type="button" class="btn approval-btn approval-btn-danger">
+                  <button wire:click="confirmReject({{ $selectedSchedule->id }})" type="button"
+                    class="btn approval-btn approval-btn-danger">
                     Từ chối
                   </button>
-                  <button wire:click="approveNow({{ $selectedSchedule->id }})" type="button" class="btn approval-btn approval-btn-success">
+                  <button wire:click="approveNow({{ $selectedSchedule->id }})" type="button"
+                    class="btn approval-btn approval-btn-success">
                     Phê duyệt
                   </button>
                 </div>
@@ -302,55 +309,89 @@
         </div>
       </div>
     </div>
+    <!-- Modal Nhập mật khẩu phòng -->
+    <div wire:ignore.self class="modal fade" id="modalPassword" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 approval-modal" style="border-radius: 18px;">
+          <div class="modal-header border-0 pb-0">
+            <div>
+              <h5 class="modal-title fw-bold text-dark mb-1">🔑 Nhập mật khẩu phòng</h5>
+              <div class="small text-muted">Mật khẩu sẽ được gửi qua email cho người dùng</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
 
+          <div class="modal-body pt-3">
+            <div class="approval-info">
+              <label class="form-label small fw-semibold text-dark mb-2">Mật khẩu phòng lab</label>
+              <input type="text" wire:model="roomPassword" class="form-control approval-control"
+                placeholder="Nhập mật khẩu..." autofocus>
+              <div class="small text-muted mt-2">
+                💡 Mật khẩu này sẽ được gửi qua email cho người đăng ký
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <div class="d-flex w-100 justify-content-end gap-2">
+              <button type="button" class="btn approval-btn approval-btn-ghost" data-bs-dismiss="modal">Hủy</button>
+              <button wire:click="approveSchedule" type="button"
+                class="btn approval-btn approval-btn-success">
+                Xác nhận phê duyệt
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <style>
-    .approval-page{
-      --ap-bg:#f6f8fc;
-      --ap-card:#ffffff;
-      --ap-text:#0f172a;
-      --ap-muted:#64748b;
-      --ap-border:#e6eaf2;
-      --ap-shadow:0 14px 40px rgba(15,23,42,.08);
-      --ap-radius:18px;
-      --ap-primary:#2563eb;
-      --ap-primary-soft:#eaf1ff;
-      --ap-success:#16a34a;
-      --ap-success-soft:#e9f9ef;
-      --ap-danger:#dc2626;
-      --ap-danger-soft:#ffecec;
-      --ap-warn:#f59e0b;
-      --ap-warn-soft:#fff3db;
+    .approval-page {
+      --ap-bg: #f6f8fc;
+      --ap-card: #ffffff;
+      --ap-text: #0f172a;
+      --ap-muted: #64748b;
+      --ap-border: #e6eaf2;
+      --ap-shadow: 0 14px 40px rgba(15, 23, 42, .08);
+      --ap-radius: 18px;
+      --ap-primary: #2563eb;
+      --ap-primary-soft: #eaf1ff;
+      --ap-success: #16a34a;
+      --ap-success-soft: #e9f9ef;
+      --ap-danger: #dc2626;
+      --ap-danger-soft: #ffecec;
+      --ap-warn: #f59e0b;
+      --ap-warn-soft: #fff3db;
     }
 
     /* body{ background: var(--ap-bg); } */
 
-    .approval-card{
+    .approval-card {
       border-radius: var(--ap-radius);
       background: var(--ap-card);
       box-shadow: var(--ap-shadow);
       overflow: hidden;
     }
 
-    .approval-badge-warn{
+    .approval-badge-warn {
       background: var(--ap-warn-soft);
       color: #7a4b00;
-      border: 1px solid rgba(245,158,11,.22);
+      border: 1px solid rgba(245, 158, 11, .22);
       border-radius: 999px;
       padding: 10px 14px;
       font-weight: 600;
       letter-spacing: .2px;
     }
 
-    .approval-filters{
+    .approval-filters {
       background: #fff;
       border: 1px solid var(--ap-border);
       border-radius: 16px;
       padding: 14px;
     }
 
-    .approval-control{
+    .approval-control {
       border: 1px solid var(--ap-border) !important;
       border-radius: 12px !important;
       padding: 10px 12px !important;
@@ -358,19 +399,20 @@
       box-shadow: none !important;
       color: var(--ap-text);
     }
-    .approval-control:focus{
-      border-color: rgba(37,99,235,.35) !important;
-      box-shadow: 0 0 0 .2rem rgba(37,99,235,.12) !important;
+
+    .approval-control:focus {
+      border-color: rgba(37, 99, 235, .35) !important;
+      box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .12) !important;
     }
 
-    .approval-table-wrap{
+    .approval-table-wrap {
       border: 1px solid var(--ap-border);
       border-radius: 16px;
       overflow: hidden;
       background: #fff;
     }
 
-    .approval-table thead th{
+    .approval-table thead th {
       background: #fbfcff;
       color: #334155;
       font-weight: 700;
@@ -379,102 +421,124 @@
       font-size: .92rem;
     }
 
-    .approval-table tbody td{
+    .approval-table tbody td {
       border-top: 1px solid var(--ap-border);
       padding: 14px 14px;
       vertical-align: middle;
       color: var(--ap-text);
     }
 
-    .approval-table tbody tr{ transition: background .15s ease; }
-    .approval-table tbody tr:hover{ background: rgba(37,99,235,.03); }
-
-    .approval-dot{
-      width: 8px;height: 8px;border-radius: 999px;
-      background: rgba(37,99,235,.35);display: inline-block;
+    .approval-table tbody tr {
+      transition: background .15s ease;
     }
 
-    .approval-pill{
+    .approval-table tbody tr:hover {
+      background: rgba(37, 99, 235, .03);
+    }
+
+    .approval-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, .35);
+      display: inline-block;
+    }
+
+    .approval-pill {
       border-radius: 999px;
       padding: 8px 12px;
       font-weight: 700;
       border: 1px solid transparent;
       font-size: .85rem;
     }
-    .approval-pill-pending{
+
+    .approval-pill-pending {
       background: var(--ap-warn-soft);
       color: #7a4b00;
-      border-color: rgba(245,158,11,.25);
-    }
-    .approval-pill-approved{
-      background: var(--ap-success-soft);
-      color: #0f6a2e;
-      border-color: rgba(22,163,74,.22);
-    }
-    .approval-pill-cancelled{
-      background: var(--ap-danger-soft);
-      color: #8a1414;
-      border-color: rgba(220,38,38,.22);
+      border-color: rgba(245, 158, 11, .25);
     }
 
-    .approval-btn{
+    .approval-pill-approved {
+      background: var(--ap-success-soft);
+      color: #0f6a2e;
+      border-color: rgba(22, 163, 74, .22);
+    }
+
+    .approval-pill-cancelled {
+      background: var(--ap-danger-soft);
+      color: #8a1414;
+      border-color: rgba(220, 38, 38, .22);
+    }
+
+    .approval-btn {
       border-radius: 12px;
       padding: 9px 12px;
       font-weight: 700;
       border: 1px solid transparent;
       transition: transform .06s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
     }
-    .approval-btn:active{ transform: translateY(1px); }
 
-    .approval-btn-primary{
+    .approval-btn:active {
+      transform: translateY(1px);
+    }
+
+    .approval-btn-primary {
       background: var(--ap-primary-soft);
-      border-color: rgba(37,99,235,.18);
+      border-color: rgba(37, 99, 235, .18);
       color: var(--ap-primary);
     }
-    .approval-btn-primary:hover{
-      background: rgba(37,99,235,.14);
-      border-color: rgba(37,99,235,.25);
+
+    .approval-btn-primary:hover {
+      background: rgba(37, 99, 235, .14);
+      border-color: rgba(37, 99, 235, .25);
     }
 
-    .approval-btn-danger{
+    .approval-btn-danger {
       background: var(--ap-danger-soft);
-      border-color: rgba(220,38,38,.18);
+      border-color: rgba(220, 38, 38, .18);
       color: var(--ap-danger);
     }
-    .approval-btn-danger:hover{
-      background: rgba(220,38,38,.12);
-      border-color: rgba(220,38,38,.25);
+
+    .approval-btn-danger:hover {
+      background: rgba(220, 38, 38, .12);
+      border-color: rgba(220, 38, 38, .25);
     }
 
-    .approval-btn-success{
+    .approval-btn-success {
       background: var(--ap-success);
       color: #fff;
-      border-color: rgba(22,163,74,.4);
-      box-shadow: 0 10px 18px rgba(22,163,74,.18);
+      border-color: rgba(22, 163, 74, .4);
+      box-shadow: 0 10px 18px rgba(22, 163, 74, .18);
     }
-    .approval-btn-success:hover{ filter: brightness(.98); }
 
-    .approval-btn-ghost{
+    .approval-btn-success:hover {
+      filter: brightness(.98);
+    }
+
+    .approval-btn-ghost {
       background: #fff;
       color: #334155;
       border-color: var(--ap-border);
     }
-    .approval-btn-ghost:hover{ background: #f8fafc; }
 
-    .approval-modal{
+    .approval-btn-ghost:hover {
+      background: #f8fafc;
+    }
+
+    .approval-modal {
       border-radius: 20px;
-      box-shadow: 0 18px 48px rgba(15,23,42,.16);
+      box-shadow: 0 18px 48px rgba(15, 23, 42, .16);
       overflow: hidden;
     }
 
-    .approval-info{
+    .approval-info {
       border: 1px solid var(--ap-border);
       border-radius: 16px;
       padding: 12px 14px;
       background: #fff;
     }
 
-    .approval-desc{
+    .approval-desc {
       background: #fbfcff;
       border: 1px solid var(--ap-border);
       border-radius: 14px;
@@ -485,55 +549,78 @@
       white-space: pre-line;
     }
 
-    .approval-files{ display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .approval-files {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
 
-    .approval-file{
-      display:flex;align-items:center;gap:10px;
-      padding: 10px 12px;border-radius:14px;border:1px solid var(--ap-border);
-      background:#fff;text-decoration:none;color:#0f172a;
+    .approval-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--ap-border);
+      background: #fff;
+      text-decoration: none;
+      color: #0f172a;
       transition: background .12s ease, border-color .12s ease;
     }
-    .approval-file:hover{
-      background: rgba(37,99,235,.04);
-      border-color: rgba(37,99,235,.22);
-      color:#0f172a;
+
+    .approval-file:hover {
+      background: rgba(37, 99, 235, .04);
+      border-color: rgba(37, 99, 235, .22);
+      color: #0f172a;
     }
 
-    .approval-file-ic{
-      width:34px;height:34px;border-radius:12px;
-      display:inline-flex;align-items:center;justify-content:center;
-      background: rgba(37,99,235,.08);
-      border: 1px solid rgba(37,99,235,.14);
+    .approval-file-ic {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, .08);
+      border: 1px solid rgba(37, 99, 235, .14);
       flex: 0 0 auto;
     }
 
-    .approval-empty{
-      background:#fbfcff;border:1px dashed var(--ap-border);
-      border-radius:14px;padding:12px 12px;
+    .approval-empty {
+      background: #fbfcff;
+      border: 1px dashed var(--ap-border);
+      border-radius: 14px;
+      padding: 12px 12px;
     }
 
-    .ap-toast-ic{
-      width: 34px;height:34px;border-radius: 12px;
-      display:inline-flex;align-items:center;justify-content:center;
-      background: rgba(37,99,235,.08);
-      border: 1px solid rgba(37,99,235,.14);
+    .ap-toast-ic {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, .08);
+      border: 1px solid rgba(37, 99, 235, .14);
       flex: 0 0 auto;
       font-weight: 800;
     }
 
-    @media (min-width: 992px){
-      .approval-files{ grid-template-columns: 1fr 1fr; }
+    @media (min-width: 992px) {
+      .approval-files {
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 
   <script>
-    function apGetModal(id){
+    function apGetModal(id) {
       const el = document.getElementById(id);
       if (!el) return null;
       return bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
     }
 
-    function apToast(type, msg, sub){
+    function apToast(type, msg, sub) {
       const toastEl = document.getElementById('apToast');
       if (!toastEl) return;
 
@@ -580,6 +667,18 @@
     window.addEventListener('toast', (e) => {
       const d = (e && e.detail) ? e.detail : e;
       apToast(d.type || 'info', d.message || '', d.sub || '');
+    });
+
+    window.addEventListener('open-password-modal', () => {
+      const m = apGetModal('modalPassword');
+      if (m) m.show();
+    });
+
+    window.addEventListener('close-password-modal', () => {
+      const el = document.getElementById('modalPassword');
+      if (!el) return;
+      const m = bootstrap.Modal.getInstance(el);
+      if (m) m.hide();
     });
   </script>
 </div>
