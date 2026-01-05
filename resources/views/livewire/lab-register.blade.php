@@ -147,7 +147,7 @@
       --r-shadow:0 14px 40px rgba(15,23,42,.08); --r-radius:18px;
       --r-success:#16a34a;
     }
-    body{ background: var(--r-bg); }
+    /* body{ background: var(--r-bg); } */
     .register-card{ border-radius: var(--r-radius); background: var(--r-card); box-shadow: var(--r-shadow); overflow:hidden; }
     .register-control{
       border:1px solid var(--r-border) !important; border-radius:12px !important;

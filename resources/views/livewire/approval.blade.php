@@ -324,7 +324,7 @@
       --ap-warn-soft:#fff3db;
     }
 
-    body{ background: var(--ap-bg); }
+    /* body{ background: var(--ap-bg); } */
 
     .approval-card{
       border-radius: var(--ap-radius);

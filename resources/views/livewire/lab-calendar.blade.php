@@ -32,6 +32,12 @@
                                 <span class="lab-check-color status-approved"></span>
                                 <span class="lab-check-label">Đã duyệt</span>
                             </label>
+                            <label class="lab-check-item">
+                                <input type="checkbox" checked data-filter-status="completed">
+                                <span class="lab-check-color status-approved"></span>
+                                <span class="lab-check-label">Đã hoàn thành</span>
+                            </label>
+                           
                         </div>
                     </div>
 
