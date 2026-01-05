@@ -10,7 +10,7 @@ use App\Http\Controllers\Auth\AuthenticateController;
 use Livewire\Volt\Volt;
 use Laravel\Fortify\Features;
 use App\Livewire\Admin\Equipment\Index;
-use App\Livewire\Admin\Equipment\Create;
+use App\Livewire\Admin\Equipment\Create as EquipmentCreate;
 use App\Livewire\Admin\Equipment\Edit;
 use App\Livewire\Approval;
 use App\Livewire\UserSchedules;
@@ -76,6 +76,8 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
         Route::get('/approval', Approval::class)->name('admin.approval');
         Route::get('/equipment', Index::class)->name('equipment.index');
+        Route::get('/equipment/create', EquipmentCreate::class)->name('admin.equipment.create');
+        Route::get('/equipment/edit/{id}', Edit::class)->name('admin.equipment.edit');
         Route::get('/lab-register', LabRegister::class)->name('lab.register');
 
     });

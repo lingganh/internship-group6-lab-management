@@ -29,7 +29,7 @@
             </div>
         </div>
     </div>
-    <br><br><br>
+
     <div class="card" style="margin: 2% 2% ">
         <div class="card-header py-3 d-flex justify-content-between">
             <div class="d-flex gap-2">
@@ -50,7 +50,7 @@
                     </select>
                 </div>
                 <div>
-                    <a href="{{route('admin.groups.create')}}" type="button" class="btn btn-primary btn-icon px-2">
+                    <a href="{{route('admin.equipment.create')}}" type="button" class="btn btn-primary btn-icon px-2">
                         <i class="ph-plus-circle px-1"></i><span>Thêm mới</span>
                     </a>
                 </div>
@@ -67,6 +67,7 @@
                 <thead>
                 <tr class="table-light">
                     <th>STT</th>
+                    <th>PHÒNG LAB</th>
                     <th>TÊN THIẾT BỊ </th>
                     <th> SỐ LƯỢNG </th>
                     <th>SỐ LƯỢNG HỎNG </th>
@@ -77,34 +78,66 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <td class="text-center">
-                        <div class="dropdown ">
-                            <a href="#" class="text-body" data-bs-toggle="dropdown">
-                                <i class="ph-list"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a href="" class="dropdown-item">
-                                    <i class="ph-note-pencil px-1"></i>
-                                    Chỉnh sửa
+                @forelse ($equipments as $index => $eq)
+                    <tr>
+                        <td>{{ $equipments->firstItem() + $index }}</td>
+                        <td>{{ $eq->lab->name ?? '—' }}</td>
+                        <td>{{ $eq->name }}</td>
+                        <td>{{ $eq->quantity ?? 0 }}</td>
+                        <td>{{ $eq->broken_quantity ?? 0 }}</td>
+                        <td>{{ $eq->actual_quantity ?? 0 }}</td>
+                        <td>
+                            @switch($eq->status)
+
+                                @case('available')
+                                    <span class="badge bg-success">Sẵn sàng sử dụng</span>
+                                    @break
+
+                                @case('in_use')
+                                    <span class="badge bg-primary">Đang sử dụng</span>
+                                    @break
+
+                                @case('maintenance')
+                                    <span class="badge bg-warning text-dark">Bảo trì</span>
+                                    @break
+
+                                @case('broken')
+                                    <span class="badge bg-danger">Hỏng</span>
+                                    @break
+
+                                @default
+                                    <span class="badge bg-secondary">Không xác định</span>
+
+                            @endswitch
+                        </td>
+                        <td title="{{ $eq->notes }}">
+                            {{ \Illuminate\Support\Str::limit($eq->notes, 20, '...') ?? '—' }}
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <a href="#" data-bs-toggle="dropdown">
+                                    <i class="ph-list"></i>
                                 </a>
-                                <a type="button" href="#" class="dropdown-item">
-                                    <i class="ph-trash px-1"></i>
-                                    Xóa
-                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                   <a href="{{ route('admin.equipment.edit', $eq->id) }}"
+                                       class="dropdown-item">
+                                        <i class="ph-note-pencil px-1"></i>
+                                        Chỉnh sửa
+                                    </a>
+                                    <a href="#" wire:click.prevent="delete({{ $eq->id }})"
+                                       class="dropdown-item">
+                                        <i class="ph-trash px-1"></i>
+                                        Xóa
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+
+                @empty
+                    <x-table-empty :colspan="9" />
+                @endforelse
                 </tbody>
-                <x-table-empty :colspan="7" />
             </table>
         </div>
     </div>
