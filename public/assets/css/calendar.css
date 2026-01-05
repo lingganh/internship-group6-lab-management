@@ -39,7 +39,9 @@ body {
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07),
     0 0 0 1px rgba(221, 225, 230, 0.9);
 }
-
+.lab-check-color.status-completed {
+    background-color: #1466ad;  
+}
 .lab-sidebar-section {
   margin-bottom: 18px;
 }
