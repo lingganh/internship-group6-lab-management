@@ -14,7 +14,7 @@ const categoryColors = {
 const statusColors = {
   pending: '#ffc107',
   approved: '#28a745',
-  completed: '#6c757d',
+  completed: '#1870bdff',
 }
 
 const categoryNames = {
@@ -513,15 +513,22 @@ function showEventDetail(calendarEvent) {
   const statusTextEl = document.getElementById('detailStatus')
   const pendingIcon = document.getElementById('statusPendingIcon')
   const approvedIcon = document.getElementById('statusApprovedIcon')
-
-  pendingIcon.style.display = 'none'
-  approvedIcon.style.display = 'none'
+  const completedIcon = document.getElementById('statusCompletedIcon')
+ 
+  if (pendingIcon) pendingIcon.style.display = 'none';
+  if (approvedIcon) approvedIcon.style.display = 'none';
+  if (completedIcon) completedIcon.style.display = 'none';
 
   if (status === 'approved') {
-    approvedIcon.style.display = 'inline-block'
+    if(approvedIcon) approvedIcon.style.display = 'inline-block'
     statusTextEl.textContent = 'Đã duyệt'
-  } else {
-    pendingIcon.style.display = 'inline-block'
+  } 
+  else if (status === 'completed') { 
+    if(completedIcon) completedIcon.style.display = 'inline-block'
+    statusTextEl.textContent = 'Đã hoàn thành'
+  } 
+  else {
+    if(pendingIcon) pendingIcon.style.display = 'inline-block'
     statusTextEl.textContent = 'Chờ duyệt'
   }
 

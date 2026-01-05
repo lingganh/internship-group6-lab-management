@@ -34,7 +34,7 @@
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="completed">
-                                <span class="lab-check-color status-approved"></span>
+                                <span class="lab-check-color status-completed"></span>
                                 <span class="lab-check-label">Đã hoàn thành</span>
                             </label>
                            
@@ -232,7 +232,9 @@
                         <i id="statusPendingIcon" class="fa-solid fa-clock" style="color:#ffc107; display:none;"></i>
                         <i id="statusApprovedIcon" class="fa-solid fa-circle-check"
                             style="color:#28a745; display:none;"></i>
-                    </span>
+                         <i id="statusCompletedIcon" class="fa-solid fa-check-double" 
+                      style="color:#6c757d; display:none;"></i>   
+                                </span>
                     <span id="detailStatus"></span>
                 </div>
             </div>
