@@ -4,7 +4,9 @@ namespace App\Livewire\Admin\Users;
 
 use App\Common\Constants;
 use App\Enums\UserStatus;
+use App\Mail\ApprovalUser;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -73,6 +75,7 @@ class Index extends Component
         $user = User::find($this->approveId);
         $user->status = UserStatus::Approved->value;
         $user->save();
+        Mail::to($user->email)->queue(new ApprovalUser($user));
         $this->dispatch('alert', type:'success', message:'Duyệt tài khoản thành công!');
     }
 
