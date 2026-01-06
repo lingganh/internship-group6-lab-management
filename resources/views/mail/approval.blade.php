@@ -75,7 +75,8 @@
             font-weight: 500;
         }
         .password-box {
-            background: linear-gradient(135deg, #16a34a 0%, #0f6a2e 100%);
+            /*background: linear-gradient(135deg, #16a34a 0%, #0f6a2e 100%);*/
+            background-color: #16a34a;
             color: white;
             border-radius: 12px;
             padding: 20px;
@@ -100,6 +101,10 @@
             font-size: 14px;
             color: #64748b;
             text-align: center;
+        }
+        .footer img {
+            max-width: 70px;
+            margin-top: 10px;
         }
         .note {
             background: #fff3db;
@@ -162,9 +167,9 @@
         </div>
 
        <div class="footer">
-        <img src="{{ $message->embed(public_path('assets/images/logoST.jpg')) }}">
-        <p>Hệ thống quản lý phòng Lab 304</p>
-    </div>
+           <img src="{{ $message->embed(public_path('assets/images/logoST.jpg')) }}">
+           <p>Hệ thống quản lý phòng Lab 304</p>
+        </div>
     </div>
 </body>
 </html>
