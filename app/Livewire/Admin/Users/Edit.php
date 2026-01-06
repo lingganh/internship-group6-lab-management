@@ -4,11 +4,13 @@ namespace App\Livewire\Admin\Users;
 
 use App\Enums\Role;
 use App\Enums\UserStatus;
+use App\Mail\ApprovalUser;
 use App\Models\Department;
 use App\Models\Role as ModelsRole;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Session;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
@@ -158,6 +160,7 @@ class Edit extends Component
         $user = User::find($this->userId);
         $user->status = UserStatus::Approved->value;
         $user->save();
+        Mail::to($user->email)->queue(new ApprovalUser($user));
         $this->dispatch('alert', type:'success', message:'Duyệt tài khoản thành công!');
     }
 

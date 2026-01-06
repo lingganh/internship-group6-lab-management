@@ -122,17 +122,17 @@ class User extends Authenticatable
     {
         if($this->status === UserStatus::Pending->value)
         {
-            return '<span class="badge bg-info bg-opacity-10 text-warning"> Chờ duyệt </span>';
+            return '<span class="badge bg-info bg-opacity-10 text-warning"> Đang chờ duyệt </span>';
         }
 
         if($this->status === UserStatus::Approved->value)
         {
-            return '<span class="badge bg-info bg-opacity-10 text-success"> Đã duyệt </span>';
+            return '<span class="badge bg-info bg-opacity-10 text-success"> Đang hoạt động </span>';
         }
 
         if($this->status === UserStatus::Archived->value)
         {
-            return '<span class="badge bg-info bg-opacity-10 text-danger"> Lưu trữ </span>';
+            return '<span class="badge bg-info bg-opacity-10 text-danger"> Đang lưu trữ </span>';
         }
 
 
