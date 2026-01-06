@@ -78,40 +78,35 @@
                 </tr>
                 </thead>
                 <tbody>
-                @forelse ($equipments as $index => $eq)
+                @forelse ($items as $index => $item)
                     <tr>
-                        <td>{{ $equipments->firstItem() + $index }}</td>
-                        <td>{{ $eq->lab->name ?? '—' }}</td>
-                        <td>{{ $eq->name }}</td>
-                        <td>{{ $eq->quantity ?? 0 }}</td>
-                        <td>{{ $eq->broken_quantity ?? 0 }}</td>
-                        <td>{{ $eq->actual_quantity ?? 0 }}</td>
+                        <td>{{ $items->firstItem() + $index }}</td>
+                        <td>{{ $item->lab->name ?? '—' }}</td>
+                        <td>{{ $item->equipment->name ?? '—' }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ $item->broken_quantity }}</td>
+                        <td>{{ $item->actual_quantity }}</td>
                         <td>
-                            @switch($eq->status)
-
+                            @php $status = $item->equipment->status ?? 'unknown'; @endphp
+                            @switch($status)
                                 @case('available')
                                     <span class="badge bg-success">Sẵn sàng sử dụng</span>
                                     @break
-
                                 @case('in_use')
                                     <span class="badge bg-primary">Đang sử dụng</span>
                                     @break
-
                                 @case('maintenance')
                                     <span class="badge bg-warning text-dark">Bảo trì</span>
                                     @break
-
                                 @case('broken')
                                     <span class="badge bg-danger">Hỏng</span>
                                     @break
-
                                 @default
                                     <span class="badge bg-secondary">Không xác định</span>
-
                             @endswitch
                         </td>
-                        <td title="{{ $eq->notes }}">
-                            {{ \Illuminate\Support\Str::limit($eq->notes, 20, '...') ?? '—' }}
+                        <td title="{{ $item->equipment->notes ?? '—' }}">
+                            {{ \Illuminate\Support\Str::limit($item->equipment->notes ?? '—', 20, '...') }}
                         </td>
                         <td class="text-center">
                             <div class="dropdown">
@@ -119,24 +114,22 @@
                                     <i class="ph-list"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                   <a href="{{ route('admin.equipment.edit', $eq->id) }}"
-                                       class="dropdown-item">
-                                        <i class="ph-note-pencil px-1"></i>
-                                        Chỉnh sửa
+                                    <a href="{{ route('admin.equipment.edit', $item->equipment->id) }}" class="dropdown-item">
+                                        <i class="ph-note-pencil px-1"></i> Chỉnh sửa
                                     </a>
-                                    <a href="#" wire:click.prevent="delete({{ $eq->id }})"
-                                       class="dropdown-item">
-                                        <i class="ph-trash px-1"></i>
-                                        Xóa
+                                    <a href="#"
+                                       wire:click.prevent="openDeleteModal({{ $item->id }})" class="dropdown-item">
+                                        <i class="ph-trash px-1"></i> Xóa
                                     </a>
                                 </div>
                             </div>
                         </td>
                     </tr>
-
                 @empty
                     <x-table-empty :colspan="9" />
                 @endforelse
+
+
                 </tbody>
             </table>
         </div>
