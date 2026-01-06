@@ -50,7 +50,7 @@
 
                         <div class="mb-3">
                             <label for="code" class="form-label">Mã phòng <span class="text-danger">*</span></label>
-                            <input wire:model.lazy="code" type="text" id="code" class="form-control @error('code') is-invalid @enderror">
+                            <input type="text" class="form-control" wire:model="code" readonly style="background:#f5f5f5; cursor:not-allowed;">
                             @error('code') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
