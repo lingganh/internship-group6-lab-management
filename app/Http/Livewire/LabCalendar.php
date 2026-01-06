@@ -18,10 +18,21 @@ class LabCalendar extends Component
     {
         $this->autoUpdateStatuses();
 
-        $groups = Group::select('id', 'name') 
+        // $groups = Group::select('id', 'name') 
+            
+        //     ->orderBy('name')
+        //     ->get();
+        $user = Auth::user();
+        $groups = Group::select('id', 'name')
+            ->when(!( !$user || (int) $user->role_id === 1), function ($q) use ($user) {
+                $q->whereIn('id', function ($sub) use ($user) {
+                    $sub->select('id')
+                        ->from('lab_events')
+                        ->where('leader_id', $user->id);
+                });
+            })
             ->orderBy('name')
             ->get();
-
         $rooms = Lab::select('code', 'name')
             ->orderBy('name')
             ->get();
