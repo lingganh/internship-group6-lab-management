@@ -15,6 +15,9 @@ use App\Livewire\Admin\Equipment\Edit;
 use App\Livewire\Approval;
 use App\Livewire\UserSchedules;
 use App\Livewire\LabRegister;
+use App\Livewire\Admin\Lab\Index as LabIndex;
+use App\Livewire\Admin\Lab\Create as LabCreate;
+use App\Livewire\Admin\Lab\Edit as LabEdit;
 
 
 //login sso
@@ -79,7 +82,9 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/equipment/create', EquipmentCreate::class)->name('admin.equipment.create');
         Route::get('/equipment/edit/{id}', Edit::class)->name('admin.equipment.edit');
         Route::get('/lab-register', LabRegister::class)->name('lab.register');
-
+        Route::get('/lab', LabIndex::class)->name('admin.lab.index');
+        Route::get('/lab/create', LabCreate::class)->name('admin.lab.create');
+        Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
     });
 });
 

@@ -75,7 +75,7 @@
                         <span>Nhóm NCKH</span>
                     </a>
                 </li>
-              
+
                 <li class="nav-item">
                     <a href="{{route('admin.coming-soon')}}"
                        class="nav-link">
@@ -111,6 +111,13 @@
                        class="nav-link {{ request()->routeIs('equipment.index') ? 'active' : '' }}">
                         <i class="ph-chart-bar"></i>
                         <span>Thiết bị</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{route('admin.lab.index')}}"
+                       class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
+                        <i class="ph-user"></i>
+                        <span>Phòng Lab</span>
                     </a>
                 </li>
             </ul>

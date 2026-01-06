@@ -128,8 +128,6 @@
                 @empty
                     <x-table-empty :colspan="9" />
                 @endforelse
-
-
                 </tbody>
             </table>
         </div>
