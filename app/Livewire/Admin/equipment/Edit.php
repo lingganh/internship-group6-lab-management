@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin\Equipment;
+namespace App\Livewire\Admin\equipment;
 
 use Livewire\Component;
 use App\Models\Equipment;
