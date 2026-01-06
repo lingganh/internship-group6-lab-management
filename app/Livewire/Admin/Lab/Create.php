@@ -8,6 +8,7 @@ use App\Models\Lab;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
 
+
 class Create extends Component
 {
     use WithFileUploads;
@@ -28,24 +29,24 @@ class Create extends Component
             'description'=>'required|string',
             'status'=>'required|in:active,maintenance,locked',
 
-            'image'=> 'nullable|image|max:2048',
+            'image_url'=> 'nullable|image|max:2048',
         ];
     }
 
     public function save(){
-        $this->image->store(path: 'image');
-        $this->validate([
-            'image' => 'nullable|image|max:2048'
-        ]);
-
-        $path = $this->image?->store('labs', 'public');
-
+        $this->validate();
+        $path = null;
+        if ($this->image) {
+            $path = $this->image->store('lab_files','public');
+        }
+       
+ 
         Lab::create([
             'name' => $this->name,
             'code' => $this->code,
             'status' => $this->status,
             'description' => $this->description,
-            'image' => $path,
+            'imageurl' => $path,
             'created_by'  => auth()->id(),
         ]);
 
