@@ -158,7 +158,7 @@ class LabDiary extends Component
             'description' => $this->edit['description'] ?: null,
             'status' => $this->edit['status'],
             'user_id' => $this->edit['user_id'] ?: null,
-            'group_id' => $this->edit['group_id'] ?: null,
+            'registered_for' => $this->edit['group_id'] ?: null,
             'feedback' => trim((string) $this->edit['feedback']) !== '' ? trim((string) $this->edit['feedback']) : null,
         ]);
 
