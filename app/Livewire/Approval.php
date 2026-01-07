@@ -90,12 +90,7 @@ class Approval extends Component
             return;
         }
 
-        if ($this->confirmType === 'reject') {
-            $this->validate([
-                'rejectionNote' => 'required|string|min:3',
-            ]);
-            $this->rejectSchedule($this->confirmId);
-        }
+       
 
         $this->dispatch('close-confirm-modal');
 
@@ -184,7 +179,6 @@ class Approval extends Component
 
         $schedule->update([
             'status' => 'cancelled',
-            'rejection_note' => $this->rejectionNote,
         ]);
 
         if ($schedule->user && $schedule->user->email) {
