@@ -94,11 +94,7 @@
                             <td>{{ Str::limit($lab->description, 60) }}</td>
                             <td>
                                 @if($lab->image_url)
-                                    <img src="{{ asset('storage/' . $lab->image_url) }}"
-                                         width="90"
-                                         class="rounded border">
-                                @else
-                                    <span class="text-muted">— Không có ảnh —</span>
+                                    <img src="{{ asset('storage/'.$lab->image_url) }}" width="80">
                                 @endif
                             </td>
                             <td class="text-center">
@@ -114,6 +110,7 @@
                                            wire:click.prevent="openDeleteModal({{ $lab->id }})" class="dropdown-item">
                                             <i class="ph-trash px-1"></i> Xóa
                                         </a>
+
                                     </div>
                                 </div>
                             </td>

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Lab;
 use App\Models\Lab;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 class Edit extends Component
 {
@@ -13,48 +14,57 @@ class Edit extends Component
     public $lab;
 
     public $name;
-    public $code;
     public $status;
     public $description;
-
+    public $code;
     public $image;
+    public $location;
+    public $capacity;
+    public $facilities;
     public $oldImage;
 
     public function mount($id)
     {
         $this->lab = Lab::findOrFail($id);
-
-        $this->name = $this->lab->name;
         $this->code = $this->lab->code;
+        $this->name = $this->lab->name;
         $this->status = $this->lab->status;
+        $this->location = $this->lab->location;
+        $this->capacity = $this->lab->capacity;
+        $this->facilities = $this->lab->facilities;
         $this->description = $this->lab->description;
-
-        $this->oldImage = $this->lab->image;
+        $this->oldImage = $this->lab->image_url;
     }
 
     protected $rules = [
         'name' => 'required|string|max:255',
         'status' => 'required',
         'description' => 'nullable',
+        'location' => 'nullable|string|max:255',
+        'capacity' => 'nullable',
+        'facilities' => 'nullable|array',
         'image' => 'nullable|image|max:2048'
     ];
 
     public function update()
     {
         $this->validate();
-
-        // nếu có upload ảnh mới
+        $path = $this->oldImage;
         if ($this->image) {
+            if ($this->oldImage && Storage::disk('public')->exists($this->oldImage)) {
+               Storage::disk('public')->delete($this->oldImage);
+            }
             $path = $this->image->store('labs', 'public');
-        } else {
-            $path = $this->oldImage;
         }
 
         $this->lab->update([
             'name' => $this->name,
             'status' => $this->status,
             'description' => $this->description,
-            'image' => $path
+            'location' => $this->location,
+            'capacity' => $this->capacity,
+            'facilities' => $this->facilities,
+            'image_url' => $path
         ]);
 
         session()->flash('success','Cập nhật phòng Lab thành công');

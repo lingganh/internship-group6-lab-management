@@ -71,9 +71,7 @@
                                 </div>
                                 <div class="mb-6">
                                     <label class="form-label">Mô tả</label>
-                                    <textarea rows="3"
-                                              wire:model.lazy="description"
-                                              class="form-control @error('description') is-invalid @enderror"></textarea>
+                                    <textarea rows="3" wire:model.lazy="description" class="form-control @error('description') is-invalid @enderror"></textarea>
                                     @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="mb-6">
@@ -87,13 +85,21 @@
                                     @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="mb-6">
+                                    <label class="form-label">Sức chứa</label>
+                                    <input type="number" wire:model.lazy="capacity" class="form-control @error('capacity') is-invalid @enderror">@error('capacity')
+                                    <div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="form-label">Tiện ích</label>
+                                    <input type="text" wire:model.lazy="facilities" class="form-control @error('facilities') is-invalid @enderror">@error('facilities')
+                                    <div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+
+                                <div class="mb-6">
                                     <label class="form-label">Ảnh minh họa</label>
-
                                     <input type="file" wire:model="image" class="form-control">
-
-                                    @error('image')
-                                    <span class="text-danger">{{ $message }}</span>
-                                    @enderror
+                                    @error('image')<span class="text-danger">{{ $message }}</span>@enderror
                                     @if ($image)
                                         <div class="mt-2">
                                             <img src="{{ $image->temporaryUrl() }}" width="120">
@@ -104,27 +110,28 @@
                         </div>
                     </div>
                 </div>
-            <div class="col-md-3 col-12">
-                <div class="card">
-                    <div class="card-header bold">
-                        <i class="ph-gear-six"></i>
-                        Hành động
-                    </div>
-                    <div class="card-body d-flex align-items-center gap-1">
-                        <button wire:loading.remove wire:target="update" class="btn btn-primary" wire:click="update">
-                            <i class="ph-floppy-disk"></i> Lưu
-                        </button>
-                        <button wire:loading wire:target="update" class="btn btn-primary" disabled>
-                            <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
-                        </button>
-                        <a href="{{ route('admin.lab.index') }}" class="btn btn-warning">
-                            <i class="ph-arrow-counter-clockwise"></i> Trở lại
-                        </a>
+                <div class="col-md-3 col-12">
+                    <div class="card">
+                        <div class="card-header bold">
+                            <i class="ph-gear-six"></i>
+                            Hành động
+                        </div>
+                        <div class="card-body d-flex align-items-center gap-1 flex-wrap">
+                            <button wire:loading.remove wire:target="save" class="btn btn-primary" wire:click="save">
+                                <i class="ph-floppy-disk"></i> Thêm
+                            </button>
+                            <button wire:loading wire:target="save" class="btn btn-primary">
+                                <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
+                            </button>
+
+                            <a href="{{ route('admin.lab.index') }}" class="btn btn-warning">
+                                <i class="ph-arrow-counter-clockwise"></i> Trở lại
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
 </div>

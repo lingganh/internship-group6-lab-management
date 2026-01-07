@@ -68,17 +68,28 @@
                             <label class="form-label">Mô tả</label>
                             <textarea class="form-control" wire:model="description"></textarea>
                         </div>
+                        <label>Vị trí</label>
+                        <input type="text" class="form-control" wire:model="location">
 
-                        <div class="mb-3">
+                        <div class="mb-6">
+                            <label class="form-label">Sức chứa</label>
+                            <input type="number" wire:model.lazy="capacity" class="form-control @error('capacity') is-invalid @enderror">@error('capacity')
+                            <div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="form-label">Tiện ích</label>
+                            <input type="text" wire:model.lazy="facilities" class="form-control @error('facilities') is-invalid @enderror">@error('facilities')
+                            <div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                       <div class="mb-3">
                             <label class="form-label">Ảnh minh họa</label>
                             <input type="file" wire:model="image" class="form-control">
-
-                            @if($image)
-                                <img src="{{ $image->temporaryUrl() }}" width="120" class="mt-2">
-                            @elseif($oldImage)
-                                <img src="{{ asset('storage/'.$oldImage) }}" width="120" class="mt-2">
+                            @if($oldImage)
+                                <img src="{{ asset('storage/'.$oldImage) }}" width="80">
                             @endif
                         </div>
+
                     </div>
                 </div>
             </div>

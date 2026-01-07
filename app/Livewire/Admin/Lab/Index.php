@@ -8,17 +8,20 @@ use Livewire\WithPagination;
 class Index extends Component
 {
     use WithPagination;
+    protected $paginationTheme = 'bootstrap';
     public $search = '';
     public $status='';
     public $deleteId = null;
-
-    protected $rules = ['confirmDelete' => 'delete'];
+    public $perPage = 10;
 
     public function updatingSearch()
     {
         $this->resetPage();
     }
-
+    public function updatingPerPage()
+    {
+        $this->resetPage();
+    }
     public function openDeleteModal($id)
     {
         $this->deleteId = $id;
@@ -32,8 +35,8 @@ class Index extends Component
 
     public function confirmDeleteLab()
     {
-        Lab::findorFail($this->deleteId)->delete();
-
+        Lab::findOrFail($this->deleteId)->delete();
+        $this->reset('deleteId');
         session()->flash('success', 'Xóa phòng Lab thành công');
 
     }
@@ -62,21 +65,17 @@ class Index extends Component
         }
 
         $labs = Lab::when($this->search, function ($query) use ($statusSearch) {
-
             $query->where(function ($q) use ($statusSearch) {
-
-
                 $q->where('name','like','%'.$this->search.'%')
                     ->orWhere('code','like','%'.$this->search.'%');
-
 
                 if ($statusSearch) {
                     $q->orWhere('status', $statusSearch);
                 }
             });
-
-        })->orderBy('name','asc')
-            ->paginate(10);
+        })
+            ->orderBy('name','asc')
+            ->paginate($this->perPage);
 
         return view('livewire.admin.lab.index', [
             'labs' => $labs

@@ -18,6 +18,8 @@ class Create extends Component
     public $status ='active';
     public $location;
     public $description;
+    public $capacity;
+    public $facilities;
     public $image;
 
     protected function rules()
@@ -27,9 +29,10 @@ class Create extends Component
             'code'=>'required|string|max:10|unique:labs,code',
             'location'=>'required|string|max:255',
             'description'=>'required|string',
+            'capacity'=>'required|integer',
+            'facilities' => 'nullable|array',
             'status'=>'required|in:active,maintenance,locked',
-
-            'image_url'=> 'nullable|image|max:2048',
+            'image'=> 'nullable|image|max:2048',
         ];
     }
 
@@ -39,14 +42,17 @@ class Create extends Component
         if ($this->image) {
             $path = $this->image->store('lab_files','public');
         }
-       
- 
+
+
         Lab::create([
             'name' => $this->name,
             'code' => $this->code,
             'status' => $this->status,
             'description' => $this->description,
-            'imageurl' => $path,
+            'image_url' => $path,
+            'capacity' => $this->capacity,
+            'facilities' => $this->facilities ?? null,
+            'location' => $this->location,
             'created_by'  => auth()->id(),
         ]);
 
