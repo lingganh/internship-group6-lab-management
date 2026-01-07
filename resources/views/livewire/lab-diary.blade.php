@@ -301,7 +301,6 @@
   </div>
 
   <style>
-    /* ====== SCOPE CSS: chỉ ảnh hưởng trong .diary-page ====== */
     .diary-page{
       --d-bg:#f6f8fc;
       --d-card:#ffffff;
@@ -461,8 +460,7 @@
     }
     .diary-page .diary-btn-ghost:hover{ background:#f8fafc; }
 
-    /* CHỈ style modal-content có class diary-modal, không đụng modal của m */
-    .diary-page .diary-modal{
+     .diary-page .diary-modal{
       border-radius:20px;
       box-shadow:0 18px 48px rgba(15,23,42,.16);
       overflow:hidden;
