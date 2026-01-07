@@ -1,5 +1,6 @@
 <div>
    <div>
+   <div>
         <div class="page-header page-header-light shadow">
             <div class="page-header-content d-lg-flex">
                 <div class="d-flex">
@@ -29,6 +30,7 @@
             </div>
         </div>
     </div>
+
   <div class="container-fluid py-4 approval-page">
     <div class="row justify-content-center">
       <div class="col-12 col-xxl-11">
@@ -188,19 +190,8 @@
       </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
-      <div id="apToast" class="toast border-0 shadow-sm" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-body d-flex align-items-start gap-2">
-          <div id="apToastIcon" class="ap-toast-ic"></div>
-          <div class="flex-grow-1">
-            <div id="apToastMsg" class="fw-semibold text-dark"></div>
-            <div id="apToastSub" class="small text-muted mt-1"></div>
-          </div>
-          <button type="button" class="btn-close ms-2 mt-1" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-    </div>
 
+    {{-- ======= MODAL CHI TIẾT ======= --}}
     <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 approval-modal">
@@ -215,6 +206,7 @@
           <div class="modal-body pt-3">
             @if($selectedSchedule)
               <div class="row g-3">
+
                 <div class="col-12 col-md-6">
                   <div class="approval-info">
                     <div class="small text-muted mb-1">Tiêu đề / Phân loại</div>
@@ -243,6 +235,15 @@
 
                 <div class="col-12 col-md-6">
                   <div class="approval-info">
+                    <div class="small text-muted mb-1">Đăng ký cho nhóm (nếu có)</div>
+                    <div class="fw-semibold text-dark">
+                      {{ $selectedSchedule->group?->name ?? 'N/A' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="approval-info">
                     <div class="small text-muted mb-1">Trạng thái</div>
                     <div class="fw-semibold text-dark">
                       @if($selectedSchedule->status === 'pending') Chờ duyệt
@@ -253,7 +254,7 @@
                   </div>
                 </div>
 
-                <div class="col-12">
+                <div class="col-12 col-md-6">
                   <div class="approval-info">
                     <div class="small text-muted mb-1">Thời gian</div>
                     <div class="fw-semibold text-dark">
@@ -291,6 +292,7 @@
                     </div>
                   </div>
                 </div>
+
               </div>
             @endif
           </div>
@@ -317,15 +319,39 @@
       </div>
     </div>
 
+
+    {{-- ======= MODAL TỪ CHỐI – NHẬP LÝ DO ======= --}}
     <div wire:ignore.self class="modal fade" id="modalConfirm" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 approval-modal" style="border-radius: 18px;">
+          
           <div class="modal-header border-0 pb-0">
             <div>
               <h5 class="modal-title fw-bold text-dark mb-1">{{ $confirmTitle }}</h5>
               <div class="small text-muted">{{ $confirmMessage }}</div>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body pt-3">
+            <div class="approval-info">
+              <label class="form-label small fw-semibold text-dark mb-2">Lý do từ chối</label>
+
+              <textarea
+                wire:model.defer="rejectionNote"
+                class="form-control approval-control"
+                rows="3"
+                placeholder="Nhập lý do từ chối..."
+              ></textarea>
+
+              <div class="small text-muted mt-2">
+                💡 Lý do này sẽ được gửi cho người đăng ký.
+              </div>
+
+              @error('rejectionNote')
+                <div class="text-danger small mt-1">{{ $message }}</div>
+              @enderror
+            </div>
           </div>
 
           <div class="modal-footer border-0 pt-0">
@@ -336,10 +362,13 @@
               </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>
-    <!-- Modal Nhập mật khẩu phòng -->
+
+
+    {{-- ======= MODAL MẬT KHẨU PHÒNG ======= --}}
     <div wire:ignore.self class="modal fade" id="modalPassword" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 approval-modal" style="border-radius: 18px;">
@@ -348,7 +377,7 @@
               <h5 class="modal-title fw-bold text-dark mb-1">🔑 Nhập mật khẩu phòng</h5>
               <div class="small text-muted">Mật khẩu sẽ được gửi qua email cho người dùng</div>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
 
           <div class="modal-body pt-3">
@@ -371,10 +400,61 @@
               </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>
+
   </div>
+
+
+
+  {{-- ========= JS =========== --}}
+  <script>
+    function apGetModal(id) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      return bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
+    }
+
+    window.addEventListener('open-details-modal', () => {
+      const m = apGetModal('modalDetails');
+      if (m) m.show();
+    });
+
+    window.addEventListener('close-details-modal', () => {
+      const el = document.getElementById('modalDetails');
+      if (!el) return;
+      const m = bootstrap.Modal.getInstance(el);
+      if (m) m.hide();
+    });
+
+    window.addEventListener('open-confirm-modal', () => {
+      const m = apGetModal('modalConfirm');
+      if (m) m.show();
+    });
+
+    window.addEventListener('close-confirm-modal', () => {
+      const el = document.getElementById('modalConfirm');
+      if (!el) return;
+      const m = bootstrap.Modal.getInstance(el);
+      if (m) m.hide();
+    });
+
+    window.addEventListener('open-password-modal', () => {
+      const m = apGetModal('modalPassword');
+      if (m) m.show();
+    });
+
+    window.addEventListener('close-password-modal', () => {
+      const el = document.getElementById('modalPassword');
+      if (!el) return;
+      const m = bootstrap.Modal.getInstance(el);
+      if (m) m.hide();
+    });
+  </script>
+
+</div>
 
   <style>
     .approval-page {
@@ -643,72 +723,4 @@
     }
   </style>
 
-  <script>
-    function apGetModal(id) {
-      const el = document.getElementById(id);
-      if (!el) return null;
-      return bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
-    }
-
-    function apToast(type, msg, sub) {
-      const toastEl = document.getElementById('apToast');
-      if (!toastEl) return;
-
-      const iconEl = document.getElementById('apToastIcon');
-      const msgEl = document.getElementById('apToastMsg');
-      const subEl = document.getElementById('apToastSub');
-
-      msgEl.textContent = msg || '';
-      subEl.textContent = sub || '';
-
-      if (type === 'success') iconEl.textContent = '✓';
-      else if (type === 'error') iconEl.textContent = '!';
-      else if (type === 'warning') iconEl.textContent = '⚠';
-      else iconEl.textContent = 'i';
-
-      const t = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2600 });
-      t.show();
-    }
-
-    window.addEventListener('open-details-modal', () => {
-      const m = apGetModal('modalDetails');
-      if (m) m.show();
-    });
-
-    window.addEventListener('close-details-modal', () => {
-      const el = document.getElementById('modalDetails');
-      if (!el) return;
-      const m = bootstrap.Modal.getInstance(el);
-      if (m) m.hide();
-    });
-
-    window.addEventListener('open-confirm-modal', () => {
-      const m = apGetModal('modalConfirm');
-      if (m) m.show();
-    });
-
-    window.addEventListener('close-confirm-modal', () => {
-      const el = document.getElementById('modalConfirm');
-      if (!el) return;
-      const m = bootstrap.Modal.getInstance(el);
-      if (m) m.hide();
-    });
-
-    window.addEventListener('toast', (e) => {
-      const d = (e && e.detail) ? e.detail : e;
-      apToast(d.type || 'info', d.message || '', d.sub || '');
-    });
-
-    window.addEventListener('open-password-modal', () => {
-      const m = apGetModal('modalPassword');
-      if (m) m.show();
-    });
-
-    window.addEventListener('close-password-modal', () => {
-      const el = document.getElementById('modalPassword');
-      if (!el) return;
-      const m = bootstrap.Modal.getInstance(el);
-      if (m) m.hide();
-    });
-  </script>
-</div>
+ </div>   

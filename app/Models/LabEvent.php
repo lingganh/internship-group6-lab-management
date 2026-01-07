@@ -23,7 +23,7 @@ class LabEvent extends Model
         'start' => 'datetime',
         'end' => 'datetime',
     ];
-     public function user()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
@@ -32,17 +32,22 @@ class LabEvent extends Model
         return $this->hasMany(LabEventFile::class);
     }
 
-      public function lab()
+    public function lab()
     {
         return $this->belongsTo(Lab::class, 'lab_code', 'code');
     }
+    public function group()
+    {
+        return $this->belongsTo(Group::class, 'registered_for', 'id');
 
-    public function getDisplayStatusAttribute()
-{
-     if ($this->status === 'approved' && Carbon::parse($this->end)->isPast()) {
-        return 'completed'; //'Đã hoàn thành'
     }
 
-    return $this->status;
-}
+    public function getDisplayStatusAttribute()
+    {
+        if ($this->status === 'approved' && Carbon::parse($this->end)->isPast()) {
+            return 'completed'; //'Đã hoàn thành'
+        }
+
+        return $this->status;
+    }
 }
