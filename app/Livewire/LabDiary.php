@@ -87,7 +87,15 @@ class LabDiary extends Component
 
     public function viewEvent($id)
     {
-        $this->selectedEvent = LabEvent::with(['user', 'files', 'lab'])->findOrFail($id);
+        $this->selectedEvent = LabEvent::with([
+            'user',
+            'files',
+            'lab',
+            'issueRequests' => function ($q) {
+                $q->with('user:id,full_name')
+                    ->orderByDesc('created_at');
+            },
+        ])->findOrFail($id);
 
         $this->edit = [
             'title' => (string) ($this->selectedEvent->title ?? ''),

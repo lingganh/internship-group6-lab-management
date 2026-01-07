@@ -23,7 +23,7 @@ class LabEvent extends Model
         'start' => 'datetime',
         'end' => 'datetime',
     ];
-     public function user()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
@@ -32,8 +32,13 @@ class LabEvent extends Model
         return $this->hasMany(LabEventFile::class);
     }
 
-      public function lab()
+    public function lab()
     {
         return $this->belongsTo(Lab::class, 'lab_code', 'code');
+    }
+
+    public function issueRequests()
+    {
+        return $this->hasMany(\App\Models\EquipmentIssueRequest::class, 'lab_event_id');
     }
 }

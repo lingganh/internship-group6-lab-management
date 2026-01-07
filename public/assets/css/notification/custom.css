@@ -1,0 +1,5 @@
+/* Thu nhỏ icon mũi tên trong Laravel pagination */
+nav[role="navigation"] svg.w-5.h-5 {
+    width: 1rem !important;
+    height: 1rem !important;
+}

@@ -10,6 +10,8 @@ use App\View\Components\tables\TableEmpty;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use App\Models\Notification;
+use App\Observers\NotificationObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,8 +33,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::component('table-empty', TableEmpty::class);
         Blade::component('quick-view', QuickView::class);
         Blade::component('auth-layout', AuthLayout::class);
+        Notification::observe(NotificationObserver::class);
 
-//dd(env('APP_ENV'));
+        //dd(env('APP_ENV'));
         if (env('APP_ENV') !== 'local') {
             URL::forceScheme('https');
         }

@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\Role as RoleEnum;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Notification;
 
 class User extends Authenticatable
 {
@@ -66,7 +68,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function role():BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
@@ -104,38 +106,41 @@ class User extends Authenticatable
 
     public function getRoleValueAttribute()
     {
-        if( $this->role->name === RoleEnum::Student->value ){
+        if ($this->role->name === RoleEnum::Student->value) {
             return  RoleEnum::Student->name;
         }
-        if( $this->role->name === RoleEnum::Admin->value ){
+        if ($this->role->name === RoleEnum::Admin->value) {
             return  RoleEnum::Admin->name;
         }
-        if( $this->role->name === RoleEnum::Officer->value ){
+        if ($this->role->name === RoleEnum::Officer->value) {
             return  RoleEnum::Officer->name;
         }
-        if( $this->role->name === RoleEnum::Teacher->value ){
+        if ($this->role->name === RoleEnum::Teacher->value) {
             return  RoleEnum::Teacher->name;
         }
         return RoleEnum::Student->name;
     }
     public function getUserStatusAttribute(): string
     {
-        if($this->status === UserStatus::Pending->value)
-        {
+        if ($this->status === UserStatus::Pending->value) {
             return '<span class="badge bg-info bg-opacity-10 text-warning"> Chờ duyệt </span>';
         }
 
-        if($this->status === UserStatus::Approved->value)
-        {
+        if ($this->status === UserStatus::Approved->value) {
             return '<span class="badge bg-info bg-opacity-10 text-success"> Đã duyệt </span>';
         }
 
-        if($this->status === UserStatus::Archived->value)
-        {
+        if ($this->status === UserStatus::Archived->value) {
             return '<span class="badge bg-info bg-opacity-10 text-danger"> Lưu trữ </span>';
         }
 
 
         return '';
+    }
+
+    // user quan hệ với thông báo
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 }
