@@ -30,6 +30,7 @@
             </div>
         </div>
     </x-slot>
+
     <div class="content">
         <livewire:admin.groups.create/>
     </div>

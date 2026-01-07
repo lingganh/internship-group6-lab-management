@@ -12,6 +12,8 @@ use Laravel\Fortify\Features;
 use App\Livewire\Admin\Equipment\Index;
 use App\Livewire\Admin\Equipment\Create;
 use App\Livewire\Admin\Equipment\Edit;
+use App\Http\Controllers\admin\DashboardController;
+
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
@@ -50,9 +52,7 @@ Route::middleware('checkAuth')->group(function () {
 
 Route::middleware('role:admin')->group(function () {
     Route::prefix('admin')->group(function () {
-        Route::get('/', function () {
-            return view('pages.admin.dashboard');
-        })->name('admin.dashboard');
+        Route::get('/', [DashboardController::class, 'render'])->name('admin.dashboard');
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
@@ -64,6 +64,7 @@ Route::middleware('role:admin')->group(function () {
             Route::get('/create',[GroupController::class, 'create'] )->name('admin.groups.create');
             Route::get('/edit/{id}',[GroupController::class, 'edit'] )->name('admin.groups.edit');
         });
+
     });
 });
 
@@ -71,7 +72,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/equipment', Index::class)->name('equipment.index');
     Route::get('/equipment/create', Create::class)->name('equipment.create');
     Route::get('/equipment/{id}/edit', Edit::class)->name('equipment.edit');
+
+    
 });
 
 
 Route::get('coming-soon', fn () => view('coming-soon'))->name('admin.coming-soon');
+
+
