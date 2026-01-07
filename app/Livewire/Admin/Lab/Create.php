@@ -19,7 +19,7 @@ class Create extends Component
     public $location;
     public $description;
     public $capacity;
-    public $facilities;
+
     public $image;
 
     protected function rules()
@@ -30,7 +30,6 @@ class Create extends Component
             'location'=>'required|string|max:255',
             'description'=>'required|string',
             'capacity'=>'required|integer',
-            'facilities' => 'nullable|array',
             'status'=>'required|in:active,maintenance,locked',
             'image'=> 'nullable|image|max:2048',
         ];
@@ -48,10 +47,9 @@ class Create extends Component
             'name' => $this->name,
             'code' => $this->code,
             'status' => $this->status,
-            'description' => $this->description,
+            'description' => $this->description ?? null,
             'image_url' => $path,
             'capacity' => $this->capacity,
-            'facilities' => $this->facilities ?? null,
             'location' => $this->location,
             'created_by'  => auth()->id(),
         ]);

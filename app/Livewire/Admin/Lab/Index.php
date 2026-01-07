@@ -26,20 +26,39 @@ class Index extends Component
     {
         $this->deleteId = $id;
 
-        $this->dispatch('openModel',
+        $this->dispatch(
+            'openModel',
             type: 'warning',
-            title: 'Xóa phòng Lab này?',
+            title: 'bạn có muốn xóa phòng lab nay không?',
             confirmEvent: 'confirmDeleteLab'
         );
     }
 
+
     public function confirmDeleteLab()
     {
-        Lab::findOrFail($this->deleteId)->delete();
-        $this->reset('deleteId');
-        session()->flash('success', 'Xóa phòng Lab thành công');
+        $lab = Lab::find($this->deleteId);
 
+        if ($lab) {
+            $lab->status = 'locked';
+            $lab->save();
+
+            $this->dispatch(
+                'alert',
+                type: 'success',
+                message: 'Đã chuyển phòng Lab sang trạng thái Tạm khóa!'
+            );
+        } else {
+            $this->dispatch(
+                'alert',
+                type: 'error',
+                message: 'Phòng Lab không tồn tại!'
+            );
+        }
+
+        $this->reset('deleteId');
     }
+
 
     public function render()
     {

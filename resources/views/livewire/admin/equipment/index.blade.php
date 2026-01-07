@@ -72,7 +72,7 @@
                     <th> SỐ LƯỢNG </th>
                     <th>SỐ LƯỢNG HỎNG </th>
                     <th>SỐ LƯỢNG THỰC </th>
-                    <th>TRẠNG THÁI </th>
+                   {{-- <th>TRẠNG THÁI </th>--}}
                     <th>MÔ TẢ </th>
                     <th class="text-center">HÀNH ĐỘNG</th>
                 </tr>
@@ -86,7 +86,7 @@
                         <td>{{ $item->quantity }}</td>
                         <td>{{ $item->broken_quantity }}</td>
                         <td>{{ $item->actual_quantity }}</td>
-                        <td>
+                      {{--  <td>
                             @php $status = $item->equipment->status ?? 'unknown'; @endphp
                             @switch($status)
                                 @case('available')
@@ -104,7 +104,7 @@
                                 @default
                                     <span class="badge bg-secondary">Không xác định</span>
                             @endswitch
-                        </td>
+                        </td>--}}
                         <td title="{{ $item->equipment->notes ?? '—' }}">
                             {{ \Illuminate\Support\Str::limit($item->equipment->notes ?? '—', 20, '...') }}
                         </td>
