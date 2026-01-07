@@ -9,9 +9,9 @@ use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
 use Livewire\Volt\Volt;
 use Laravel\Fortify\Features;
-use App\Livewire\Admin\Equipment\Index;
-use App\Livewire\Admin\Equipment\Create;
-use App\Livewire\Admin\Equipment\Edit;
+use App\Livewire\Admin\equipment\Index;
+use App\Livewire\Admin\equipment\Create as EquipmentCreate;
+use App\Livewire\Admin\equipment\Edit;
 use App\Livewire\Approval;
 use App\Livewire\UserSchedules;
 use App\Livewire\LabRegister;
@@ -21,6 +21,9 @@ use App\Http\Controllers\admin\AdminNotificationController;
 use App\Livewire\Client\EquipmentIssues\BulkCreate;
 use App\Http\Controllers\admin\EquipmentIssueRequestController as AdminEquipmentIssueRequestController;
 
+use App\Livewire\Admin\Lab\Index as LabIndex;
+use App\Livewire\Admin\Lab\Create as LabCreate;
+use App\Livewire\Admin\Lab\Edit as LabEdit;
 
 
 //login sso
@@ -88,6 +91,8 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
         Route::get('/approval', Approval::class)->name('admin.approval');
         Route::get('/equipment', Index::class)->name('equipment.index');
+        Route::get('/equipment/create', EquipmentCreate::class)->name('admin.equipment.create');
+        Route::get('/equipment/edit/{id}', Edit::class)->name('admin.equipment.edit');
         Route::get('/lab-register', LabRegister::class)->name('lab.register');
 
         Route::prefix('equipment-issue-requests')->group(function () {
@@ -111,6 +116,9 @@ Route::middleware('role:admin')->group(function () {
         // Thông báo có báo hỏng đến admin
         Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])
             ->name('admin.notifications.mark-all-read');
+        Route::get('/lab', LabIndex::class)->name('admin.lab.index');
+        Route::get('/lab/create', LabCreate::class)->name('admin.lab.create');
+        Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
     });
 });
 

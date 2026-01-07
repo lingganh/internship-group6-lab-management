@@ -13,7 +13,8 @@ const categoryColors = {
 
 const statusColors = {
   pending: '#ffc107',
-  approved: '#28a745'
+  approved: '#28a745',
+  completed: '#1870bdff'
 }
 
 const categoryNames = {
@@ -25,7 +26,14 @@ const categoryNames = {
 const roomMap = {}
 if (window.LAB_ROOMS && Array.isArray(window.LAB_ROOMS)) {
   window.LAB_ROOMS.forEach((r) => {
-    if (r.code) roomMap[r.code] = r.name || r.code
+    if (r.code != null) roomMap[String(r.code)] = r.name || String(r.code)
+  })
+}
+
+const groupMap = {}
+if (window.LAB_GROUPS && Array.isArray(window.LAB_GROUPS)) {
+  window.LAB_GROUPS.forEach((g) => {
+    if (g.id != null) groupMap[String(g.id)] = g.name || String(g.id)
   })
 }
 
@@ -99,6 +107,13 @@ function initCalendar() {
       start: new Date().toISOString().split('T')[0]
     },
 
+    eventAllow: function (dropInfo, draggedEvent) {
+      if (!checkPermission(draggedEvent)) return false
+      const now = new Date()
+      if (dropInfo.start && dropInfo.start < now) return false
+      return true
+    },
+
     eventDidMount: function (info) {
       const el = info.el
       const props = info.event.extendedProps || {}
@@ -113,6 +128,10 @@ function initCalendar() {
       if (status === 'pending') el.classList.add('is-pending')
       else el.classList.remove('is-pending')
 
+      const canEdit = checkPermission(info.event)
+      if (!canEdit) el.classList.add('is-no-edit')
+      else el.classList.remove('is-no-edit')
+
       el.style.position = 'relative'
       el.style.willChange = 'transform'
     },
@@ -123,11 +142,19 @@ function initCalendar() {
 
       const status = props.status || 'pending'
       const roomName = props.roomName || ''
-      const isApproved = status === 'approved'
-      const statusText = isApproved ? 'Đã duyệt' : 'Chờ duyệt'
-      const statusIcon = isApproved
-        ? '<i class="fa-solid fa-circle-check"></i>'
-        : '<i class="fa-solid fa-clock"></i>'
+      let statusText = 'Chờ duyệt'
+      let statusIcon = '<i class="fa-solid fa-clock"></i>'
+
+      if (status === 'approved') {
+        statusText = 'Đã duyệt'
+        statusIcon = '<i class="fa-solid fa-circle-check"></i>'
+      } else if (status === 'completed') {
+        statusText = 'Đã hoàn thành'
+        statusIcon = '<i class="fa-solid fa-check-double"></i>'
+      } else if (status === 'cancelled') {
+        statusText = 'Đã hủy'
+        statusIcon = '<i class="fa-solid fa-ban"></i>'
+      }
 
       const cat = props.category || 'work'
       const catText = categoryNames[cat] || cat
@@ -171,7 +198,7 @@ function initCalendar() {
     },
 
     eventClick: function (info) {
-      showEventDetail(info.event)
+      showEventDetails(info.event)
     },
 
     select: function (info) {
@@ -191,7 +218,7 @@ function initCalendar() {
         info.revert()
         return
       }
-      updateEventTime(info.event)
+      updateEventTime(info.event, info)
     },
 
     eventResize: function (info) {
@@ -201,7 +228,7 @@ function initCalendar() {
         info.revert()
         return
       }
-      updateEventTime(info.event)
+      updateEventTime(info.event, info)
     }
   })
 
@@ -264,16 +291,37 @@ function setMinDateForInputs() {
 async function loadEvent() {
   try {
     const response = await fetch('/bookings', { headers: { Accept: 'application/json' } })
-    const data = await response.json()
+    const text = await response.text()
+
+    let data = null
+    try {
+      data = JSON.parse(text)
+    } catch (e) {
+      console.error('loadEvent not JSON:', response.status, text)
+      if (window.toastr) toastr.error('Không tải được dữ liệu lịch (response không phải JSON).')
+      return
+    }
+
+    if (!response.ok) {
+      console.error('loadEvent not ok:', response.status, data)
+      if (window.toastr) toastr.error((data && data.message) || 'Không tải được dữ liệu lịch.')
+      return
+    }
+
     const raw = Array.isArray(data) ? data : data.data || []
 
     events = raw.map((item) => {
       const category = item.category || 'work'
       const status = item.status || 'pending'
       const safeCategory = categoryColors[category] ? category : 'work'
-      const roomCode = item.lab_code || null
+
+      const roomCode = item.lab_code != null ? String(item.lab_code) : null
       const roomName = roomCode ? roomMap[roomCode] || roomCode : null
+
       const color = item.color || categoryColors[safeCategory] || '#3788d8'
+
+      const registeredFor = item.registered_for != null ? String(item.registered_for) : ''
+      const registeredForName = registeredFor ? groupMap[registeredFor] || registeredFor : ''
 
       return {
         id: item.id,
@@ -285,7 +333,10 @@ async function loadEvent() {
         status: status,
         roomCode: roomCode,
         roomName: roomName,
-        color: color
+        color: color,
+        user_id: item.user_id || item.userId || null,
+        registered_for: registeredFor,
+        registeredForName: registeredForName
       }
     })
 
@@ -312,7 +363,11 @@ function updateCalendar() {
 
     visibleEvents.forEach((e) => {
       const startDate = e.start instanceof Date ? e.start : new Date(e.start)
-      const endDate = e.end ? (e.end instanceof Date ? e.end : new Date(e.end)) : new Date(startDate.getTime() + 60 * 60 * 1000)
+      const endDate = e.end
+        ? e.end instanceof Date
+          ? e.end
+          : new Date(e.end)
+        : new Date(startDate.getTime() + 60 * 60 * 1000)
 
       const bg = e.color || categoryColors[e.category] || '#3788d8'
       const tx = readableTextColor(bg)
@@ -331,6 +386,9 @@ function updateCalendar() {
           status: e.status,
           roomCode: e.roomCode,
           roomName: e.roomName,
+          user_id: e.user_id,
+          registered_for: e.registered_for,
+          registeredForName: e.registeredForName,
           _color: bg,
           _textColor: tx
         }
@@ -362,6 +420,10 @@ function openCreateModal(start = null, end = null) {
       const endDate = new Date(end)
       document.getElementById('eventEndDate').value = endDate.toISOString().split('T')[0]
       document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
+    } else {
+      const endAuto = new Date(startDate.getTime() + 60 * 60 * 1000)
+      document.getElementById('eventEndDate').value = endAuto.toISOString().split('T')[0]
+      document.getElementById('eventEndTime').value = endAuto.toTimeString().slice(0, 5)
     }
   } else {
     document.getElementById('eventStartDate').value = today
@@ -378,184 +440,201 @@ function closeModal() {
 }
 
 async function saveEvent() {
-  const id = document.getElementById('eventId').value
+  const eventId = document.getElementById('eventId').value
   const title = document.getElementById('eventTitle').value.trim()
   const category = document.getElementById('eventCategory').value
-  const roomCode = document.getElementById('eventRoom').value.trim()
+  const color = document.getElementById('eventColor').value
+  const labCode = document.getElementById('eventRoom').value
+  const registeredFor = document.getElementById('eventRegisteredFor').value.trim()
+
   const startDate = document.getElementById('eventStartDate').value
   const startTime = document.getElementById('eventStartTime').value
   const endDate = document.getElementById('eventEndDate').value
   const endTime = document.getElementById('eventEndTime').value
   const description = document.getElementById('eventDescription').value.trim()
-  const filesInput = document.getElementById('eventFiles')
-  const colorInput = document.getElementById('eventColor')
-  const selectedColor = colorInput ? colorInput.value : null
 
-  if (!title) {
-    if (window.toastr) toastr.error('Vui lòng nhập tiêu đề sự kiện')
-    return
-  }
-  if (!roomCode) {
-    if (window.toastr) toastr.error('Vui lòng chọn phòng lab / phòng sử dụng')
+  if (!title || !labCode || !startDate || !startTime || !endDate || !endTime) {
+    toastr.error('Vui lòng điền đầy đủ thông tin bắt buộc.')
     return
   }
 
-  const startDateTime = new Date(`${startDate}T${startTime}`)
-  const endDateTime = new Date(`${endDate}T${endTime}`)
-  const now = new Date()
+  const start = `${startDate} ${startTime}:00`
+  const end = `${endDate} ${endTime}:00`
 
-  if (!id && startDateTime < now) {
-    if (window.toastr) toastr.error('Không thể đăng ký sự kiện trong quá khứ')
-    return
-  }
-  if (endDateTime <= startDateTime) {
-    if (window.toastr) toastr.error('Thời gian kết thúc phải sau thời gian bắt đầu')
-    return
-  }
-
-  const API_URL = '/bookings'
   const formData = new FormData()
   formData.append('title', title)
   formData.append('category', category)
-  formData.append('lab_code', roomCode)
-  formData.append('start', `${startDate} ${startTime}:00`)
-  formData.append('end', `${endDate} ${endTime}:00`)
+  formData.append('color', color)
+  formData.append('lab_code', labCode)
+  formData.append('start', start)
+  formData.append('end', end)
   formData.append('description', description)
+  formData.append('registered_for', registeredFor)
 
-  if (selectedColor) formData.append('color', selectedColor)
-
-  if (filesInput && filesInput.files.length > 0) {
-    Array.from(filesInput.files).forEach((file) => formData.append('files[]', file))
+  const filesEl = document.getElementById('eventFiles')
+  const files = filesEl ? filesEl.files : null
+  if (files && files.length > 0) {
+    for (let i = 0; i < files.length; i++) formData.append('files[]', files[i])
   }
 
-  try {
-    let url = API_URL
-    if (id) {
-      url = `${API_URL}/${id}`
-      formData.append('_method', 'PUT')
+  const url = eventId ? `/bookings/${eventId}` : '/bookings'
+  if (eventId) formData.append('_method', 'PUT')
+
+  fetch(url, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
     }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body: formData
-    })
-
-    const result = await response.json().catch(() => ({}))
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        if (window.toastr) toastr.error('Bạn cần đăng nhập để đăng ký sự kiện.')
-        return
+  })
+    .then(async (response) => {
+      const text = await response.text()
+      let data = null
+      try {
+        data = JSON.parse(text)
+      } catch (e) {
+        console.error('saveEvent not JSON:', response.status, text)
+        toastr.error('Có lỗi xảy ra khi lưu sự kiện (response không phải JSON).')
+        return null
       }
 
-      const msg =
-        (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
-        'Có lỗi xảy ra, vui lòng thử lại.'
-      if (window.toastr) toastr.error(msg)
-      console.error('Save event error: ', result)
-      return
-    }
+      if (!response.ok) {
+        toastr.error((data && data.message) || 'Có lỗi xảy ra khi lưu sự kiện.')
+        return null
+      }
 
-    if (window.toastr) toastr.success(result.message || (id ? 'Cập nhật sự kiện thành công.' : 'Tạo sự kiện thành công.'))
-    await loadEvent()
-    closeModal()
-  } catch (error) {
-    console.error(error)
-    if (window.toastr) toastr.error('Lỗi kết nối máy chủ. Vui lòng thử lại sau.')
-  }
+      return data
+    })
+    .then(async (data) => {
+      if (!data) return
+      if (data.message) toastr.success(data.message)
+      closeModal()
+      await loadEvent()
+    })
+    .catch((error) => {
+      console.error('Error:', error)
+      toastr.error('Có lỗi xảy ra khi lưu sự kiện.')
+    })
 }
 
-function showEventDetail(calendarEvent) {
-  const props = calendarEvent.extendedProps || {}
-  const title = calendarEvent.title
-  const startDate = calendarEvent.start
-  const endDate = calendarEvent.end
-  const category = props.category
-  const description = props.description
-  const status = props.status
-  const roomName = props.roomName || (props.roomCode ? roomMap[props.roomCode] || props.roomCode : null)
+function showEventDetails(eventData) {
+  currentEventId = eventData.id
 
-  currentEventId = calendarEvent.id
+  document.getElementById('detailTitle').textContent = eventData.title
+  document.getElementById('detailTime').textContent = `${formatDateTime(eventData.start)} - ${formatDateTime(eventData.end)}`
 
-  document.getElementById('detailTime').textContent = `${startDate.toLocaleDateString('vi-VN')} ${startDate.toLocaleTimeString('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })} - ${endDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+  const roomName = eventData.extendedProps.roomName || ''
+  document.getElementById('detailRoom').textContent = roomName
 
-  document.getElementById('detailRoom').textContent = roomName || 'Phòng máy trung tâm'
+  const registeredForRow = document.getElementById('detailRegisteredForRow')
+  const registeredForSpan = document.getElementById('detailRegisteredFor')
 
-  if (description) {
-    document.getElementById('detailDescription').textContent = description
-    document.getElementById('detailDescriptionRow').style.display = 'flex'
+  const rfName = eventData.extendedProps.registeredForName || ''
+  if (rfName) {
+    registeredForSpan.textContent = rfName
+    registeredForRow.style.display = 'flex'
   } else {
-    document.getElementById('detailDescriptionRow').style.display = 'none'
+    registeredForRow.style.display = 'none'
   }
 
-  document.getElementById('detailTitle').textContent = title
-  document.getElementById('detailCategory').textContent = categoryNames[category] || category
+  const descRow = document.getElementById('detailDescriptionRow')
+  const descSpan = document.getElementById('detailDescription')
+  if (eventData.extendedProps.description) {
+    descSpan.textContent = eventData.extendedProps.description
+    descRow.style.display = 'flex'
+  } else {
+    descRow.style.display = 'none'
+  }
 
-  const statusTextEl = document.getElementById('detailStatus')
+  const categoryLabels = {
+    work: 'Làm việc / nghiên cứu',
+    seminar: 'Hội thảo / seminar',
+    other: 'Khác'
+  }
+  document.getElementById('detailCategory').textContent = categoryLabels[eventData.extendedProps.category] || eventData.extendedProps.category
+
+  const statusLabels = {
+    pending: 'Chờ duyệt',
+    approved: 'Đã duyệt',
+    completed: 'Đã hoàn thành',
+    cancelled: 'Đã hủy'
+  }
+  document.getElementById('detailStatus').textContent = statusLabels[eventData.extendedProps.status] || eventData.extendedProps.status
+
   const pendingIcon = document.getElementById('statusPendingIcon')
   const approvedIcon = document.getElementById('statusApprovedIcon')
+  const completedIcon = document.getElementById('statusCompletedIcon')
+  if (pendingIcon) pendingIcon.style.display = eventData.extendedProps.status === 'pending' ? 'inline' : 'none'
+  if (approvedIcon) approvedIcon.style.display = eventData.extendedProps.status === 'approved' ? 'inline' : 'none'
+  if (completedIcon) completedIcon.style.display = eventData.extendedProps.status === 'completed' ? 'inline' : 'none'
 
-  pendingIcon.style.display = 'none'
-  approvedIcon.style.display = 'none'
+  const canEdit = checkPermission(eventData)
+  const editBtn = document.getElementById('editEventBtn')
+  const deleteBtn = document.getElementById('deleteEventBtn')
 
-  if (status === 'approved') {
-    approvedIcon.style.display = 'inline-block'
-    statusTextEl.textContent = 'Đã duyệt'
-  } else {
-    pendingIcon.style.display = 'inline-block'
-    statusTextEl.textContent = 'Chờ duyệt'
-  }
+  if (editBtn) editBtn.style.display = canEdit ? 'inline-flex' : 'none'
+  if (deleteBtn) deleteBtn.style.display = canEdit ? 'inline-flex' : 'none'
 
   document.getElementById('detailModal').classList.add('active')
 }
 
 function closeDetailModal() {
   document.getElementById('detailModal').classList.remove('active')
-  currentEventId = null
+  // currentEventId = null
 }
 
 function editEvent() {
-  const event = events.find((e) => e.id == currentEventId)
-  if (!event) return
+  const eventData = calendar.getEventById(currentEventId)
+  if (!eventData) return
+
+  if (!checkPermission(eventData)) {
+    toastr.error('Bạn không có quyền chỉnh sửa sự kiện này.')
+    return
+  }
 
   closeDetailModal()
 
-  document.getElementById('modalTitle').textContent = 'Sửa sự kiện'
-  document.getElementById('eventId').value = event.id
-  document.getElementById('eventTitle').value = event.title
-  document.getElementById('eventCategory').value = event.category
-  document.getElementById('eventDescription').value = event.description || ''
-  document.getElementById('eventRoom').value = event.roomCode || ''
+  document.getElementById('modalTitle').textContent = 'Chỉnh sửa sự kiện'
+  document.getElementById('eventId').value = eventData.id
+  document.getElementById('eventTitle').value = eventData.title
+  document.getElementById('eventCategory').value = eventData.extendedProps.category || 'work'
+  document.getElementById('eventColor').value = eventData.backgroundColor || '#039be5'
+  document.getElementById('eventRoom').value = eventData.extendedProps.roomCode || ''
+  document.getElementById('eventRegisteredFor').value = eventData.extendedProps.registered_for || ''
+  document.getElementById('eventDescription').value = eventData.extendedProps.description || ''
 
-  if (event.color) setColorValue(event.color)
-  else resetColorPicker()
+  const startDate = new Date(eventData.start)
+  const endDate = new Date(eventData.end || new Date(startDate.getTime() + 60 * 60 * 1000))
 
-  const startDate = new Date(event.start)
-  const endDate = new Date(event.end)
-
-  const startLocalDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`
-  const endLocalDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`
-
-  const startTime = startDate.toTimeString().slice(0, 5)
-  const endTime = endDate.toTimeString().slice(0, 5)
-
-  document.getElementById('eventStartDate').value = startLocalDate
-  document.getElementById('eventStartTime').value = startTime
-  document.getElementById('eventEndDate').value = endLocalDate
-  document.getElementById('eventEndTime').value = endTime
+  document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]
+  document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5)
+  document.getElementById('eventEndDate').value = endDate.toISOString().split('T')[0]
+  document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
 
   document.getElementById('eventModal').classList.add('active')
 }
 
 function deleteEvent() {
+  const eventData = calendar.getEventById(currentEventId)
+  if (!eventData) return
+
+  if (!checkPermission(eventData)) {
+    toastr.error('Bạn không có quyền xóa sự kiện này.')
+    return
+  }
+
+  closeDetailModal()
   document.getElementById('confirmDeleteModal').classList.add('active')
+}
+
+function formatDateTime(dateString) {
+  const date = dateString instanceof Date ? dateString : new Date(dateString)
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} ${hours}:${minutes}`
 }
 
 function closeConfirmDelete() {
@@ -574,7 +653,15 @@ async function confirmDelete() {
       }
     })
 
-    const result = await response.json().catch(() => ({}))
+    const text = await response.text()
+    let result = null
+    try {
+      result = JSON.parse(text)
+    } catch (e) {
+      console.error('confirmDelete not JSON:', response.status, text)
+      if (window.toastr) toastr.error('Không thể xóa sự kiện (response không phải JSON).')
+      return
+    }
 
     if (!response.ok) {
       if (window.toastr) toastr.error(result.message || 'Không thể xóa sự kiện.')
@@ -590,9 +677,10 @@ async function confirmDelete() {
   }
 }
 
-async function updateEventTime(calendarEvent) {
+async function updateEventTime(calendarEvent, infoCtx = null) {
   const id = calendarEvent.id
   const props = calendarEvent.extendedProps || {}
+
   const startDate = calendarEvent.start
   const endDate = calendarEvent.end || new Date(startDate.getTime() + 60 * 60 * 1000)
 
@@ -603,7 +691,7 @@ async function updateEventTime(calendarEvent) {
     const hour = String(date.getHours()).padStart(2, '0')
     const minute = String(date.getMinutes()).padStart(2, '0')
     const second = String(date.getSeconds()).padStart(2, '0')
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}`
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`
   }
 
   const start = formatLocalDateTime(startDate)
@@ -612,7 +700,7 @@ async function updateEventTime(calendarEvent) {
   const payload = {
     title: calendarEvent.title,
     category: props.category || 'work',
-    lab_code: props.roomCode || props.lab_code || null,
+    lab_code: props.roomCode || null,
     description: props.description || '',
     start,
     end
@@ -620,7 +708,7 @@ async function updateEventTime(calendarEvent) {
 
   if (!payload.lab_code) {
     if (window.toastr) toastr.error('Sự kiện không có thông tin phòng, không thể cập nhật thời gian.')
-    calendarEvent.revert()
+    if (infoCtx && typeof infoCtx.revert === 'function') infoCtx.revert()
     return
   }
 
@@ -635,32 +723,32 @@ async function updateEventTime(calendarEvent) {
       body: JSON.stringify(payload)
     })
 
-    const result = await response.json().catch(() => ({}))
+    const text = await response.text()
+    let result = null
+    try {
+      result = JSON.parse(text)
+    } catch (e) {
+      console.error('updateEventTime not JSON:', response.status, text)
+      if (window.toastr) toastr.error('Không thể cập nhật thời gian (response không phải JSON).')
+      if (infoCtx && typeof infoCtx.revert === 'function') infoCtx.revert()
+      return
+    }
 
     if (!response.ok) {
       const msg =
-        (result && (result.message || (result.errors && Object.values(result.errors)[0][0]))) ||
+        (result && (result.message || (result.errors && Object.values(result.errors)[0] && Object.values(result.errors)[0][0]))) ||
         'Không thể cập nhật thời gian.'
       if (window.toastr) toastr.error(msg)
-      calendarEvent.revert()
+      if (infoCtx && typeof infoCtx.revert === 'function') infoCtx.revert()
       return
     }
 
     if (window.toastr) toastr.success(result.message || 'Đã cập nhật thời gian sự kiện.')
-
-    const eventIndex = events.findIndex((e) => e.id == id)
-    if (eventIndex !== -1) {
-      events[eventIndex] = { ...events[eventIndex], start: start, end: end }
-      const calEvent = calendar.getEventById(id)
-      if (calEvent) {
-        calEvent.setStart(startDate)
-        calEvent.setEnd(endDate)
-      }
-    }
+    await loadEvent()
   } catch (err) {
     console.error(err)
     if (window.toastr) toastr.error('Lỗi kết nối khi cập nhật.')
-    calendarEvent.revert()
+    if (infoCtx && typeof infoCtx.revert === 'function') infoCtx.revert()
   }
 }
 
@@ -764,6 +852,13 @@ if (detailModalEl) {
   })
 }
 
+const confirmDeleteEl = document.getElementById('confirmDeleteModal')
+if (confirmDeleteEl) {
+  confirmDeleteEl.addEventListener('click', function (e) {
+    if (e.target === this) closeConfirmDelete()
+  })
+}
+
 function initMiniCalendar() {
   const miniEl = document.getElementById('miniCalendar')
   if (!miniEl) return
@@ -795,4 +890,31 @@ function initMiniCalendar() {
   })
 
   mini.render()
+}
+
+function checkPermission(eventData) {
+  if (!window.LAB_USER || !window.LAB_USER.logged_in) return false
+
+  const u = window.LAB_USER
+
+  const isAdmin =
+    String(u.role_id) === '1' ||
+    String(u.roleId) === '1' ||
+    String(u.role) === '1' ||
+    String(u.is_admin) === '1' ||
+    u.is_admin === true
+
+  if (isAdmin) return true
+
+  const props = eventData.extendedProps || {}
+  const isOwner = props.user_id != null && String(props.user_id) === String(u.user_id)
+  if (!isOwner) return false
+
+  if (props.status === 'approved') {
+    const eventStart = new Date(eventData.start)
+    const now = new Date()
+    if (eventStart <= now) return false
+  }
+
+  return true
 }

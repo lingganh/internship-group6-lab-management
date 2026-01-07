@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Carbon\Carbon;
 class LabEvent extends Model
 {
     use HasFactory;
@@ -40,5 +40,18 @@ class LabEvent extends Model
     public function issueRequests()
     {
         return $this->hasMany(\App\Models\EquipmentIssueRequest::class, 'lab_event_id');
+    public function group()
+    {
+        return $this->belongsTo(Group::class, 'registered_for', 'id');
+
+    }
+
+    public function getDisplayStatusAttribute()
+    {
+        if ($this->status === 'approved' && Carbon::parse($this->end)->isPast()) {
+            return 'completed'; //'Đã hoàn thành'
+        }
+
+        return $this->status;
     }
 }

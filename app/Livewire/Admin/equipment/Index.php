@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Livewire\Admin\Equipment;
+namespace App\Livewire\Admin\equipment;
 
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Equipment;
 use App\Models\Lab;
-
+use App\Models\LabEquipmentItem;
+use Illuminate\Support\Facades\DB;
 
 class Index extends Component
 {
@@ -18,51 +19,107 @@ class Index extends Component
     public $search = '';
     public $lab = '';
     public $status = '';
-    public $perPage =10;
+    public $perPage = 10;
 
-    public function updated($field)
+    public function updatingSearch()
     {
-        if(in_array($field, ["status", "lab", "search"])){
-            $this->resetPage();
-        }
+        $this->resetPage();
     }
 
-    public function delete(int $id)
+    public function updatingLab()
     {
-        $eq = Equipment::find($id);
+        $this->resetPage();
+    }
 
-        if($eq) return;
+    public function updatingStatus()
+    {
+        $this->resetPage();
+    }
 
-        $eq->delete();
+    public function updatingPerPage()
+    {
+        $this->resetPage();
+    }
+
+    public $deleteId;
+
+    public function openDeleteModal($id)
+    {
+        $this->deleteId = $id;
+
+        $this->dispatch(
+            'openModel',
+            type: 'warning',
+            title: 'Bạn có chắc chắn muốn xóa thiết bị này không?',
+            confirmEvent: 'confirmDeleteEquipment'
+        );
+    }
+
+    public function delete()
+    {
+        $eq = Equipment::with('labItems')->find($this->deleteId);
+
+        if (! $eq) return;
+
+        DB::transaction(function () use ($eq) {
+            $eq->labItems()->delete();
+            $eq->delete();
+        });
 
         $this->dispatch(
             'notify',
-            type:'success',
-            message: 'Đã xóa thiết bị thàng công.'
+            type: 'success',
+            message: 'Xoá thiết bị thành công!'
         );
     }
 
 
 
+
     public function render()
     {
-        $equipments = Equipment::with('lab')
-            ->when($this->search, function ($q)
-            {
-                $q->where(fn($sub) =>
-                $sub->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('code', 'like', '%'.$this->search.'%')
-                    ->orWhere('type', 'like', '%'.$this->search.'%')
-                );
+        $search = trim(mb_strtolower($this->search));
+
+        $statusMap =
+            [
+            'sẵn sàng sử dụng' => 'available',
+            'đang sử dụng' => 'in_use',
+            'bảo trì' => 'maintenance',
+            'hỏng' => 'broken',
+        ];
+
+        $items = LabEquipmentItem::query()
+            ->with(['lab', 'equipment'])
+
+            ->when($search, function($q) use ($search, $statusMap) {
+                $q->where(function($sub) use ($search, $statusMap) {
+                    $sub->whereHas('equipment', fn($eq) => $eq
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhere('type', 'like', "%{$search}%")
+                    )
+                        ->orWhereHas('lab', fn($lab) => $lab->where('name', 'like', "%{$search}%"));
+
+                    foreach ($statusMap as $text => $value) {
+                        if (str_contains($search, $text)) {
+                            $sub->orWhereHas('equipment', fn($eq) => $eq->where('status', $value));
+                        }
+                    }
+                });
             })
+
+
+            ->when($this->status, fn($q) => $q->whereHas('equipment', fn($eq) => $eq->where('status', $this->status)))
+
+
             ->when($this->lab, fn($q) => $q->where('lab_id', $this->lab))
-            ->when($this->status, fn($q) => $q->where('status', $this->status))
+
             ->latest()
             ->paginate($this->perPage);
 
-        return view('livewire.admin.equipment.index',[
+        return view('livewire.admin.equipment.index', [
             'labs' => Lab::orderBy('name')->get(),
-            'equipments' => $equipments
-        ]);
+            'items' => $items,
+        ])->layout('components.layouts.admin-layout');
     }
 }

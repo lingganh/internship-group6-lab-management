@@ -21,12 +21,12 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('group_user', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('group_id');
-            $table->timestamps();
-        });
+//        Schema::create('group_user', function (Blueprint $table) {
+//            $table->id();
+//            $table->unsignedBigInteger('user_id');
+//            $table->unsignedBigInteger('group_id');
+//            $table->timestamps();
+//        });
     }
 
 
@@ -36,6 +36,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('groups');
-        Schema::dropIfExists('group_user');
+//        Schema::dropIfExists('group_user');
     }
 };

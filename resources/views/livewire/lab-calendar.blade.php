@@ -32,6 +32,12 @@
                                 <span class="lab-check-color status-approved"></span>
                                 <span class="lab-check-label">Đã duyệt</span>
                             </label>
+                            <label class="lab-check-item">
+                                <input type="checkbox" checked data-filter-status="completed">
+                                <span class="lab-check-color status-completed"></span>
+                                <span class="lab-check-label">Đã hoàn thành</span>
+                            </label>
+                           
                         </div>
                     </div>
 
@@ -94,6 +100,17 @@
           <div class="form-group full-width">
             <label>Tiêu đề sự kiện <span style="color:#d93025">*</span></label>
             <input type="text" id="eventTitle" required placeholder="Ví dụ: Họp Lab, Seminar...">
+          </div>
+
+          <!-- Đăng ký cho -->
+          <div class="form-group full-width">
+            <label>Đăng ký cho</label>
+           <select id="eventRegisteredFor" class="form-control">
+        <option value="">-- Chọn nhóm (Không bắt buộc) --</option>
+        @foreach($groups as $group)
+            <option value="{{ $group->id }}">{{ $group->name }}</option>
+        @endforeach
+    </select>
           </div>
 
           <!-- Loại sự kiện -->
@@ -213,6 +230,10 @@
                     <span class="detail-icon">📍</span>
                     <span id="detailRoom"></span>
                 </div>
+                <div class="detail-row" id="detailRegisteredForRow" style="display: none;">
+                    <span class="detail-icon">👥</span>
+                    <span id="detailRegisteredFor"></span>
+                </div>
                 <div class="detail-row" id="detailDescriptionRow" style="display: none;">
                     <span class="detail-icon">📝</span>
                     <span id="detailDescription"></span>
@@ -226,17 +247,19 @@
                         <i id="statusPendingIcon" class="fa-solid fa-clock" style="color:#ffc107; display:none;"></i>
                         <i id="statusApprovedIcon" class="fa-solid fa-circle-check"
                             style="color:#28a745; display:none;"></i>
-                    </span>
+                         <i id="statusCompletedIcon" class="fa-solid fa-check-double" 
+                      style="color:#6c757d; display:none;"></i>   
+                                </span>
                     <span id="detailStatus"></span>
                 </div>
             </div>
             <div class="modal-footer">
                 @auth
-                    <button type="button" class="btn btn-danger" onclick="deleteEvent()">
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn" onclick="deleteEvent()">
                         <i class="fa-regular fa-trash-can"></i>
                         <span>Xóa</span>
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="editEvent()">
+                    <button type="button" class="btn btn-primary" id="editEventBtn" onclick="editEvent()">
                         <i class="fa-regular fa-pen-to-square"></i>
                         <span>Sửa</span>
                     </button>
@@ -264,8 +287,13 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
-        window.LAB_USER = @json(['logged_in' => auth()->check(), 'is_admin' => auth()->check() && auth()->user()->code === 'admin']);
+        window.LAB_USER = @json([
+            'logged_in' => auth()->check(), 
+            'is_admin' => auth()->check() && auth()->user()->code === 'admin',
+            'user_id' => auth()->check() ? auth()->user()->id : null
+        ]);
         window.LAB_ROOMS = @json($rooms->map(fn($r) => ['code' => $r->code, 'name' => $r->name])->values());
+        window.LAB_GROUPS = @json($groups->map(fn($g) => ['id' => $g->id, 'name' => $g->name])->values());
     </script>
     <script src="{{ asset('assets/js/calendar.js') }}"></script>
 </div>

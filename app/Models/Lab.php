@@ -23,10 +23,12 @@ class Lab extends Model
     ];
 
 
-    public function equipment()
+    public function equipmentItems()
     {
-       return  $this->hasMany(Equipment::class);
+        return $this->hasMany(LabEquipmentItem::class);
     }
 
 
 }
+
+

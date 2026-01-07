@@ -9,7 +9,10 @@ class Equipment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+  
+
+    protected $table = 'equipment';
+    protected $fillable  = [
         'lab_id',
         'name',
         'code',
@@ -25,9 +28,8 @@ class Equipment extends Model
     ];
 
 
-
-    public function lab()
+    public function labItems()
     {
-        return $this->belongsTo(Lab::class);
+        return $this->hasMany(LabEquipmentItem::class);
     }
 }

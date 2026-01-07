@@ -1,4 +1,34 @@
 <div>
+    <div>
+        <div class="page-header page-header-light shadow">
+            <div class="page-header-content d-lg-flex">
+                <div class="d-flex">
+                    <h4 class="page-title mb-0">
+                        Đăng ký lịch
+                    </h4>
+
+                    <a href="#page_header"
+                       class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                       data-bs-toggle="collapse">
+                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="page-header-content d-lg-flex border-top">
+                <div class="d-flex">
+                    <div class="breadcrumb py-2">
+                        <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
+                        <span class="breadcrumb-item active">Đăng ký lịch </span>
+                    </div>
+
+                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
+                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
   <div class="container-fluid py-4 register-page">
     <div class="row justify-content-center">
       <div class="col-12 col-xxl-8">
@@ -147,7 +177,7 @@
       --r-shadow:0 14px 40px rgba(15,23,42,.08); --r-radius:18px;
       --r-success:#16a34a;
     }
-    body{ background: var(--r-bg); }
+    /* body{ background: var(--r-bg); } */
     .register-card{ border-radius: var(--r-radius); background: var(--r-card); box-shadow: var(--r-shadow); overflow:hidden; }
     .register-control{
       border:1px solid var(--r-border) !important; border-radius:12px !important;

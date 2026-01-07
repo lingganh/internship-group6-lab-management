@@ -7,7 +7,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-12">
                         <label for="lastLoginAt" class="col-form-label" wire:ignore>
                             Trạng thái tài khoản:
                             {!! str_replace('class="', 'class="fs-14 ', $user->user_status) !!}
