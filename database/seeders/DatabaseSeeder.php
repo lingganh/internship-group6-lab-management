@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
 //        $this->call(LabEventSeeder::class);
         $this->call(DepartmentSeeder::class);
         $this->call(EquipmentSeeder::class);
+        $this->call(LabEquipmentItemSeeder::class);
     }
 }

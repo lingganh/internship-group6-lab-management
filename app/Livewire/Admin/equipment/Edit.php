@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\equipment;
 use Livewire\Component;
 use App\Models\Equipment;
 use App\Models\Lab;
+use Illuminate\Support\Facades\DB;
 
 class Edit extends Component
 {
@@ -24,21 +25,28 @@ class Edit extends Component
 
     public function mount($id)
     {
-        $this->equipmentId = $id;
-        $eq = Equipment::findOrFail($id);
+        $eq = Equipment::with('labItems')->findOrFail($id);
 
-        $this->lab_id = $eq->lab_id;
+        $this->equipmentId = $eq->id;
         $this->name = $eq->name;
         $this->code = $eq->code;
         $this->type = $eq->type;
         $this->status = $eq->status;
-        $this->purchased_date = $eq->purchased_date;
-        $this->specifications = $eq->specifications;
-        $this->notes = $eq->notes ;
-        $this->quantity = $eq->quantity ?? 0;
-        $this->broken_quantity = $eq->broken_quantity ?? 0;
-        $this->actual_quantity = $eq->actual_quantity ?? 0;
+        $this->purchased_date = optional($eq->purchased_date)->format('Y-m-d');
+        $this->notes = $eq->notes;
+
+
+        $this->specifications = json_decode($eq->specifications, true) ?? [];
+
+
+        $item = $eq->labItems->first();
+
+        $this->lab_id = $item->lab_id ?? null;
+        $this->quantity = $item->quantity ?? 0;
+        $this->broken_quantity = $item->broken_quantity ?? 0;
+        $this->actual_quantity = max(0, $this->quantity - $this->broken_quantity);
     }
+
     protected function rules()
     {
         return [
@@ -48,29 +56,58 @@ class Edit extends Component
             'type' => 'required|string|max:255',
             'status' => 'required|in:available,in_use,maintenance,broken',
             'purchased_date' => 'nullable|date',
-            'specifications' => 'nullable|string',
-            'notes' => 'nullable|string',
 
             'quantity' => 'required|integer|min:0',
             'broken_quantity' => 'required|integer|min:0|max:' . $this->quantity,
+
+            'specifications' => 'nullable|array',
+            'notes' => 'nullable|string',
         ];
     }
 
-    public function update(){
-        $data = $this->validate();
-        $data['actual_quantity'] = max(0, $data['quantity'] - $data['broken_quantity']);
+
+    public function update()
+    {
+        $this->validate();
+
+        DB::transaction(function () {
+
+            $equipment = Equipment::findOrFail($this->equipmentId);
 
 
-        Equipment::findOrFail($this->equipmentId)->update($data);
+            $equipment->update([
+                'name' => $this->name,
+                'code' => $this->code,
+                'type' => $this->type,
+                'status' => $this->status,
+                'purchased_date' => $this->purchased_date,
+                'notes' => $this->notes,
+                'specifications' => json_encode($this->specifications),
+            ]);
 
-        $this->dispatch(
-            'notify',
-            type: 'success',
-            message: 'Cập nhật thiết bị thành công!'
-        );
+
+            $this->actual_quantity = max(0, $this->quantity - $this->broken_quantity);
+
+
+            $equipment->labItems()->updateOrCreate(
+                ['lab_id' => $this->lab_id],
+                [
+                    'quantity' => $this->quantity,
+                    'broken_quantity' => $this->broken_quantity,
+                    'actual_quantity' => $this->actual_quantity,
+                ]
+            );
+        });
+
+        // Thông báo
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Cập nhật thiết bị thành công!'
+        ]);
 
         return redirect()->route('equipment.index');
     }
+
     public function render()
     {
         return view('livewire.admin.equipment.edit',[

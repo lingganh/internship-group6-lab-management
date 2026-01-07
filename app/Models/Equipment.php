@@ -17,26 +17,14 @@ class Equipment extends Model
         'purchased_date',
         'specifications',
         'notes',
-        'quantity',
-        'broken_quantity',
-        'actual_quantity',
     ];
     protected $casts = [
         'purchased_date'=>'date',
     ];
 
-    protected static function booted()
-    {
-        static::saving(function ($equipment)
-        {
-            $equipment->actual_quantity =
-                max(0, $equipment->quantity - $equipment->broken_quantity);
-        });
-    }
 
-
-    public function lab()
+    public function labItems()
     {
-        return $this->belongsTo(Lab::class);
+        return $this->hasMany(LabEquipmentItem::class);
     }
 }
