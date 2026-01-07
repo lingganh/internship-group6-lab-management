@@ -10,6 +10,7 @@ use App\Models\Group;
 use App\Models\LabEvent;
 use App\Models\LabEventFile;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class LabRegister extends Component
 {
@@ -77,7 +78,7 @@ class LabRegister extends Component
     {
         $this->validate();
 
-        if (now()->greaterThan(\Carbon\Carbon::parse($this->form['start']))) {
+        if (now()->greaterThan(Carbon::parse($this->form['start']))) {
             $this->dispatch('toast', detail: [
                 'type' => 'error',
                 'message' => 'Không thể tạo lịch trong quá khứ.',
@@ -110,7 +111,7 @@ class LabRegister extends Component
             'category'      => $this->form['category'],
             'lab_code'      => $this->form['lab_code'],
             'user_id'       => $this->form['user_id'],
-            'registerd_for' => $this->form['group_id'] ?: null,
+            'registered_for' => $this->form['group_id'] ?: null,
             'start'         => $this->form['start'],
             'end'           => $this->form['end'],
             'description'   => $this->form['description'],
