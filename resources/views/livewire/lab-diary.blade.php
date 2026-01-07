@@ -243,6 +243,33 @@
                   @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
+                    <select wire:model.defer="edit.user_id" class="form-select diary-control">
+                      <option value="">Chọn người dùng...</option>
+                      @foreach($users as $u)
+                        <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
+                          {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
+                        </option>
+                      @endforeach
+                    </select>
+                    @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho</label>
+                    <select wire:model.defer="edit.group_id" class="form-select diary-control">
+                      <option value="">Chọn nhóm / lớp...</option>
+                      @foreach($groups as $g)
+                        <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
+                          {{ $g->name ?? ('Group #'.$g->id) }}
+                        </option>
+                      @endforeach
+                    </select>
+                    @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                  </div>
+
+
                 <div class="col-12">
                   <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
                   <textarea wire:model.defer="edit.description" class="form-control diary-control" rows="3"></textarea>

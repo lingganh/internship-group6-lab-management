@@ -6,6 +6,8 @@ use App\Models\Lab;
 use App\Models\LabEvent;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\User;
+use App\Models\Group;
 
 class LabDiary extends Component
 {
@@ -30,6 +32,7 @@ class LabDiary extends Component
         'status' => 'pending',
         'user_id' => '',
         'feedback' => '',
+        'group_id' => '',
     ];
 
     protected $paginationTheme = 'bootstrap';
@@ -87,7 +90,7 @@ class LabDiary extends Component
 
     public function viewEvent($id)
     {
-        $this->selectedEvent = LabEvent::with(['user', 'files', 'lab'])->findOrFail($id);
+        $this->selectedEvent = LabEvent::with(['user', 'files', 'lab', 'group'])->findOrFail($id);
 
         $this->edit = [
             'title' => (string) ($this->selectedEvent->title ?? ''),
@@ -99,6 +102,7 @@ class LabDiary extends Component
             'color' => (string) ($this->selectedEvent->color ?? '#3498db'),
             'status' => (string) ($this->selectedEvent->status ?? 'pending'),
             'user_id' => (string) ($this->selectedEvent->user_id ?? ''),
+            'group_id' => (string) ($this->selectedEvent->group_id ?? ''),
             'feedback' => (string) ($this->selectedEvent->feedback ?? ''),
         ];
 
@@ -132,6 +136,8 @@ class LabDiary extends Component
             'edit.description' => 'nullable|string|max:5000',
             'edit.status' => 'required|in:pending,approved,cancelled',
             'edit.feedback' => 'nullable|string|max:2000',
+            'edit.user_id' => 'nullable|exists:users,id',
+            'edit.group_id' => 'nullable|exists:groups,id',
         ]);
 
         if ($this->edit['status'] === 'approved') {
@@ -151,6 +157,8 @@ class LabDiary extends Component
             'end' => $this->edit['end'],
             'description' => $this->edit['description'] ?: null,
             'status' => $this->edit['status'],
+            'user_id' => $this->edit['user_id'] ?: null,
+            'group_id' => $this->edit['group_id'] ?: null,
             'feedback' => trim((string) $this->edit['feedback']) !== '' ? trim((string) $this->edit['feedback']) : null,
         ]);
 
@@ -191,12 +199,23 @@ class LabDiary extends Component
     {
         $labs = Lab::select('code', 'name')->orderBy('name')->get();
 
-      $q = LabEvent::query()
-            ->with(['user:id,full_name,email', 'lab:code,name'])
-            ->where('status', 'completed')  
-            ->where('end', '<', now())    
-            ->orderByDesc('start');
+        $users = User::select('id', 'full_name', 'email')
+            ->orderBy('full_name')
+            ->get();
 
+        $groups = Group::select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        $q = LabEvent::query()
+            ->with([
+                'user:id,full_name,email',
+                'lab:code,name',
+                'group:id,name',
+            ])
+            ->where('status', 'completed')
+            ->where('end', '<', now())
+            ->orderByDesc('start');
         if ($this->filterLabCode !== '')
             $q->where('lab_code', $this->filterLabCode);
         if ($this->filterStatus !== '')
@@ -218,7 +237,7 @@ class LabDiary extends Component
 
         $events = $q->paginate(15);
 
-        return view('livewire.lab-diary', compact('labs', 'events'))
+        return view('livewire.lab-diary', compact('labs', 'events', 'users', 'groups'))
             ->layout('components.layouts.admin-layout');
     }
 }
