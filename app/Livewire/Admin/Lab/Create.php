@@ -29,7 +29,7 @@ class Create extends Component
             'code'=>'required|string|max:10|unique:labs,code',
             'location'=>'required|string|max:255',
             'description'=>'nullable|string',
-            'capacity'=>'required|integer',
+            'capacity'=>'nullable|integer',
             'status'=>'required|in:active,maintenance,locked',
             'image'=> 'nullable|image|max:2048',
         ];
@@ -49,7 +49,7 @@ class Create extends Component
             'status' => $this->status,
             'description' => $this->description ?? null,
             'image_url' => $path,
-            'capacity' => $this->capacity,
+            'capacity' => $this->capacityConstant?? null,
             'location' => $this->location,
             'created_by'  => auth()->id(),
         ]);
@@ -61,7 +61,6 @@ class Create extends Component
         'name.required'        => 'Tên phòng không được bỏ trống.',
         'code.required'        => 'Mã phòng không được bỏ trống.',
         'location.required'    => 'Địa điểm không được bỏ trống.',
-        'capacity.required'    => 'Sức chứa không được bỏ trống.',
     ];
 
     public function render()
