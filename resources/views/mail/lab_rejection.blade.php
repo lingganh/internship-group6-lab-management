@@ -3,10 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Lịch đăng ký bị từ chối</title>
+    <style>
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e6eaf2;
+            font-size: 14px;
+            color: #64748b;
+            text-align: center;
+        }
+        .footer img {
+            max-width: 70px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body style="font-family: Arial, sans-serif; background:#f4f6f8; padding:20px;">
     <div style="max-width:600px; margin:0 auto; background:white; border-radius:12px; padding:24px;">
-        
+
         <h2 style="color:#dc2626; margin-bottom:12px;">Lịch đã bị từ chối</h2>
 
         <p>Xin chào {{ $schedule->user->full_name }},</p>
