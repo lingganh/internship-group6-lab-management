@@ -25,7 +25,6 @@
     <div class="content">
         <div class="row g-3 align-items-start">
 
-            {{-- FORM --}}
             <div class="col-xl-9 col-lg-8 col-12 order-1">
                 <div class="card">
                     <div class="card-header fw-bold">
@@ -39,10 +38,7 @@
                                 <label class="form-label">
                                     Tên phòng lab <span class="text-danger">*</span>
                                 </label>
-                                <input
-                                    wire:model.live="name"
-                                    type="text"
-                                    class="form-control @error('name') is-invalid @enderror">
+                                <input wire:model.live="name" type="text" class="form-control @error('name') is-invalid @enderror">
                                 @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -118,7 +114,6 @@
                 </div>
             </div>
 
-            {{-- ACTION --}}
             <div class="col-xl-3 col-lg-4 col-12 order-2">
                 <div class="card">
                     <div class="card-header fw-bold">
@@ -126,32 +121,18 @@
                     </div>
 
                     <div class="card-body d-flex align-items-center gap-2 flex-nowrap">
-                        <button
-                            wire:loading.remove
-                            wire:target="save"
-                            wire:click="save"
-                            class="btn btn-primary text-nowrap"
-                        >
+                        <button wire:loading.remove wire:target="save" wire:click="save" class="btn btn-primary text-nowrap">
                             <i class="ph-floppy-disk"></i> Thêm
                         </button>
 
-                        <button
-                            wire:loading
-                            wire:target="save"
-                            class="btn btn-primary text-nowrap"
-                            disabled
-                        >
+                        <button wire:loading wire:target="save" class="btn btn-primary text-nowrap" disabled>
                             <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                         </button>
 
-                        <a
-                            href="{{ route('admin.lab.index') }}"
-                            class="btn btn-warning text-nowrap"
-                        >
+                        <a href="{{ route('admin.lab.index') }}" class="btn btn-warning text-nowrap">
                             <i class="ph-arrow-counter-clockwise"></i> Trở lại
                         </a>
                     </div>
-
                 </div>
             </div>
 

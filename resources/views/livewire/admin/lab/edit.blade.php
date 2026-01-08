@@ -8,9 +8,7 @@
                             Phòng lab - <span class="fw-normal">Danh sách Phòng lab</span>
                         </h4>
 
-                        <a href="#page_header"
-                           class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                           data-bs-toggle="collapse">
+                        <a href="#page_header" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
                             <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                         </a>
                     </div>
@@ -30,9 +28,7 @@
                             </span>
                         </div>
 
-                        <a href="#breadcrumb_elements"
-                           class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                           data-bs-toggle="collapse">
+                        <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
                             <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                         </a>
                     </div>
@@ -43,7 +39,6 @@
         <br>
 
         <div class="row">
-            {{-- FORM --}}
             <div class="col-md-9 col-12">
                 <div class="card">
                     <div class="card-header bold">
@@ -56,10 +51,7 @@
                             <label class="form-label">
                                 Tên phòng <span class="text-danger">*</span>
                             </label>
-                            <input
-                                wire:model.lazy="name"
-                                type="text"
-                                class="form-control @error('name') is-invalid @enderror">
+                            <input wire:model.lazy="name" type="text" class="form-control @error('name') is-invalid @enderror">
                             @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -69,12 +61,7 @@
                             <label class="form-label">
                                 Mã phòng <span class="text-danger">*</span>
                             </label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                wire:model="code"
-                                readonly
-                                style="background:#f5f5f5; cursor:not-allowed;">
+                            <input type="text" class="form-control" wire:model="code" readonly style="background:#f5f5f5; cursor:not-allowed;">
                         </div>
 
                         <div class="mb-3">
@@ -98,10 +85,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Sức chứa</label>
-                            <input
-                                type="number"
-                                wire:model.lazy="capacity"
-                                class="form-control @error('capacity') is-invalid @enderror">
+                            <input type="number" wire:model.lazy="capacity" class="form-control @error('capacity') is-invalid @enderror">
                             @error('capacity')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -111,17 +95,14 @@
                             <label class="form-label">Ảnh minh họa</label>
                             <input type="file" wire:model="image" class="form-control">
                             @if($oldImage)
-                                <img
-                                    src="{{ asset('storage/'.$oldImage) }}"
-                                    width="80"
-                                    class="mt-2 rounded border">
+                                <img src="{{ asset('storage/'.$oldImage) }}" width="80" class="mt-2 rounded border">
                             @endif
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- ACTION --}}
+
             <div class="col-md-3 col-12">
                 <div class="card">
                     <div class="card-header bold">
@@ -129,30 +110,17 @@
                         Hành động
                     </div>
 
-                    {{-- 🔥 FIX RESPONSIVE: KHÔNG BAO GIỜ RỚT DÒNG --}}
+
                     <div class="card-body d-flex align-items-center gap-2 flex-nowrap">
-                        <button
-                            wire:loading.remove
-                            wire:target="update"
-                            wire:click="update"
-                            class="btn btn-primary text-nowrap"
-                        >
+                        <button wire:loading.remove wire:target="update" wire:click="update" class="btn btn-primary text-nowrap">
                             <i class="ph-floppy-disk"></i> Lưu
                         </button>
 
-                        <button
-                            wire:loading
-                            wire:target="update"
-                            class="btn btn-primary text-nowrap"
-                            disabled
-                        >
+                        <button wire:loading wire:target="update" class="btn btn-primary text-nowrap" disabled>
                             <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                         </button>
 
-                        <a
-                            href="{{ route('admin.lab.index') }}"
-                            class="btn btn-warning text-nowrap"
-                        >
+                        <a href="{{ route('admin.lab.index') }}" class="btn btn-warning text-nowrap">
                             <i class="ph-arrow-counter-clockwise"></i> Trở lại
                         </a>
                     </div>
