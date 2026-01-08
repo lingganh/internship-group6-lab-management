@@ -148,7 +148,7 @@ class LabDiary extends Component
     private function flashToast(string $type, string $message)
     {
         session()->flash($type, $message);
-        $this->dispatch('toast', type: $type, message: $message);
+        $this->dispatch('alert', type: $type, message: $message);
     }
 
     public function updateEvent()
@@ -263,7 +263,7 @@ class LabDiary extends Component
         $this->dispatch('close-confirm-modal');
         $this->dispatch('close-details-modal');
 
-        $this->flashToast('success', "Đã xóa lịch #{$id}.");
+        $this->flashToast('success', "Đã xóa lịch .");
     }
 
     /**

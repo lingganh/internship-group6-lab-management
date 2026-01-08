@@ -80,12 +80,13 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('admin.coming-soon') }}" class="nav-link">
+                {{-- <li class="nav-item">
+                    <a href="{{route('admin.coming-soon')}}"
+                       class="nav-link">
                         <i class="ph-activity"></i>
                         <span>Hoạt động nhóm</span>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item-header pt-0">
                     <div class="text-uppercase fs-sm lh-sm opacity-50 sidebar-resize-hide">Báo cáo - Thống kê</div>
                     <i class="ph-dots-three sidebar-resize-show"></i>
