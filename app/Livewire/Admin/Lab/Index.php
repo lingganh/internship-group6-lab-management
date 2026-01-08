@@ -46,7 +46,7 @@ class Index extends Component
             $this->dispatch(
                 'alert',
                 type: 'success',
-                message: 'Đã chuyển phòng Lab sang trạng thái Tạm khóa!'
+                message: 'Xóa phongd lab thanhd công!'
             );
         } else {
             $this->dispatch(
