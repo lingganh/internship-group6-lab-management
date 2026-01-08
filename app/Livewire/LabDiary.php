@@ -12,8 +12,10 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
-class LabDiary extends Component
+
+class LabDiary extends Component    
 {
     use WithPagination;
     use WithFileUploads;
@@ -299,6 +301,10 @@ class LabDiary extends Component
 
     public function render()
     {
+        $now = Carbon::now();
+        LabEvent::where('status', 'approved')
+                ->where('end', '<', $now)
+                ->update(['status' => 'completed']);
         $labs = Lab::select('code', 'name')->orderBy('name')->get();
 
         $users = User::select('id', 'full_name', 'email')
