@@ -98,7 +98,7 @@
                                                     {{ $item->title }}
                                                 </div>
                                                 <div class="small text-muted">
-                                                     --}}
+                                                    
                                                      {{ $this->categoryLabel($item->category) }}
                                                 </div>
                                             </td>

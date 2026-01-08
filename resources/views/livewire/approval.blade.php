@@ -553,268 +553,274 @@
 
         </div> {{-- /.row --}}
     </div> {{-- /.container-fluid --}}
+<style>
+    .approval-page {
+        --ap-bg: #f8fafc;
+        --ap-card: #ffffff;
+        --ap-text: #0f172a;
+        --ap-muted: #64748b;
+        --ap-border: #e5e7eb;
+        --ap-radius: 14px;
+        --ap-primary: #2563eb;
+        --ap-primary-soft: #eaf1ff;
+        --ap-success: #16a34a;
+        --ap-success-soft: #e9f9ef;
+        --ap-danger: #dc2626;
+        --ap-danger-soft: #fee2e2;
+        --ap-warn: #f59e0b;
+        --ap-warn-soft: #fff3db;
+        background: var(--ap-bg);
+    }
 
-    <style>
-        .approval-page {
-            --ap-bg: #f8fafc;
-            --ap-card: #ffffff;
-            --ap-text: #0f172a;
-            --ap-muted: #64748b;
-            --ap-border: #e5e7eb;
-            --ap-radius: 14px;
-            --ap-primary: #2563eb;
-            --ap-primary-soft: #eaf1ff;
-            --ap-success: #16a34a;
-            --ap-success-soft: #e9f9ef;
-            --ap-danger: #dc2626;
-            --ap-danger-soft: #fee2e2;
-            --ap-warn: #f59e0b;
-            --ap-warn-soft: #fff3db;
-            background: var(--ap-bg);
+    .approval-card {
+        border-radius: var(--ap-radius);
+        background: var(--ap-card);
+        border: 1px solid var(--ap-border);
+        box-shadow: none;
+    }
+
+    .approval-badge-warn {
+        background: var(--ap-warn-soft);
+        color: #7a4b00;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-weight: 600;
+        border: 1px solid rgba(245, 158, 11, .22);
+    }
+
+    .approval-filters {
+        background: #fff;
+        border: 1px solid var(--ap-border);
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .approval-control {
+        border: 1px solid var(--ap-border) !important;
+        border-radius: 8px !important;
+        padding: 8px 10px !important;
+        font-size: 0.9rem;
+    }
+
+    /* 👉 SỬA Ở ĐÂY: bỏ overflow: hidden */
+    .approval-table-wrap {
+        border: 1px solid var(--ap-border);
+        border-radius: 12px;
+        background: #fff;
+        overflow-x: auto;   /* cho scroll ngang khi cần */
+        overflow-y: visible; /* để dropdown không bị cắt */
+        position: relative;
+    }
+
+    .approval-table thead th {
+        background: #f9fafb;
+        color: #374151;
+        font-weight: 600;
+        padding: 12px;
+        border-bottom: 1px solid var(--ap-border);
+    }
+
+    .approval-table tbody td {
+        padding: 12px;
+        border-top: 1px solid var(--ap-border);
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .approval-pill {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-weight: 600;
+        font-size: .78rem;
+    }
+
+    .approval-pill-pending {
+        background: var(--ap-warn-soft);
+        color: #7a4b00;
+    }
+
+    .approval-pill-approved {
+        background: var(--ap-success-soft);
+        color: #166534;
+    }
+
+    .approval-pill-cancelled {
+        background: var(--ap-danger-soft);
+        color: #b91c1c;
+    }
+
+    .approval-btn {
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .approval-btn-success {
+        background: var(--ap-success);
+        color: #fff;
+        border: 1px solid var(--ap-success);
+    }
+
+    .approval-btn-danger {
+        background: var(--ap-danger-soft);
+        color: var(--ap-danger);
+        border: 1px solid #fecaca;
+    }
+
+    .approval-btn-ghost {
+        background: #fff;
+        border: 1px solid var(--ap-border);
+        color: var(--ap-muted);
+    }
+
+    .approval-info {
+        border: 1px solid var(--ap-border);
+        border-radius: 10px;
+        padding: 10px;
+        background: #fff;
+    }
+
+    .approval-desc {
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        white-space: pre-line;
+        border: 1px solid var(--ap-border);
+    }
+
+    .approval-files {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .approval-file {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid var(--ap-border);
+        text-decoration: none;
+        color: inherit;
+        background: #fff;
+    }
+
+    .approval-file-ic {
+        background: var(--ap-primary-soft);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+    }
+
+    .text-wrap-mobile {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 260px;
+    }
+
+    .text-center-desktop {
+        text-align: center;
+    }
+
+    .action-cell {
+        text-align: center;
+    }
+
+    .approval-action-dropdown {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        position: relative; /* giúp dropdown bám đúng chỗ */
+    }
+
+    .approval-action-toggle {
+        padding: 0;
+        line-height: 1;
+        color: #2563eb;
+    }
+
+    .approval-action-toggle i {
+        font-size: 18px;
+    }
+
+    .approval-action-dropdown .dropdown-menu {
+        border-radius: 8px;
+        font-size: 0.86rem;
+        min-width: 140px;
+    }
+
+    @media (max-width: 991.98px) {
+        .approval-table,
+        .approval-table thead,
+        .approval-table tbody,
+        .approval-table tr,
+        .approval-table td {
+            display: block;
+            width: 100%;
         }
 
-        .approval-card {
-            border-radius: var(--ap-radius);
-            background: var(--ap-card);
-            border: 1px solid var(--ap-border);
-            box-shadow: none;
+        .approval-table thead {
+            display: none;
         }
 
-        .approval-badge-warn {
-            background: var(--ap-warn-soft);
-            color: #7a4b00;
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-weight: 600;
-            border: 1px solid rgba(245, 158, 11, .22);
-        }
-
-        .approval-filters {
-            background: #fff;
-            border: 1px solid var(--ap-border);
-            border-radius: 12px;
-            padding: 12px;
-        }
-
-        .approval-control {
+        .approval-table tbody tr {
+            margin-bottom: 1.2rem;
             border: 1px solid var(--ap-border) !important;
-            border-radius: 8px !important;
-            padding: 8px 10px !important;
-            font-size: 0.9rem;
-        }
-
-        .approval-table-wrap {
-            border: 1px solid var(--ap-border);
             border-radius: 12px;
-            overflow: hidden;
             background: #fff;
-        }
-
-        .approval-table thead th {
-            background: #f9fafb;
-            color: #374151;
-            font-weight: 600;
-            padding: 12px;
-            border-bottom: 1px solid var(--ap-border);
+            position: relative;
         }
 
         .approval-table tbody td {
-            padding: 12px;
-            border-top: 1px solid var(--ap-border);
-            vertical-align: middle;
-            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: right;
+            padding: 10px 14px !important;
+            border-bottom: 1px solid var(--ap-border) !important;
+            border-top: none !important;
         }
 
-        .approval-pill {
-            border-radius: 999px;
-            padding: 4px 10px;
+        .approval-table tbody td:last-child {
+            border-bottom: none !important;
+            background: #f8fbff;
+        }
+
+        .approval-table td::before {
+            content: attr(data-label);
+            float: left;
             font-weight: 600;
-            font-size: .78rem;
-        }
-
-        .approval-pill-pending {
-            background: var(--ap-warn-soft);
-            color: #7a4b00;
-        }
-
-        .approval-pill-approved {
-            background: var(--ap-success-soft);
-            color: #166534;
-        }
-
-        .approval-pill-cancelled {
-            background: var(--ap-danger-soft);
-            color: #b91c1c;
-        }
-
-        .approval-btn {
-            border-radius: 8px;
-            padding: 7px 14px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .approval-btn-success {
-            background: var(--ap-success);
-            color: #fff;
-            border: 1px solid var(--ap-success);
-        }
-
-        .approval-btn-danger {
-            background: var(--ap-danger-soft);
-            color: var(--ap-danger);
-            border: 1px solid #fecaca;
-        }
-
-        .approval-btn-ghost {
-            background: #fff;
-            border: 1px solid var(--ap-border);
             color: var(--ap-muted);
-        }
-
-        .approval-info {
-            border: 1px solid var(--ap-border);
-            border-radius: 10px;
-            padding: 10px;
-            background: #fff;
-        }
-
-        .approval-desc {
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            white-space: pre-line;
-            border: 1px solid var(--ap-border);
-        }
-
-        .approval-files {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 6px;
-        }
-
-        .approval-file {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 8px;
-            border-radius: 8px;
-            border: 1px solid var(--ap-border);
-            text-decoration: none;
-            color: inherit;
-            background: #fff;
-        }
-
-        .approval-file-ic {
-            background: var(--ap-primary-soft);
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
         }
 
         .text-wrap-mobile {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 260px;
+            white-space: normal !important;
+            text-align: right;
+            max-width: 100% !important;
         }
 
-        .text-center-desktop {
-            text-align: center;
+        .approval-table td[data-label="Sự kiện"] {
+            background: var(--ap-primary-soft);
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
         }
 
-        .action-cell {
-            text-align: center;
+        .approval-table td[data-label="Sự kiện"]::before {
+            margin-bottom: 4px;
         }
+    }
+</style>
 
-        .approval-action-dropdown {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .approval-action-toggle {
-            padding: 0;
-            line-height: 1;
-            color: #6b7280;
-        }
-
-        .approval-action-toggle i {
-            font-size: 18px;
-        }
-
-        .approval-action-dropdown .dropdown-menu {
-            border-radius: 8px;
-            font-size: 0.86rem;
-        }
-
-        @media (max-width: 991.98px) {
-            .approval-table,
-            .approval-table thead,
-            .approval-table tbody,
-            .approval-table tr,
-            .approval-table td {
-                display: block;
-                width: 100%;
-            }
-
-            .approval-table thead {
-                display: none;
-            }
-
-            .approval-table tbody tr {
-                margin-bottom: 1.2rem;
-                border: 1px solid var(--ap-border) !important;
-                border-radius: 12px;
-                background: #fff;
-            }
-
-            .approval-table tbody td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: right;
-                padding: 10px 14px !important;
-                border-bottom: 1px solid var(--ap-border) !important;
-                border-top: none !important;
-            }
-
-            .approval-table tbody td:last-child {
-                border-bottom: none !important;
-                background: #f8fbff;
-            }
-
-            .approval-table td::before {
-                content: attr(data-label);
-                float: left;
-                font-weight: 600;
-                color: var(--ap-muted);
-                font-size: 0.75rem;
-                text-transform: uppercase;
-            }
-
-            .text-wrap-mobile {
-                white-space: normal !important;
-                text-align: right;
-                max-width: 100% !important;
-            }
-
-            .approval-table td[data-label="Sự kiện"] {
-                background: var(--ap-primary-soft);
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
-            }
-
-            .approval-table td[data-label="Sự kiện"]::before {
-                margin-bottom: 4px;
-            }
-        }
-    </style>
 
     <script>
         function apGetModal(id) {
