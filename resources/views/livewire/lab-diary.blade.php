@@ -1,184 +1,201 @@
 <div>
-  <div>
-        <div class="page-header page-header-light shadow">
-            <div class="page-header-content d-lg-flex">
-                <div class="d-flex">
-                    <h4 class="page-title mb-0">
-                        Nhật ký sử dụng
-                    </h4>
-
-                    <a href="#page_header"
-                       class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                       data-bs-toggle="collapse">
-                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+    <div class="page-header page-header-light shadow">
+        <div class="page-header-content d-lg-flex">
+            <div class="d-flex">
+                <h4 class="page-title mb-0">Nhật ký sử dụng</h4>
+                <a href="#page_header"
+                   class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                   data-bs-toggle="collapse">
+                    <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+                </a>
+            </div>
+        </div>
+        <div class="page-header-content d-lg-flex border-top">
+            <div class="d-flex">
+                <div class="breadcrumb py-2">
+                    <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item">
+                        <i class="ph-house"></i>
                     </a>
+                    <span class="breadcrumb-item active">Nhật ký sử dụng</span>
                 </div>
             </div>
-            <div class="page-header-content d-lg-flex border-top">
-                <div class="d-flex">
-                    <div class="breadcrumb py-2">
-                        <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
-                        <span class="breadcrumb-item active">Nhật ký sử dụng </span>
+        </div>
+    </div>
+
+    <div id="toastPayload"
+         data-success="{{ session('success') }}"
+         data-error="{{ session('error') }}"
+         data-warning="{{ session('warning') }}"
+         data-info="{{ session('info') }}"
+         style="display:none"></div>
+
+    <div class="container-fluid py-4 diary-page">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xxl-11">
+                <div class="card border-0 diary-card">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h4 class="mb-0 fw-bold text-dark">Nhật ký sử dụng</h4>
                     </div>
 
-                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
-                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                    </a>
-                </div>
+                    <div class="card-body pt-3">
+                        <div class="diary-filters mb-3">
+                            <div class="row g-2 g-md-3 align-items-end">
+                                <div class="col-12 col-md-3">
+                                    <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
+                                    <select wire:model.live="filterLabCode" class="form-select diary-control">
+                                        <option value="">Tất cả</option>
+                                        @foreach($labs as $lab)
+                                            <option wire:key="lab-{{ $lab->code }}" value="{{ $lab->code }}">
+                                                {{ $lab->name }} ({{ $lab->code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
+                                <div class="col-6 col-md-2">
+                                    <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
+                                    <input type="date"
+                                           wire:model.live="filterFrom"
+                                           class="form-control diary-control">
+                                </div>
+
+                                <div class="col-6 col-md-2">
+                                    <label class="form-label small fw-semibold text-dark mb-1">Đến ngày</label>
+                                    <input type="date"
+                                           wire:model.live="filterTo"
+                                           class="form-control diary-control">
+                                </div>
+
+                                <div class="col-12 col-md-5">
+                                    <label class="form-label small fw-semibold text-dark mb-1">Từ khóa</label>
+                                    <input type="text"
+                                           wire:model.live="keyword"
+                                           class="form-control diary-control"
+                                           placeholder="Tiêu đề / mô tả / feedback...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="diary-table-wrap">
+                            <table class="table align-middle mb-0 diary-table">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width: 250px;">Nội dung</th>
+                                        <th>Phòng</th>
+                                        <th>Người đăng ký</th>
+                                        <th>Thời gian</th>
+                                        <th class="text-center">Trạng thái</th>
+                                        <th class="text-end">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($events as $item)
+                                        <tr wire:key="event-{{ $item->id }}">
+                                            <td data-label="Nội dung">
+                                                <div class="fw-bold text-dark text-wrap-mobile">
+                                                    {{ $item->title }}
+                                                </div>
+                                                <div class="small text-muted">
+                                                    #{{ $item->id }} • {{ $this->categoryLabel($item->category) }}
+                                                </div>
+                                            </td>
+
+                                            <td data-label="Phòng">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $item->lab?->name ?? ($item->lab_code ?? 'N/A') }}
+                                                </div>
+                                                <div class="small text-muted">
+                                                    {{ $item->lab_code ?? '-' }}
+                                                </div>
+                                            </td>
+
+                                            <td data-label="Người đăng ký">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $item->user?->full_name ?? 'N/A' }}
+                                                </div>
+                                                <div class="small text-muted text-break">
+                                                    {{ $item->user?->email ?? '' }}
+                                                </div>
+                                            </td>
+
+                                            <td data-label="Thời gian">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $item->start->format('d/m/Y') }}
+                                                </div>
+                                                <div class="small text-muted">
+                                                    {{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}
+                                                </div>
+                                            </td>
+
+                                            <td data-label="Trạng thái" class="text-center-desktop">
+                                                @if($item->status === 'pending')
+                                                    <span class="badge diary-pill diary-pill-pending">
+                                                        Chờ duyệt
+                                                    </span>
+                                                @elseif($item->status === 'approved')
+                                                    <span class="badge diary-pill diary-pill-approved">
+                                                        Đã duyệt
+                                                    </span>
+                                                @elseif($item->status === 'completed')
+                                                    <span class="badge diary-pill diary-pill-approved">
+                                                        Đã hoàn thành
+                                                    </span>
+                                                @else
+                                                    <span class="badge diary-pill diary-pill-cancelled">
+                                                        Từ chối
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            <td class="text-end-desktop action-cell">
+                                                <button
+                                                    wire:click="viewEvent({{ $item->id }})"
+                                                    class="btn btn-sm diary-btn diary-btn-primary w-100-mobile"
+                                                    type="button">
+                                                    Chi tiết
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5">
+                                                <div class="text-muted">
+                                                    Không có dữ liệu phù hợp.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-3 d-flex justify-content-center">
+                            {{ $events->links() }}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-   <div
-    id="toastPayload"
-    data-success="{{ session('success') }}"
-    data-error="{{ session('error') }}"
-    data-warning="{{ session('warning') }}"
-    data-info="{{ session('info') }}"
-    style="display:none"
-  ></div>
 
-  <div class="container-fluid py-4 diary-page">
-    <div class="row justify-content-center">
-      <div class="col-12 col-xxl-11">
-        <div class="card border-0 diary-card">
-          <div class="card-header bg-white border-0 pb-0">
-            <div class="d-flex flex-row align-items-center justify-content-between gap-3">
-              <div>
-                <h4 class="mb-0 fw-bold text-dark">Nhật ký sử dụng</h4>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-body pt-3">
-            <div class="diary-filters mb-3">
-              <div class="row g-2 g-md-3 align-items-end">
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                  <select wire:model.live="filterLabCode" class="form-select diary-control">
-                    <option value="">Tất cả</option>
-                    @foreach($labs as $lab)
-                      <option wire:key="lab-{{ $lab->code }}" value="{{ $lab->code }}">{{ $lab->name }} ({{ $lab->code }})</option>
-                    @endforeach
-                  </select>
+        {{-- Toast --}}
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
+            <div id="apToast" class="toast border-0 shadow-sm" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-body d-flex align-items-start gap-2">
+                    <div id="apToastIcon" class="ap-toast-ic"></div>
+                    <div class="flex-grow-1">
+                        <div id="apToastMsg" class="fw-semibold text-dark"></div>
+                        <div id="apToastSub" class="small text-muted mt-1"></div>
+                    </div>
+                    <button type="button"
+                            class="btn-close ms-2 mt-1"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
                 </div>
-
-                {{-- <div class="col-12 col-md-2">
-                  <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                  <select wire:model.live="filterStatus" class="form-select diary-control">
-                    <option value="">Tất cả</option>
-                    <option value="pending">Chờ duyệt</option>
-                    <option value="approved">Đã duyệt</option>
-                    <option value="cancelled">Đã từ chối</option>
-                  </select>
-                </div> --}}
-
-                <div class="col-12 col-md-2">
-                  <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
-                  <input type="date" wire:model.live="filterFrom" class="form-control diary-control">
-                </div>
-
-                <div class="col-12 col-md-2">
-                  <label class="form-label small fw-semibold text-dark mb-1">Đến ngày</label>
-                  <input type="date" wire:model.live="filterTo" class="form-control diary-control">
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Từ khóa</label>
-                  <input type="text" wire:model.live="keyword" class="form-control diary-control" placeholder="Tiêu đề / mô tả / feedback...">
-                </div>
-              </div>
             </div>
-
-            <div class="table-responsive diary-table-wrap">
-              <table class="table align-middle mb-0 diary-table">
-                <thead>
-                  <tr>
-                    <th style="min-width: 280px;">Nội dung</th>
-                    <th style="min-width: 160px;">Phòng</th>
-                    <th style="min-width: 180px;">Người đăng ký</th>
-                    <th style="min-width: 210px;">Thời gian</th>
-                    <th class="text-center" style="width: 150px;">Trạng thái</th>
-                    <th class="text-end" style="width: 170px;">Hành động</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  @forelse($events as $item)
-                    <tr wire:key="event-{{ $item->id }}">
-                      <td>
-                        <div class="fw-semibold text-dark text-truncate" style="max-width: 520px;">{{ $item->title }}</div>
-                        <div class="small text-muted">#{{ $item->id }} • {{ $this->categoryLabel($item->category) }}</div>
-                      </td>
-
-                      <td>
-                        <div class="fw-semibold text-dark">{{ $item->lab?->name ?? ($item->lab_code ?? 'N/A') }}</div>
-                        <div class="small text-muted">{{ $item->lab_code ?? '-' }}</div>
-                      </td>
-
-                      <td>
-                        <div class="fw-semibold text-dark">{{ $item->user?->full_name ?? 'N/A' }}</div>
-                        <div class="small text-muted">{{ $item->user?->email ?? '' }}</div>
-                      </td>
-
-                      <td>
-                        <div class="fw-semibold text-dark">{{ $item->start->format('d/m/Y') }}</div>
-                        <div class="small text-muted">{{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}</div>
-                      </td>
-
-                      <td class="text-center">
-                        @if($item->status === 'pending')
-                          <span class="badge diary-pill diary-pill-pending">Chờ duyệt</span>
-                        @elseif($item->status === 'approved')
-                          <span class="badge diary-pill diary-pill-approved">Đã duyệt</span>
-                        @elseif($item->status === 'completed')
-                          <span class="badge diary-pill diary-pill-approved">Đã hoàn thành</span>  
-                        @else
-                          <span class="badge diary-pill diary-pill-cancelled">Từ chối</span>
-                        @endif
-                      </td>
-
-                      <td class="text-end">
-                        <button wire:click="viewEvent({{ $item->id }})" class="btn btn-sm diary-btn diary-btn-primary" type="button">
-                          Chi tiết
-                        </button>
-                      </td>
-                    </tr>
-                  @empty
-                    <tr>
-                      <td colspan="6" class="text-center py-5">
-                        <div class="text-muted">Không có dữ liệu phù hợp.</div>
-                      </td>
-                    </tr>
-                  @endforelse
-                </tbody>
-              </table>
-            </div>
-
-            <div class="mt-3 d-flex justify-content-center">
-              {{ $events->links() }}
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
 
-    {{-- TOAST --}}
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
-      <div id="apToast" class="toast border-0 shadow-sm" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-body d-flex align-items-start gap-2">
-          <div id="apToastIcon" class="ap-toast-ic"></div>
-          <div class="flex-grow-1">
-            <div id="apToastMsg" class="fw-semibold text-dark"></div>
-            <div id="apToastSub" class="small text-muted mt-1"></div>
-          </div>
-          <button type="button" class="btn-close ms-2 mt-1" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      </div>
-    </div>
-
-    {{-- MODAL DETAILS --}}
-    <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
+        {{-- Modal Details --}}
+         <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 diary-modal">
           <div class="modal-header border-0 pb-0">
@@ -332,330 +349,331 @@
       </div>
     </div>
 
-    {{-- MODAL CONFIRM --}}
-    <div wire:ignore.self class="modal fade" id="modalConfirm" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 diary-modal" style="border-radius: 18px;">
-          <div class="modal-header border-0 pb-0">
-            <div>
-              <h5 class="modal-title fw-bold text-dark mb-1">Xác nhận xóa</h5>
-              <div class="small text-muted">Xóa lịch này sẽ không thể khôi phục.</div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
 
-          <div class="modal-footer border-0 pt-0">
-            <div class="d-flex w-100 justify-content-end gap-2">
-              <button type="button" class="btn diary-btn diary-btn-ghost" data-bs-dismiss="modal">Hủy</button>
-              <button wire:click="deleteEvent" type="button" class="btn diary-btn diary-btn-danger">Xác nhận xóa</button>
+        {{-- Modal Confirm --}}
+        <div wire:ignore.self
+             class="modal fade"
+             id="modalConfirm"
+             tabindex="-1"
+             aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content border-0 diary-modal">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark mb-1">
+                            Xác nhận xóa
+                        </h5>
+                    </div>
+                    <div class="modal-body py-3 text-muted">
+                        Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa?
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button"
+                                class="btn diary-btn diary-btn-ghost"
+                                data-bs-dismiss="modal">
+                            Hủy
+                        </button>
+                        <button
+                            wire:click="deleteEvent"
+                            type="button"
+                            class="btn diary-btn diary-btn-danger">
+                            Xác nhận xóa
+                        </button>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
 
-  </div>
+    <style>
+        .diary-page {
+            --d-bg: #f6f8fc;
+            --d-card: #ffffff;
+            --d-text: #0f172a;
+            --d-muted: #64748b;
+            --d-border: #e6eaf2;
+            --d-shadow: 0 14px 40px rgba(15, 23, 42, .08);
+            --d-radius: 18px;
+            --d-primary: #2563eb;
+            --d-primary-soft: #eaf1ff;
+            --d-success: #16a34a;
+            --d-success-soft: #e9f9ef;
+            --d-danger: #dc2626;
+            --d-danger-soft: #ffecec;
+            --d-warn: #f59e0b;
+            --d-warn-soft: #fff3db;
+            background: var(--d-bg);
+            min-height: 100vh;
+        }
 
-  <style>
-    /* ====== SCOPE CSS: chỉ ảnh hưởng trong .diary-page ====== */
-    .diary-page{
-      --d-bg:#f6f8fc;
-      --d-card:#ffffff;
-      --d-text:#0f172a;
-      --d-muted:#64748b;
-      --d-border:#e6eaf2;
-      --d-shadow:0 14px 40px rgba(15,23,42,.08);
-      --d-radius:18px;
-      --d-primary:#2563eb;
-      --d-primary-soft:#eaf1ff;
-      --d-success:#16a34a;
-      --d-success-soft:#e9f9ef;
-      --d-danger:#dc2626;
-      --d-danger-soft:#ffecec;
-      --d-warn:#f59e0b;
-      --d-warn-soft:#fff3db;
-    }
+        .diary-card {
+            border-radius: var(--d-radius);
+            background: var(--d-card);
+            box-shadow: var(--d-shadow);
+            border: none;
+        }
 
-    .diary-page{ background: var(--d-bg); }
+        .diary-filters {
+            background: #fff;
+            border: 1px solid var(--d-border);
+            border-radius: 16px;
+            padding: 14px;
+        }
 
-    .diary-page .diary-card{
-      border-radius: var(--d-radius);
-      background: var(--d-card);
-      box-shadow: var(--d-shadow);
-      overflow: hidden;
-    }
+        .diary-control {
+            border: 1px solid var(--d-border) !important;
+            border-radius: 12px !important;
+            padding: 10px 12px !important;
+        }
 
-    .diary-page .diary-filters{
-      background:#fff;
-      border:1px solid var(--d-border);
-      border-radius:16px;
-      padding:14px;
-    }
+        .diary-table-wrap {
+            border: 1px solid var(--d-border);
+            border-radius: 16px;
+            overflow: hidden;
+            background: #fff;
+        }
 
-    .diary-page .diary-control{
-      border:1px solid var(--d-border) !important;
-      border-radius:12px !important;
-      padding:10px 12px !important;
-      background:#fff !important;
-      box-shadow:none !important;
-      color:var(--d-text);
-    }
-    .diary-page .diary-control:focus{
-      border-color: rgba(37,99,235,.35) !important;
-      box-shadow: 0 0 0 .2rem rgba(37,99,235,.12) !important;
-    }
+        .diary-table thead th {
+            background: #fbfcff;
+            color: #334155;
+            font-weight: 700;
+            padding: 14px;
+            font-size: .92rem;
+            border-bottom: 1px solid var(--d-border);
+        }
 
-    .diary-page .diary-table-wrap{
-      border:1px solid var(--d-border);
-      border-radius:16px;
-      overflow:hidden;
-      background:#fff;
-    }
+        .diary-table tbody td {
+            padding: 14px;
+            border-top: 1px solid var(--d-border);
+        }
 
-    .diary-page .diary-table{
-      margin:0;
-    }
+        .diary-pill {
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-weight: 700;
+            font-size: .8rem;
+            display: inline-flex;
+        }
 
-    .diary-page .diary-table thead th{
-      background:#fbfcff;
-      color:#334155;
-      font-weight:700;
-      border-bottom:1px solid var(--d-border);
-      padding:14px 14px;
-      font-size:.92rem;
-      vertical-align:middle;
-      white-space:nowrap;
-    }
+        .diary-pill-pending {
+            background: var(--d-warn-soft);
+            color: #7a4b00;
+        }
 
-    .diary-page .diary-table tbody td{
-      border-top:1px solid var(--d-border);
-      padding:14px 14px;
-      vertical-align:middle;
-      color:var(--d-text);
-    }
+        .diary-pill-approved {
+            background: var(--d-success-soft);
+            color: #0f6a2e;
+        }
 
-    .diary-page .diary-table tbody tr{
-      transition: background .15s ease;
-    }
-    .diary-page .diary-table tbody tr:hover{
-      background: rgba(37,99,235,.03);
-    }
+        .diary-pill-cancelled {
+            background: var(--d-danger-soft);
+            color: #8a1414;
+        }
 
-    .diary-page .diary-pill{
-      border-radius:999px;
-      padding:8px 12px;
-      font-weight:900;
-      border:1px solid transparent;
-      font-size:.85rem;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width: 90px;
-    }
-    .diary-page .diary-pill-pending{
-      background: var(--d-warn-soft);
-      color:#7a4b00;
-      border-color: rgba(245,158,11,.25);
-    }
-    .diary-page .diary-pill-approved{
-      background: var(--d-success-soft);
-      color:#0f6a2e;
-      border-color: rgba(22,163,74,.22);
-    }
-    .diary-page .diary-pill-cancelled{
-      background: var(--d-danger-soft);
-      color:#8a1414;
-      border-color: rgba(220,38,38,.22);
-    }
+        .diary-btn {
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-weight: 700;
+            transition: all .2s;
+        }
 
-    .diary-page .diary-btn{
-      border-radius:12px;
-      padding:9px 12px;
-      font-weight:900;
-      border:1px solid transparent;
-      transition: transform .06s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
-      white-space: nowrap;
-    }
-    .diary-page .diary-btn:active{ transform: translateY(1px); }
+        .diary-btn-primary {
+            background: var(--d-primary-soft);
+            color: var(--d-primary);
+            border: 1px solid rgba(37, 99, 235, .1);
+        }
 
-    .diary-page .diary-btn-primary{
-      background: var(--d-primary-soft);
-      border-color: rgba(37,99,235,.18);
-      color: var(--d-primary);
-    }
-    .diary-page .diary-btn-primary:hover{
-      background: rgba(37,99,235,.14);
-      border-color: rgba(37,99,235,.25);
-    }
+        .diary-btn-success {
+            background: var(--d-success);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+        }
 
-    .diary-page .diary-btn-success{
-      background: var(--d-success);
-      color:#fff;
-      border-color: rgba(22,163,74,.4);
-      box-shadow: 0 10px 18px rgba(22,163,74,.18);
-    }
-    .diary-page .diary-btn-success:hover{
-      filter: brightness(.98);
-      box-shadow: 0 14px 24px rgba(22,163,74,.22);
-    }
+        .diary-btn-danger {
+            background: var(--d-danger-soft);
+            color: var(--d-danger);
+        }
 
-    .diary-page .diary-btn-danger{
-      background: var(--d-danger-soft);
-      border-color: rgba(220,38,38,.18);
-      color: var(--d-danger);
-    }
-    .diary-page .diary-btn-danger:hover{
-      background: rgba(220,38,38,.12);
-      border-color: rgba(220,38,38,.25);
-    }
+        .diary-btn-ghost {
+            background: #fff;
+            border: 1px solid var(--d-border);
+            color: var(--d-muted);
+        }
 
-    .diary-page .diary-btn-ghost{
-      background:#fff;
-      color:#334155;
-      border-color: var(--d-border);
-      border:1px solid var(--d-border);
-    }
-    .diary-page .diary-btn-ghost:hover{ background:#f8fafc; }
+        .text-center-desktop {
+            text-align: center;
+        }
 
-    /* CHỈ style modal-content có class diary-modal, không đụng modal của m */
-    .diary-page .diary-modal{
-      border-radius:20px;
-      box-shadow:0 18px 48px rgba(15,23,42,.16);
-      overflow:hidden;
-      background: #fff;
-    }
+        .text-end-desktop {
+            text-align: right;
+        }
 
-    .diary-page .diary-filebox{
-      border:1px solid var(--d-border);
-      border-radius:16px;
-      padding:12px 14px;
-      background:#fff;
-    }
-    .diary-page .diary-filelist{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .diary-page .diary-fileitem{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(15,23,42,.06);
-      background:#fbfcff;
-      text-decoration:none;
-      color: var(--d-text);
-      transition: background .12s ease, border-color .12s ease;
-    }
-    .diary-page .diary-fileitem:hover{
-      background:#f3f7ff;
-      border-color: rgba(37,99,235,.16);
-    }
-    .diary-page .diary-filedot{
-      width:10px;height:10px;border-radius:99px;
-      background: rgba(37,99,235,.35);
-      flex:0 0 auto;
-    }
-    .diary-page .diary-filename{
-      font-weight:700;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      width:100%;
-    }
+        .text-wrap-mobile {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 320px;
+        }
 
-    .diary-page .ap-toast-ic{
-      width:34px;height:34px;border-radius:12px;
-      display:inline-flex;align-items:center;justify-content:center;
-      background: rgba(37,99,235,.08);
-      border: 1px solid rgba(37,99,235,.14);
-      flex: 0 0 auto;
-      font-weight: 900;
-      color: #0f172a;
-    }
-  </style>
+        .diary-info {
+            border: 1px solid var(--d-border);
+            border-radius: 14px;
+            padding: 10px 12px;
+            background: #fff;
+        }
 
-  @once
-  <script>
-    function apGetModal(id){
-      const el = document.getElementById(id);
-      if (!el) return null;
-      return bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
-    }
+        .diary-filebox {
+            background: #f8fafc;
+        }
 
-    function apToast(type, msg, sub){
-      const toastEl = document.getElementById('apToast');
-      if (!toastEl || !msg) return;
+        .diary-files {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
 
-      const iconEl = document.getElementById('apToastIcon');
-      const msgEl = document.getElementById('apToastMsg');
-      const subEl = document.getElementById('apToastSub');
+        .diary-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--d-border);
+            text-decoration: none;
+            color: inherit;
+            background: #fff;
+        }
 
-      msgEl.textContent = msg || '';
-      subEl.textContent = sub || '';
+        .diary-file-ic {
+            background: var(--d-primary-soft);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
 
-      if (type === 'success') iconEl.textContent = '✓';
-      else if (type === 'error') iconEl.textContent = '!';
-      else if (type === 'warning') iconEl.textContent = '⚠';
-      else iconEl.textContent = 'i';
+        /* RESPONSIVE CARD STYLE */
+        @media (max-width: 991.98px) {
+            .diary-table,
+            .diary-table thead,
+            .diary-table tbody,
+            .diary-table tr,
+            .diary-table td {
+                display: block;
+                width: 100%;
+            }
 
-      bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2600 }).show();
-    }
+            .diary-table thead {
+                display: none;
+            }
 
-    function fireSessionToast(){
-      const p = document.getElementById('toastPayload');
-      if(!p) return;
+            .diary-table tbody tr {
+                margin-bottom: 1rem;
+                border: 1px solid var(--d-border) !important;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                background: #fff;
+            }
 
-      const s = p.getAttribute('data-success');
-      const e = p.getAttribute('data-error');
-      const w = p.getAttribute('data-warning');
-      const i = p.getAttribute('data-info');
+            .diary-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                padding: 10px 15px !important;
+                border-bottom: 1px dashed var(--d-border) !important;
+                border-top: none !important;
+            }
 
-      if (s) apToast('success', s, '');
-      else if (e) apToast('error', e, '');
-      else if (w) apToast('warning', w, '');
-      else if (i) apToast('info', i, '');
+            .diary-table tbody td:last-child {
+                border-bottom: none !important;
+                background: #f8fbff;
+            }
 
-      p.setAttribute('data-success','');
-      p.setAttribute('data-error','');
-      p.setAttribute('data-warning','');
-      p.setAttribute('data-info','');
-    }
+            .diary-table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 700;
+                color: var(--d-muted);
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
 
-    window.addEventListener('open-details-modal', () => {
-      const m = apGetModal('modalDetails');
-      if (m) m.show();
-    });
+            .text-wrap-mobile {
+                white-space: normal !important;
+                text-align: right;
+                max-width: 100% !important;
+                font-size: 1rem;
+            }
 
-    window.addEventListener('close-details-modal', () => {
-      const el = document.getElementById('modalDetails');
-      if (!el) return;
-      const m = bootstrap.Modal.getInstance(el);
-      if (m) m.hide();
-    });
+            .diary-table td[data-label="Nội dung"] {
+                background: var(--d-primary-soft);
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+                padding: 15px !important;
+            }
 
-    window.addEventListener('open-confirm-modal', () => {
-      const m = apGetModal('modalConfirm');
-      if (m) m.show();
-    });
+            .diary-table td[data-label="Nội dung"]::before {
+                margin-bottom: 4px;
+            }
 
-    window.addEventListener('close-confirm-modal', () => {
-      const el = document.getElementById('modalConfirm');
-      if (!el) return;
-      const m = bootstrap.Modal.getInstance(el);
-      if (m) m.hide();
-    });
+            .w-100-mobile {
+                width: 100%;
+            }
 
-    document.addEventListener('livewire:load', () => {
-      fireSessionToast();
+            .diary-page {
+                padding: 10px !important;
+            }
+        }
 
-      if (window.Livewire && Livewire.hook) {
-        Livewire.hook('message.processed', () => {
-          fireSessionToast();
-        });
-      }
-    });
-  </script>
-  @endonce
+        .ap-toast-ic {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--d-primary-soft);
+            color: var(--d-primary);
+            font-weight: bold;
+        }
+
+        .diary-modal {
+            border-radius: 20px;
+            overflow: hidden;
+        }
+    </style>
+
+    <script>
+        function apToast(type, msg, sub) {
+            const toastEl = document.getElementById('apToast');
+            if (!toastEl) return;
+            document.getElementById('apToastMsg').textContent = msg;
+            document.getElementById('apToastSub').textContent = sub || '';
+            const icon = document.getElementById('apToastIcon');
+            icon.textContent = type === 'success'
+                ? '✓'
+                : (type === 'error' ? '!' : 'i');
+            bootstrap.Toast.getOrCreateInstance(toastEl).show();
+        }
+
+        window.addEventListener('open-details-modal', () =>
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetails')).show()
+        );
+
+        window.addEventListener('close-details-modal', () =>
+            bootstrap.Modal.getInstance(document.getElementById('modalDetails'))?.hide()
+        );
+
+        window.addEventListener('open-confirm-modal', () =>
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalConfirm')).show()
+        );
+
+        window.addEventListener('close-confirm-modal', () =>
+            bootstrap.Modal.getInstance(document.getElementById('modalConfirm'))?.hide()
+        );
+    </script>
 </div>
