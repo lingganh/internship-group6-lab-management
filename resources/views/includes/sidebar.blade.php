@@ -48,22 +48,29 @@
                         <span>Đăng ký lịch</span>
                     </a>
                 </li>
-                  <li class="nav-item">
+                 
+
+                <li class="nav-item">
+                    <a href="{{route('admin.approval')}}"
+                       class="nav-link ">
+                        <i class="ph-calendar-check"></i>
+                        <span>Danh sách lịch</span>
+                    </a>
+                </li>
+                {{-- <li class="nav-item">
+                    <a href="{{route('admin.approval')}}"
+                       class="nav-link ">
+                        <i class="ph-calendar-check"></i>
+                        <span>Lịch đã đăng ký</span>
+                    </a>
+                </li> --}}
+                 <li class="nav-item">
                     <a href="{{route('admin.lab-diary')}}"
                        class="nav-link">
                         <i class="ph-note-blank"></i>
                         <span>Nhật ký sử dụng</span>
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    <a href="{{route('admin.approval')}}"
-                       class="nav-link ">
-                        <i class="ph-calendar-check"></i>
-                        <span>Duyệt lịch đăng ký</span>
-                    </a>
-                </li>
-
                 <li class="nav-item-header pt-0">
                     <div class="text-uppercase fs-sm lh-sm opacity-50 sidebar-resize-hide">Nhóm - Hoạt động</div>
                     <i class="ph-dots-three sidebar-resize-show"></i>

@@ -13,7 +13,7 @@ class Approval extends Component
 {
     use WithPagination;
 
-    public $filterStatus = 'pending';
+    public $filterStatus = '';
     public $filterUserId = '';
     public $filterDate = '';
     public $filterLabCode = '';
@@ -27,8 +27,7 @@ class Approval extends Component
     public $confirmNote = '';
 
     public $passwordModalId = null;
-    public $roomPassword = '';
-
+    public $roomCode = '';  
     public $rejectionNote = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -40,6 +39,7 @@ class Approval extends Component
         'filterLabCode' => ['except' => ''],
     ];
 
+ 
     public function updatingFilterStatus()
     {
         $this->resetPage();
@@ -60,12 +60,14 @@ class Approval extends Component
         $this->resetPage();
     }
 
+ 
     public function viewSchedule($scheduleId)
     {
         $this->selectedSchedule = LabEvent::with(['user', 'files', 'lab', 'group'])->findOrFail($scheduleId);
         $this->dispatch('open-details-modal');
     }
 
+ 
     public function confirmReject($id = null)
     {
         $id = $id ?? $this->selectedSchedule?->id;
@@ -83,6 +85,25 @@ class Approval extends Component
         $this->dispatch('open-confirm-modal');
     }
 
+ 
+    public function confirmDelete($id = null)
+    {
+        $id = $id ?? $this->selectedSchedule?->id;
+        if (!$id) {
+            return;
+        }
+
+        $this->confirmType = 'delete';
+        $this->confirmTitle = 'Xác nhận xóa lịch';
+        $this->confirmMessage = 'Hành động này sẽ xóa lịch đăng ký khỏi hệ thống. Bạn chắc chắn?';
+        $this->confirmId = $id;
+        $this->confirmNote = '';
+        $this->rejectionNote = '';
+
+        $this->dispatch('open-confirm-modal');
+    }
+
+ 
     public function performConfirm()
     {
         if (!$this->confirmId || !$this->confirmType) {
@@ -90,7 +111,16 @@ class Approval extends Component
             return;
         }
 
-       
+        if ($this->confirmType === 'reject') {
+            if (trim($this->rejectionNote) === '') {
+                $this->dispatch('toast', type: 'warning', message: 'Thiếu lý do', sub: 'Vui lòng nhập lý do từ chối.');
+                return;
+            }
+
+            $this->rejectSchedule($this->confirmId);
+        } elseif ($this->confirmType === 'delete') {
+            $this->deleteSchedule($this->confirmId);
+        }
 
         $this->dispatch('close-confirm-modal');
 
@@ -100,6 +130,7 @@ class Approval extends Component
         $this->rejectionNote = '';
     }
 
+ 
     public function approveNow($id = null)
     {
         $id = $id ?? $this->selectedSchedule?->id;
@@ -114,6 +145,7 @@ class Approval extends Component
             return;
         }
 
+        // check trùng lịch đã duyệt cùng phòng
         $hasConflict = LabEvent::where('status', 'approved')
             ->where('id', '!=', $schedule->id)
             ->where('lab_code', $schedule->lab_code)
@@ -129,7 +161,7 @@ class Approval extends Component
         }
 
         $this->passwordModalId = $id;
-        $this->roomPassword = '';
+        $this->roomCode = '';
         $this->dispatch('open-password-modal');
     }
 
@@ -140,8 +172,8 @@ class Approval extends Component
             return;
         }
 
-        if (empty($this->roomPassword)) {
-            $this->dispatch('toast', type: 'warning', message: 'Thiếu mật khẩu', sub: 'Vui lòng nhập mật khẩu phòng.');
+        if (empty($this->roomCode)) {
+            $this->dispatch('toast', type: 'warning', message: 'Thiếu mã phòng', sub: 'Vui lòng nhập mã phòng lab.');
             return;
         }
 
@@ -149,11 +181,15 @@ class Approval extends Component
 
         $schedule->update(['status' => 'approved']);
 
-        Mail::to($schedule->user->email)->queue(new \App\Mail\ApprovalNotification($schedule, $this->roomPassword));
+        if ($schedule->user && $schedule->user->email) {
+            Mail::to($schedule->user->email)->queue(
+                new \App\Mail\ApprovalNotification($schedule, $this->roomCode)
+            );
+        }
 
         $this->dispatch('close-password-modal');
         $this->passwordModalId = null;
-        $this->roomPassword = '';
+        $this->roomCode = '';
 
         if ($this->selectedSchedule && $this->selectedSchedule->id == $schedule->id) {
             $this->selectedSchedule->refresh();
@@ -163,6 +199,7 @@ class Approval extends Component
         $this->dispatch('close-details-modal');
     }
 
+ 
     public function rejectSchedule($id = null)
     {
         $id = $id ?? $this->selectedSchedule?->id;
@@ -177,12 +214,17 @@ class Approval extends Component
             return;
         }
 
+        $reason = trim($this->rejectionNote) ?: null;
+
         $schedule->update([
             'status' => 'cancelled',
+            'reason' => $reason,
         ]);
 
         if ($schedule->user && $schedule->user->email) {
-            Mail::to($schedule->user->email)->queue(new \App\Mail\RejectionNotification($schedule, $this->rejectionNote));
+            Mail::to($schedule->user->email)->queue(
+                new \App\Mail\RejectionNotification($schedule, $this->rejectionNote)
+            );
         }
 
         if ($this->selectedSchedule && $this->selectedSchedule->id == $schedule->id) {
@@ -193,6 +235,32 @@ class Approval extends Component
         $this->dispatch('close-details-modal');
     }
 
+ 
+    public function deleteSchedule($id = null)
+    {
+        $id = $id ?? $this->selectedSchedule?->id;
+        if (!$id) {
+            return;
+        }
+
+        $schedule = LabEvent::find($id);
+
+        if (!$schedule) {
+            $this->dispatch('toast', type: 'warning', message: 'Không tìm thấy lịch', sub: 'Lịch đã bị xóa trước đó.');
+            return;
+        }
+
+        $schedule->delete();
+
+        if ($this->selectedSchedule && $this->selectedSchedule->id == $id) {
+            $this->selectedSchedule = null;
+        }
+
+        $this->dispatch('toast', type: 'success', message: 'Đã xóa lịch', sub: "Lịch #{$id} đã được xóa.");
+        $this->dispatch('close-details-modal');
+    }
+
+ 
     public function render()
     {
         $schedules = LabEvent::with(['user', 'lab'])
@@ -204,10 +272,11 @@ class Approval extends Component
             ->paginate(15);
 
         return view('livewire.approval', [
-            'schedules' => $schedules,
+            'schedules'    => $schedules,
             'pendingCount' => LabEvent::where('status', 'pending')->count(),
-            'users' => User::select('id', 'full_name')->orderBy('full_name')->get(),
-            'labs' => Lab::select('code', 'name')->orderBy('name')->get(),
+            'users'        => User::select('id', 'full_name')->orderBy('full_name')->get(),
+            'labs'         => Lab::select('code', 'name')->orderBy('name')->get(),
         ])->layout('components.layouts.admin-layout');
     }
 }
+    
