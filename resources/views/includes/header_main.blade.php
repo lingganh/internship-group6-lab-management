@@ -7,17 +7,19 @@
         </div>
 
         <div class="navbar-brand flex-1 flex-lg-0 ms-xl-5">
-            <a href="{{route('home')}}" class="d-inline-flex align-items-center">
+            <a href="{{ route('home') }}" class="d-inline-flex align-items-center">
                 <img class="w-40px h-40px" src="{{ asset('assets/images/login.png') }}" alt="">
             </a>
-            <span class="d-none d-lg-inline-block mx-lg-2" style="text-transform: uppercase; font-weight: bold; font-size: 16px; color: #fff">Hệ thống quản lý phòng lab</span>
+            <span class="d-none d-lg-inline-block mx-lg-2"
+                style="text-transform: uppercase; font-weight: bold; font-size: 16px; color: #fff">Hệ thống quản lý
+                phòng lab</span>
         </div>
 
 
 
         <ul class="nav flex-row justify-content-end order-1 order-lg-2 align-items-center">
             <li class="nav-item ms-lg-2">
-                <a href="{{route('events.calendar')}}" class="navbar-nav-link align-items-center rounded-pill p-1">
+                <a href="{{ route('events.calendar') }}" class="navbar-nav-link align-items-center rounded-pill p-1">
                     <div class="status-indicator-container">
                         <i class="ph-newspaper "></i>
                     </div>
@@ -25,7 +27,7 @@
                 </a>
             </li>
             <li class="nav-item ms-lg-2">
-                <a href="{{route('home')}}" class="navbar-nav-link align-items-center rounded-pill p-1">
+                <a href="{{ route('home') }}" class="navbar-nav-link align-items-center rounded-pill p-1">
                     <div class="status-indicator-container">
                         <i class="ph-calendar "></i>
                     </div>
@@ -33,46 +35,73 @@
                 </a>
             </li>
 
-            @if(auth()->check())
+            {{-- Thông báo --}}
+            @php
+                $currentUser = auth()->user();
+                $unreadCount = 0;
+
+                if ($currentUser) {
+                    $unreadCount = $currentUser->notifications()->whereNull('read_at')->count();
+                }
+            @endphp
+
+            <li class="nav-item">
+                <a class="navbar-nav-link align-items-center rounded-pill p-1" data-bs-toggle="offcanvas"
+                    href="#notifications" role="button" aria-controls="notifications">
+                    <div class="status-indicator-container">
+                        <i class="ph-bell"></i>
+                    </div>
+
+                    <span id="notificationUnreadBadge"
+                        class="badge bg-danger rounded-pill ms-1 {{ $unreadCount > 0 ? '' : 'd-none' }}">
+                        {{ $unreadCount }}
+                    </span>
+                </a>
+            </li>
+
+            @if (auth()->check())
                 <li class="nav-item nav-item-dropdown-lg dropdown ms-lg-2">
-                    <a href="#" class="navbar-nav-link align-items-center rounded-pill p-1" data-bs-toggle="dropdown">
+                    <a href="#" class="navbar-nav-link align-items-center rounded-pill p-1"
+                        data-bs-toggle="dropdown">
                         <div class="status-indicator-container">
-                            <img src="{{ Avatar::create(auth()->user()->full_name ?? auth()->user()->full_name)->toBase64() }}" class="w-32px h-32px rounded-pill" alt="">
+                            <img src="{{ Avatar::create(auth()->user()->full_name ?? auth()->user()->full_name)->toBase64() }}"
+                                class="w-32px h-32px rounded-pill" alt="">
                             <span class="status-indicator bg-success"></span>
                         </div>
-                        <span class="d-none d-lg-inline-block mx-lg-2">{{auth()->user()->full_name ?? auth()->user()->full_name}}</span>
-{{--                        <div class="status-indicator-container">--}}
-{{--                            <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt="">--}}
-{{--                        </div>--}}
-{{--                        <span class="d-none d-lg-inline-block mx-lg-2">Phong</span>--}}
+                        <span
+                            class="d-none d-lg-inline-block mx-lg-2">{{ auth()->user()->full_name ?? auth()->user()->full_name }}</span>
+                        {{--                        <div class="status-indicator-container"> --}}
+                        {{--                            <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt=""> --}}
+                        {{--                        </div> --}}
+                        {{--                        <span class="d-none d-lg-inline-block mx-lg-2">Phong</span> --}}
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-end">
-                        @if(auth()->user()->hasRole('admin'))
-                            <a href="{{route('admin.dashboard')}}" class="dropdown-item">
+                        @if (auth()->user()->hasRole('admin'))
+                            <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
                                 <i class="ph-wrench me-2"></i>
                                 Quản trị hệ thống
                             </a>
                         @endif
-                        <a href="{{route('user.schedules')}}" class="dropdown-item">
+                        <a href="{{ route('user.schedules') }}" class="dropdown-item">
                             <i class="ph-calendar me-2"></i>
                             Lịch đã đăng ký
                         </a>
-                        <a href="{{route('client.info-user')}}" class="dropdown-item">
+                        <a href="{{ route('client.info-user') }}" class="dropdown-item">
                             <i class="ph-user me-2"></i>
                             Tài khoản
                         </a>
-                        <a href="{{route('client.change-password')}}" class="dropdown-item">
+                        <a href="{{ route('client.change-password') }}" class="dropdown-item">
                             <i class="ph-lock-key me-2"></i>
                             Đổi mật khẩu
                         </a>
-                        <a href="{{route('client.two-factor')}}" class="dropdown-item">
+                        <a href="{{ route('client.two-factor') }}" class="dropdown-item">
                             <i class="ph-key me-2"></i>
                             Xác thực 2 yếu tố
                         </a>
                         <div class="dropdown-divider"></div>
 
-                        <form action="{{route('handleLogout')}}" method="POST">
+                        <form action="{{ route('handleLogout') }}" method="POST">
                             @csrf
                             <button type="submit" class="dropdown-item">
                                 <i class="ph-sign-out me-2"></i>
@@ -83,9 +112,10 @@
                 </li>
             @else
                 <li class="nav-item nav-item-dropdown-lg dropdown ms-lg-2">
-                    <a href="{{route('login')}}" class="navbar-nav-link align-items-center rounded-pill p-1">
+                    <a href="{{ route('login') }}" class="navbar-nav-link align-items-center rounded-pill p-1">
                         <div class="status-indicator-container">
-                            <img src="{{ asset('assets\images\default-user-image.png')}}" class="w-32px h-32px rounded-pill" alt="">
+                            <img src="{{ asset('assets\images\default-user-image.png') }}"
+                                class="w-32px h-32px rounded-pill" alt="">
                         </div>
                         <span class="d-none d-lg-inline-block mx-lg-2">Đăng nhập</span>
                     </a>

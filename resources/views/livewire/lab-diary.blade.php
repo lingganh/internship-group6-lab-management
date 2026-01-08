@@ -126,12 +126,13 @@
                                                     {{ $item->start->format('d/m/Y') }}
                                                 </div>
                                                 <div class="small text-muted">
-                                                    {{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}
+                                                    {{ $item->start->format('H:i') }} –
+                                                    {{ $item->end->format('H:i') }}
                                                 </div>
                                             </td>
 
                                             <td data-label="Trạng thái" class="text-center-desktop">
-                                                @if($item->status === 'pending')
+                                                @if ($item->status === 'pending')
                                                     <span class="badge diary-pill diary-pill-pending">
                                                         Chờ duyệt
                                                     </span>

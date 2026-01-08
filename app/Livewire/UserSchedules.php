@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\LabEvent;
 use Carbon\Carbon;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 
 class UserSchedules extends Component
@@ -16,8 +17,16 @@ class UserSchedules extends Component
     public $filterDate = '';
     public $selectedSchedule = null;
     public $comment = '';
+    public ?int $selectedEventId = null;
+    public string $feedbackModalKey = '';
+    public bool $feedbackLocked = false;
+
+    public ?LabEvent $selectedEvent = null;
 
     protected $paginationTheme = 'bootstrap';
+
+    // feedback tạo Phản hồi thành công
+    public ?string $feedbackSuccessMessage = null;
 
     protected $listeners = [
         // không cần gì ở đây
@@ -71,25 +80,33 @@ class UserSchedules extends Component
         $this->dispatch('open-modal', id: 'detailModal');
     }
 
-    public function openFeedback($id): void
+    public function openFeedback(int $eventId): void
     {
-        $event = LabEvent::find($id);
+        $event = LabEvent::with('lab')->findOrFail($eventId);
 
-        if (! $event) {
-            $this->dispatch('toaster', 'Không tìm thấy lịch');
-            return;
-        }
+        $this->selectedEventId = $event->id;
+        $this->selectedEvent   = $event;
 
-        if (! $this->canFeedback($event)) {
+        $locked = filled($event->feedback);
+
+        if (! $locked && ! $this->canFeedback($event)) {
             $this->dispatch('toaster', 'Chưa thể phản hồi');
             return;
         }
 
-        $this->selectedSchedule = $event;
-        $this->comment = '';
+        $this->feedbackSuccessMessage = null;
 
+        // mở modal
         $this->dispatch('open-modal', id: 'feedbackModal');
+
+        // load dữ liệu cho component con
+        $this->dispatch('initIssueFromEvent', eventId: $event->id);
+
+        if ($locked) {
+            $this->dispatch('toaster', 'Lịch này bạn đã gửi phản hồi rồi. Bạn chỉ xem lại thôi.');
+        }
     }
+
 
     public function cancelSchedule($id): void
     {
@@ -135,6 +152,13 @@ class UserSchedules extends Component
             return;
         }
 
+        if (! $this->selectedEventId) {
+            $this->dispatch('toaster', 'Không tìm thấy lịch');
+            return;
+        }
+
+        $this->dispatch('submitIssueRequest');
+
         $this->validate([
             'comment' => 'required|string|min:3'
         ], [], [
@@ -150,5 +174,20 @@ class UserSchedules extends Component
 
         $this->dispatch('close-modal', id: 'feedbackModal');
         $this->reset('comment');
+    }
+
+    public function submitIssueRequest(): void
+    {
+        $this->dispatch('submitIssueRequest');
+    }
+
+    #[\Livewire\Attributes\On('issueRequestCreated')]
+    public function onIssueRequestCreated(int $requestId): void
+    {
+        $this->feedbackSuccessMessage = 'Đã gửi ý kiến phản hồi. Vui lòng chờ admin xử lý.';
+
+        $this->dispatch('toaster', 'Đã gửi phản hồi');
+
+        $this->dispatch('close-modal', id: 'feedbackModal');
     }
 }

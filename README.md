@@ -18,6 +18,8 @@
 	DB_USERNAME=username
 	DB_PASSWORD=password
 
+	REVERB_HOST=127.0.0.1
+
 ```
 
 3. Run
@@ -42,6 +44,8 @@
 
 ``` bash
 back-end
+	# 2 terminal
 	 php artisan serve
+	 php artisan reverb:start 
 	
 - Login with default admin account : admin and password: 123456aA@
