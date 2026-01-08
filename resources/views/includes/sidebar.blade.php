@@ -31,7 +31,7 @@
         <div class="sidebar-section">
             <ul class="nav nav-sidebar" data-nav-type="accordion">
                 <li class="nav-item">
-                    <a href="{{route('admin.dashboard')}}"
+                    <a href="{{route('admin.coming-soon')}}"
                        class="nav-link">
                         <i class="ph-house"></i>
                         <span>Dashboard</span>

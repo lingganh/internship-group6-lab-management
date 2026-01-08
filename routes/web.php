@@ -18,8 +18,7 @@ use App\Livewire\LabRegister;
 use App\Livewire\Admin\Lab\Index as LabIndex;
 use App\Livewire\Admin\Lab\Create as LabCreate;
 use App\Livewire\Admin\Lab\Edit as LabEdit;
-use App\Livewire\Admin\Equipment\Create;
-use App\Http\Controllers\admin\DashboardController;
+
 
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
@@ -61,11 +60,11 @@ Route::middleware('checkAuth')->group(function () {
 });
 
 Route::middleware('role:admin')->group(function () {
-    Route::prefix('admin')->group(callback: function () {
-        // Route::get('/', action: [DashboardController::class, 'render'])->name('admin.dashboard');
-         Route::get('/', function () {
+    Route::prefix('admin')->group(function () {
+        Route::get('/', function () {
             return view('pages.admin.dashboard');
         })->name('admin.dashboard');
+
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
             Route::get('/create', [UserController::class, 'create'])->name('admin.users.create');
@@ -91,15 +90,4 @@ Route::middleware('role:admin')->group(function () {
 
 
 
-Route::prefix('admin')->group(function () {
-    Route::get('/equipment', Index::class)->name('equipment.index');
-    Route::get('/equipment/create', Create::class)->name('equipment.create');
-    Route::get('/equipment/{id}/edit', Edit::class)->name('equipment.edit');
-
-    
-});
-
-
 Route::get('coming-soon', fn () => view('coming-soon'))->name('admin.coming-soon');
-
-
