@@ -8,6 +8,8 @@ use App\Models\Lab;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
+
 
 class Approval extends Component
 {
@@ -263,6 +265,13 @@ class Approval extends Component
  
     public function render()
     {
+         $now = Carbon::now();
+        LabEvent::where('status', 'approved')
+                ->where('end', '<', $now)
+                ->update(['status' => 'completed']);
+        $labs = Lab::select('code', 'name')->orderBy('name')->get();
+
+
         $schedules = LabEvent::with(['user', 'lab'])
             ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterUserId !== '', fn($q) => $q->where('user_id', $this->filterUserId))
