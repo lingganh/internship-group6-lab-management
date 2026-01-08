@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enums\Role as RoleEnum;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Notification;
 
 class User extends Authenticatable
 {
@@ -66,7 +68,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function role():BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
@@ -104,16 +106,16 @@ class User extends Authenticatable
 
     public function getRoleValueAttribute()
     {
-        if( $this->role->name === RoleEnum::Student->value ){
+        if ($this->role->name === RoleEnum::Student->value) {
             return  RoleEnum::Student->name;
         }
-        if( $this->role->name === RoleEnum::Admin->value ){
+        if ($this->role->name === RoleEnum::Admin->value) {
             return  RoleEnum::Admin->name;
         }
-        if( $this->role->name === RoleEnum::Officer->value ){
+        if ($this->role->name === RoleEnum::Officer->value) {
             return  RoleEnum::Officer->name;
         }
-        if( $this->role->name === RoleEnum::Teacher->value ){
+        if ($this->role->name === RoleEnum::Teacher->value) {
             return  RoleEnum::Teacher->name;
         }
         return RoleEnum::Student->name;
@@ -137,5 +139,11 @@ class User extends Authenticatable
 
 
         return '';
+    }
+
+    // user quan hệ với thông báo
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 }

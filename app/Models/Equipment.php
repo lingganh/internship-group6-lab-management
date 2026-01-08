@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Equipment extends Model
 {
+    use HasFactory;
+
+
 
     protected $table = 'equipment';
     protected $fillable  = [
-        'lab_id',
         'name',
         'code',
         'type',
@@ -19,7 +22,7 @@ class Equipment extends Model
         'notes',
     ];
     protected $casts = [
-        'purchased_date'=>'date',
+        'purchased_date' => 'date',
     ];
 
 

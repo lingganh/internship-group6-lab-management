@@ -51,6 +51,7 @@
 
 
 @livewireScripts
+@include('includes.admin_notifications')
 </body>
 
 </html>
