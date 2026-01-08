@@ -20,7 +20,7 @@ class Edit extends Component
     public $image;
     public $location;
     public $capacity;
-    public $facilities;
+
     public $oldImage;
 
     public function mount($id)
@@ -31,7 +31,6 @@ class Edit extends Component
         $this->status = $this->lab->status;
         $this->location = $this->lab->location;
         $this->capacity = $this->lab->capacity;
-        $this->facilities = $this->lab->facilities;
         $this->description = $this->lab->description;
         $this->oldImage = $this->lab->image_url;
     }
@@ -42,7 +41,6 @@ class Edit extends Component
         'description' => 'nullable',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable',
-        'facilities' => 'nullable|array',
         'image' => 'nullable|image|max:2048'
     ];
 
@@ -63,7 +61,6 @@ class Edit extends Component
             'description' => $this->description,
             'location' => $this->location,
             'capacity' => $this->capacity,
-            'facilities' => $this->facilities,
             'image_url' => $path
         ]);
 

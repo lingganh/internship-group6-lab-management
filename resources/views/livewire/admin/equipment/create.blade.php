@@ -91,7 +91,7 @@
                         </div>
 
                         <div class="row mt-3">
-                            <div class="col-4">
+                            <div class="col-6">
                                 <label for="quantity" class="col-form-label">
                                     Số lượng:
                                 </label>
@@ -100,8 +100,7 @@
                                 <label class="validation-error-label text-danger">{{ $message }}</label>
                                 @enderror
                             </div>
-
-                            <div class="col-4">
+                            <div class="col-6">
                                 <label for="actual_quantity" class="col-form-label">
                                     Số lượng thực:
                                 </label>
@@ -112,7 +111,7 @@
                             </div>
                         </div>
 
-                        <div class="row mt-3">
+                       {{-- <div class="row mt-3">
                             <div class="col-6">
                                 <label for="status" class="col-form-label">
                                     Trạng thái:
@@ -127,8 +126,8 @@
                                 @error('status')
                                 <label class="validation-error-label text-danger">{{ $message }}</label>
                                 @enderror
-                            </div>
-
+                            </div>--}}
+                            <br>
                             <div class="col-6">
                                 <label for="purchased_date" class="col-form-label">
                                     Ngày thêm:
@@ -138,7 +137,7 @@
                                 <label class="validation-error-label text-danger">{{ $message }}</label>
                                 @enderror
                             </div>
-                        </div>
+
 
                         <div class="row mt-3">
                             <div class="col-12">
