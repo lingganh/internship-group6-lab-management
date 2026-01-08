@@ -34,7 +34,7 @@
             </div>
         </div>
     </x-slot>
-
+<br>
     <div class="row">
         <div class="col-md-9 col-12">
             <div class="card">
@@ -90,7 +90,7 @@
                     </div>
 
 
-                    <div class="mb-3">
+                 {{--   <div class="mb-3">
                         <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
                         <select wire:model.lazy="status" id="status"
                             class="form-select @error('status') is-invalid @enderror">
@@ -99,10 +99,8 @@
                             <option value="maintenance">Maintenance</option>
                             <option value="broken">Broken</option>
                         </select>
-                        @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                        @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>--}}
 
                     <div class="mb-3">
                         <label for="purchased_date" class="form-label">Ngày sửa</label>

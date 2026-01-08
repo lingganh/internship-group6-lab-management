@@ -106,9 +106,9 @@
                                         <a href="{{ route('admin.lab.edit', $lab->id) }}" class="dropdown-item">
                                             <i class="ph-note-pencil px-1"></i> Chỉnh sửa
                                         </a>
-                                        <a href="#"
-                                           wire:click.prevent="openDeleteModal({{ $lab->id }})" class="dropdown-item">
-                                            <i class="ph-trash px-1"></i> Xóa
+                                        <a type="button" @click="$wire.openDeleteModal({{ $lab->id }})" href="#" class="dropdown-item">
+                                            <i class="ph-trash px-1"></i>
+                                            Xóa
                                         </a>
 
                                     </div>
@@ -116,7 +116,7 @@
                             </td>
                         </tr>
                     @empty
-                        <x-table-empty :colspan="9" />
+                        <x-table-empty :colspan="7" />
                     @endforelse
 
 
@@ -126,5 +126,3 @@
         </div>
     </div>
 </div>
-
-

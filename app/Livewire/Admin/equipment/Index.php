@@ -11,15 +11,16 @@ use Illuminate\Support\Facades\DB;
 
 class Index extends Component
 {
-    use  WithPagination;
+    use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
-
+    protected $listeners = ['confirmDeleteEquipment']; // Thêm dòng này
 
     public $search = '';
     public $lab = '';
     public $status = '';
     public $perPage = 10;
+    public $deleteId;
 
     public function updatingSearch()
     {
@@ -41,8 +42,6 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public $deleteId;
-
     public function openDeleteModal($id)
     {
         $this->deleteId = $id;
@@ -50,38 +49,43 @@ class Index extends Component
         $this->dispatch(
             'openModel',
             type: 'warning',
-            title: 'Bạn có chắc chắn muốn xóa thiết bị này không?',
+            title: 'Bạn có muốn xóa thiết bị này không?',
             confirmEvent: 'confirmDeleteEquipment'
         );
     }
 
-    public function delete()
+    public function confirmDeleteEquipment()  
     {
         $eq = Equipment::with('labItems')->find($this->deleteId);
 
-        if (! $eq) return;
+        if (!$eq) {
+            $this->dispatch(
+                'alert',
+                type: 'error',
+                message: 'Thiết bị không tồn tại!'
+            );
+            return;
+        }
 
         DB::transaction(function () use ($eq) {
-            $eq->labItems()->delete();
-            $eq->delete();
+            $eq->labItems()->delete(); // Xóa các mục trong lab trước
+            $eq->delete(); // Xóa thiết bị
         });
 
         $this->dispatch(
-            'notify',
+            'alert',
             type: 'success',
-            message: 'Xoá thiết bị thành công!'
+            message: 'Xóa thiết bị thành công!'
         );
+
+        $this->reset('deleteId');
     }
-
-
-
 
     public function render()
     {
         $search = trim(mb_strtolower($this->search));
 
-        $statusMap =
-            [
+        $statusMap = [
             'sẵn sàng sử dụng' => 'available',
             'đang sử dụng' => 'in_use',
             'bảo trì' => 'maintenance',
@@ -90,7 +94,6 @@ class Index extends Component
 
         $items = LabEquipmentItem::query()
             ->with(['lab', 'equipment'])
-
             ->when($search, function($q) use ($search, $statusMap) {
                 $q->where(function($sub) use ($search, $statusMap) {
                     $sub->whereHas('equipment', fn($eq) => $eq
@@ -107,13 +110,8 @@ class Index extends Component
                     }
                 });
             })
-
-
             ->when($this->status, fn($q) => $q->whereHas('equipment', fn($eq) => $eq->where('status', $this->status)))
-
-
             ->when($this->lab, fn($q) => $q->where('lab_id', $this->lab))
-
             ->latest()
             ->paginate($this->perPage);
 

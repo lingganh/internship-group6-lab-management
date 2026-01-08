@@ -62,6 +62,7 @@
                                            class="form-control @error('code') is-invalid @enderror">
                                     @error('code') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
+                                <br><br><br><br>
                                 <div class="mb-6">
                                     <label class="form-label">Vị trí</label>
                                     <input type="text"
@@ -69,11 +70,13 @@
                                            class="form-control @error('location') is-invalid @enderror">
                                     @error('location') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
+                                <br><br><br><br>
                                 <div class="mb-6">
                                     <label class="form-label">Mô tả</label>
                                     <textarea rows="3" wire:model.lazy="description" class="form-control @error('description') is-invalid @enderror"></textarea>
                                     @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
+                                <br><br><br><br><br><br>
                                 <div class="mb-6">
                                     <label class="form-label">Trạng thái</label>
                                     <select wire:model.lazy="status"
@@ -84,18 +87,13 @@
                                     </select>
                                     @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
+                                <br><br><br><br>
                                 <div class="mb-6">
                                     <label class="form-label">Sức chứa</label>
                                     <input type="number" wire:model.lazy="capacity" class="form-control @error('capacity') is-invalid @enderror">@error('capacity')
                                     <div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
-
-                                <div class="mb-6">
-                                    <label class="form-label">Tiện ích</label>
-                                    <input type="text" wire:model.lazy="facilities" class="form-control @error('facilities') is-invalid @enderror">@error('facilities')
-                                    <div class="invalid-feedback">{{ $message }}</div>@enderror
-                                </div>
-
+                                <br><br><br><br>
                                 <div class="mb-6">
                                     <label class="form-label">Ảnh minh họa</label>
                                     <input type="file" wire:model="image" class="form-control">

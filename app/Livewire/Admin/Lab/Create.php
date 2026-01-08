@@ -19,7 +19,7 @@ class Create extends Component
     public $location;
     public $description;
     public $capacity;
-    public $facilities;
+
     public $image;
 
     protected function rules()
@@ -28,9 +28,8 @@ class Create extends Component
             'name'=>'required|string|max:255',
             'code'=>'required|string|max:10|unique:labs,code',
             'location'=>'required|string|max:255',
-            'description'=>'required|string',
+            'description'=>'nullable|string',
             'capacity'=>'required|integer',
-            'facilities' => 'nullable|array',
             'status'=>'required|in:active,maintenance,locked',
             'image'=> 'nullable|image|max:2048',
         ];
@@ -48,10 +47,9 @@ class Create extends Component
             'name' => $this->name,
             'code' => $this->code,
             'status' => $this->status,
-            'description' => $this->description,
+            'description' => $this->description ?? null,
             'image_url' => $path,
             'capacity' => $this->capacity,
-            'facilities' => $this->facilities ?? null,
             'location' => $this->location,
             'created_by'  => auth()->id(),
         ]);
@@ -59,6 +57,13 @@ class Create extends Component
         session()->flash('success', 'Thêm phòng Lab thành công');
         return redirect()->route('admin.lab.index');
     }
+    protected $messages = [
+        'name.required'        => 'Tên phòng không được bỏ trống.',
+        'code.required'        => 'Mã phòng không được bỏ trống.',
+        'location.required'    => 'Địa điểm không được bỏ trống.',
+        'capacity.required'    => 'Sức chứa không được bỏ trống.',
+    ];
+
     public function render()
     {
         return view('livewire.admin.lab.create')
