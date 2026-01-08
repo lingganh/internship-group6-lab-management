@@ -30,11 +30,8 @@
                         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                             <div>
                                 <h4 class="mb-1 fw-semibold text-dark">Danh sách lịch</h4>
-                                {{-- <div class="text-muted small">
-                                    Quản lý các yêu cầu đăng ký phòng lab.
-                                </div> --}}
                             </div>
-                            <div class="d-flex align-items-center gap-2"> 
+                            <div class="d-flex align-items-center gap-2">
                                 <span class="badge approval-badge-warn">
                                     <span class="me-1">Đang chờ</span>
                                     <span class="fw-bold">{{ $pendingCount }}</span>
@@ -44,7 +41,6 @@
                     </div>
 
                     <div class="card-body pt-3">
-                        {{-- FILTERS --}}
                         <div class="approval-filters mb-3">
                             <div class="row g-2 g-md-3 align-items-end">
                                 <div class="col-12 col-md-3">
@@ -87,7 +83,6 @@
                             </div>
                         </div>
 
-                        {{-- TABLE --}}
                         <div class="approval-table-wrap">
                             <table class="table align-middle mb-0 approval-table">
                                 <thead>
@@ -95,7 +90,6 @@
                                         <th>Sự kiện</th>
                                         <th>Mã phòng</th>
                                         <th>Người đăng ký</th>
-                                        {{-- <th>Lý do</th> --}}
                                         <th>Thời gian</th>
                                         <th class="text-center">Trạng thái</th>
                                         <th class="text-center">Hành động</th>
@@ -104,7 +98,6 @@
                                 <tbody>
                                     @forelse($schedules as $item)
                                         <tr>
-                                            {{-- Sự kiện --}}
                                             <td data-label="Sự kiện">
                                                 <div class="fw-semibold text-dark text-wrap-mobile">
                                                     {{ $item->title }}
@@ -114,7 +107,6 @@
                                                 </div>
                                             </td>
 
-                                            {{-- Mã phòng --}}
                                             <td data-label="Mã phòng">
                                                 <div class="fw-semibold text-dark">
                                                     {{ $item->lab_code ?? '' }}
@@ -124,7 +116,6 @@
                                                 </div>
                                             </td>
 
-                                            {{-- Người đăng ký --}}
                                             <td data-label="Người đăng ký">
                                                 <div class="fw-semibold text-dark">
                                                     {{ $item->user?->full_name ?? '' }}
@@ -134,14 +125,6 @@
                                                 </div>
                                             </td>
 
-                                            {{-- Lý do --}}
-                                            {{-- <td data-label="Lý do">
-                                                <div class="small text-muted text-wrap-mobile">
-                                                    {{ $item->reason ? \Illuminate\Support\Str::limit($item->reason, 70) : '' }}
-                                                </div>
-                                            </td> --}}
-
-                                            {{-- Thời gian --}}
                                             <td data-label="Thời gian">
                                                 <div class="fw-semibold text-dark">
                                                     {{ optional($item->start)->format('d/m/Y') }}
@@ -153,7 +136,6 @@
                                                 </div>
                                             </td>
 
-                                            {{-- Trạng thái --}}
                                             <td data-label="Trạng thái" class="text-center-desktop">
                                                 @if($item->status === 'pending')
                                                     <span class="badge approval-pill approval-pill-pending">
@@ -174,7 +156,6 @@
                                                 @endif
                                             </td>
 
-                                            {{-- Hành động: menu 3 chấm --}}
                                             <td class="text-center action-cell" data-label="Hành động">
                                                 <div class="dropdown approval-action-dropdown">
                                                     <button
@@ -245,7 +226,6 @@
                 </div>
             </div>
 
-            {{-- MODAL CHI TIẾT --}}
             <div wire:ignore.self
                  class="modal fade"
                  id="modalDetails"
@@ -356,7 +336,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Mô tả --}}
                                     <div class="col-12">
                                         <div class="approval-info">
                                             <div class="small text-muted mb-1">
@@ -368,8 +347,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Lý do --}}
-                                    {{-- Lý do – chỉ hiện khi lịch bị từ chối --}}
                                     @if($selectedSchedule && $selectedSchedule->status === 'cancelled')
                                         <div class="col-12">
                                             <div class="approval-info">
@@ -383,9 +360,6 @@
                                         </div>
                                     @endif
 
-                                     <!-- #region -->
-
-                                    {{-- FILE ĐÍNH KÈM --}}
                                     <div class="col-12">
                                         <div class="approval-info">
                                             <div class="small text-muted mb-1">
@@ -447,7 +421,6 @@
                 </div>
             </div>
 
-            {{-- MODAL TỪ CHỐI / XÓA --}}
             <div wire:ignore.self
                  class="modal fade"
                  id="modalConfirm"
@@ -504,7 +477,6 @@
                 </div>
             </div>
 
-            {{-- MODAL NHẬP MÃ PHÒNG --}}
             <div wire:ignore.self
                  class="modal fade"
                  id="modalPassword"
@@ -551,276 +523,341 @@
                 </div>
             </div>
 
-        </div> {{-- /.row --}}
-    </div> {{-- /.container-fluid --}}
-<style>
-    .approval-page {
-        --ap-bg: #f8fafc;
-        --ap-card: #ffffff;
-        --ap-text: #0f172a;
-        --ap-muted: #64748b;
-        --ap-border: #e5e7eb;
-        --ap-radius: 14px;
-        --ap-primary: #2563eb;
-        --ap-primary-soft: #eaf1ff;
-        --ap-success: #16a34a;
-        --ap-success-soft: #e9f9ef;
-        --ap-danger: #dc2626;
-        --ap-danger-soft: #fee2e2;
-        --ap-warn: #f59e0b;
-        --ap-warn-soft: #fff3db;
-        background: var(--ap-bg);
-    }
+            <div wire:ignore.self
+                 class="modal fade"
+                 id="modalConflict"
+                 tabindex="-1"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 approval-modal">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-semibold text-danger">
+                                ⚠ Trùng lịch với 1 lịch đã duyệt
+                            </h5>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-2 text-dark fw-semibold">
+                                Khung giờ này đã có lịch khác được phê duyệt.
+                            </p>
 
-    .approval-card {
-        border-radius: var(--ap-radius);
-        background: var(--ap-card);
-        border: 1px solid var(--ap-border);
-        box-shadow: none;
-    }
+                            @if($conflictSchedule)
+                                <div class="approval-info mb-3">
+                                    <div class="small text-muted mb-1">
+                                        Lịch đang trùng
+                                    </div>
+                                    <div class="fw-semibold text-dark">
+                                        {{ $conflictSchedule->title }}
+                                    </div>
+                                    <div class="small text-muted">
+                                        Phòng:
+                                        {{ $conflictSchedule->lab?->name ?? 'N/A' }}
+                                        ({{ $conflictSchedule->lab_code ?? '-' }})
+                                    </div>
+                                    <div class="small text-muted mt-1">
+                                        Thời gian:
+                                        {{ optional($conflictSchedule->start)->format('H:i d/m/Y') }}
+                                        –
+                                        {{ optional($conflictSchedule->end)->format('H:i d/m/Y') }}
+                                    </div>
+                                    <div class="small text-muted mt-1">
+                                        Người đăng ký:
+                                        {{ $conflictSchedule->user?->full_name ?? 'N/A' }}
+                                    </div>
+                                </div>
+                            @endif
 
-    .approval-badge-warn {
-        background: var(--ap-warn-soft);
-        color: #7a4b00;
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-weight: 600;
-        border: 1px solid rgba(245, 158, 11, .22);
-    }
+                            <p class="text-muted mb-0">
+                                Bạn có chắc muốn <strong> phê duyệt</strong> và tiếp tục nhập mã phòng?
+                            </p>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button"
+                                    class="btn approval-btn approval-btn-ghost"
+                                    data-bs-dismiss="modal">
+                                Hủy
+                            </button>
+                            <button type="button"
+                                    wire:click="forceApprove"
+                                    class="btn approval-btn approval-btn-success">
+                                Vẫn phê duyệt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    .approval-filters {
-        background: #fff;
-        border: 1px solid var(--ap-border);
-        border-radius: 12px;
-        padding: 12px;
-    }
+        </div>
+    </div>
 
-    .approval-control {
-        border: 1px solid var(--ap-border) !important;
-        border-radius: 8px !important;
-        padding: 8px 10px !important;
-        font-size: 0.9rem;
-    }
-
-    /* 👉 SỬA Ở ĐÂY: bỏ overflow: hidden */
-    .approval-table-wrap {
-        border: 1px solid var(--ap-border);
-        border-radius: 12px;
-        background: #fff;
-        overflow-x: auto;   /* cho scroll ngang khi cần */
-        overflow-y: visible; /* để dropdown không bị cắt */
-        position: relative;
-    }
-
-    .approval-table thead th {
-        background: #f9fafb;
-        color: #374151;
-        font-weight: 600;
-        padding: 12px;
-        border-bottom: 1px solid var(--ap-border);
-    }
-
-    .approval-table tbody td {
-        padding: 12px;
-        border-top: 1px solid var(--ap-border);
-        vertical-align: middle;
-        font-size: 0.9rem;
-    }
-
-    .approval-pill {
-        border-radius: 999px;
-        padding: 4px 10px;
-        font-weight: 600;
-        font-size: .78rem;
-    }
-
-    .approval-pill-pending {
-        background: var(--ap-warn-soft);
-        color: #7a4b00;
-    }
-
-    .approval-pill-approved {
-        background: var(--ap-success-soft);
-        color: #166534;
-    }
-
-    .approval-pill-cancelled {
-        background: var(--ap-danger-soft);
-        color: #b91c1c;
-    }
-
-    .approval-btn {
-        border-radius: 8px;
-        padding: 7px 14px;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .approval-btn-success {
-        background: var(--ap-success);
-        color: #fff;
-        border: 1px solid var(--ap-success);
-    }
-
-    .approval-btn-danger {
-        background: var(--ap-danger-soft);
-        color: var(--ap-danger);
-        border: 1px solid #fecaca;
-    }
-
-    .approval-btn-ghost {
-        background: #fff;
-        border: 1px solid var(--ap-border);
-        color: var(--ap-muted);
-    }
-
-    .approval-info {
-        border: 1px solid var(--ap-border);
-        border-radius: 10px;
-        padding: 10px;
-        background: #fff;
-    }
-
-    .approval-desc {
-        background: #f8fafc;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        white-space: pre-line;
-        border: 1px solid var(--ap-border);
-    }
-
-    .approval-files {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 6px;
-    }
-
-    .approval-file {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 6px 8px;
-        border-radius: 8px;
-        border: 1px solid var(--ap-border);
-        text-decoration: none;
-        color: inherit;
-        background: #fff;
-    }
-
-    .approval-file-ic {
-        background: var(--ap-primary-soft);
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-    }
-
-    .text-wrap-mobile {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 260px;
-    }
-
-    .text-center-desktop {
-        text-align: center;
-    }
-
-    .action-cell {
-        text-align: center;
-    }
-
-    .approval-action-dropdown {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        position: relative; /* giúp dropdown bám đúng chỗ */
-    }
-
-    .approval-action-toggle {
-        padding: 0;
-        line-height: 1;
-        color: #2563eb;
-    }
-
-    .approval-action-toggle i {
-        font-size: 18px;
-    }
-
-    .approval-action-dropdown .dropdown-menu {
-        border-radius: 8px;
-        font-size: 0.86rem;
-        min-width: 140px;
-    }
-
-    @media (max-width: 991.98px) {
-        .approval-table,
-        .approval-table thead,
-        .approval-table tbody,
-        .approval-table tr,
-        .approval-table td {
-            display: block;
-            width: 100%;
+    <style>
+        .approval-page {
+            --ap-bg: #f8fafc;
+            --ap-card: #ffffff;
+            --ap-text: #0f172a;
+            --ap-muted: #64748b;
+            --ap-border: #e5e7eb;
+            --ap-radius: 14px;
+            --ap-primary: #2563eb;
+            --ap-primary-soft: #eaf1ff;
+            --ap-success: #16a34a;
+            --ap-success-soft: #e9f9ef;
+            --ap-danger: #dc2626;
+            --ap-danger-soft: #fee2e2;
+            --ap-warn: #f59e0b;
+            --ap-warn-soft: #fff3db;
+            background: var(--ap-bg);
         }
 
-        .approval-table thead {
-            display: none;
+        .approval-card {
+            border-radius: var(--ap-radius);
+            background: var(--ap-card);
+            border: 1px solid var(--ap-border);
+            box-shadow: none;
         }
 
-        .approval-table tbody tr {
-            margin-bottom: 1.2rem;
+        .approval-badge-warn {
+            background: var(--ap-warn-soft);
+            color: #7a4b00;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-weight: 600;
+            border: 1px solid rgba(245, 158, 11, .22);
+        }
+
+        .approval-filters {
+            background: #fff;
+            border: 1px solid var(--ap-border);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .approval-control {
             border: 1px solid var(--ap-border) !important;
+            border-radius: 8px !important;
+            padding: 8px 10px !important;
+            font-size: 0.9rem;
+        }
+
+        .approval-table-wrap {
+            border: 1px solid var(--ap-border);
             border-radius: 12px;
             background: #fff;
+            overflow-x: auto;
+            overflow-y: visible;
             position: relative;
         }
 
-        .approval-table tbody td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: right;
-            padding: 10px 14px !important;
-            border-bottom: 1px solid var(--ap-border) !important;
-            border-top: none !important;
-        }
-
-        .approval-table tbody td:last-child {
-            border-bottom: none !important;
-            background: #f8fbff;
-        }
-
-        .approval-table td::before {
-            content: attr(data-label);
-            float: left;
+        .approval-table thead th {
+            background: #f9fafb;
+            color: #374151;
             font-weight: 600;
+            padding: 12px;
+            border-bottom: 1px solid var(--ap-border);
+        }
+
+        .approval-table tbody td {
+            padding: 12px;
+            border-top: 1px solid var(--ap-border);
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .approval-pill {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-weight: 600;
+            font-size: .78rem;
+        }
+
+        .approval-pill-pending {
+            background: var(--ap-warn-soft);
+            color: #7a4b00;
+        }
+
+        .approval-pill-approved {
+            background: var(--ap-success-soft);
+            color: #166534;
+        }
+
+        .approval-pill-cancelled {
+            background: var(--ap-danger-soft);
+            color: #b91c1c;
+        }
+
+        .approval-btn {
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .approval-btn-success {
+            background: var(--ap-success);
+            color: #fff;
+            border: 1px solid var(--ap-success);
+        }
+
+        .approval-btn-danger {
+            background: var(--ap-danger-soft);
+            color: var(--ap-danger);
+            border: 1px solid #fecaca;
+        }
+
+        .approval-btn-ghost {
+            background: #fff;
+            border: 1px solid var(--ap-border);
             color: var(--ap-muted);
-            font-size: 0.75rem;
-            text-transform: uppercase;
+        }
+
+        .approval-info {
+            border: 1px solid var(--ap-border);
+            border-radius: 10px;
+            padding: 10px;
+            background: #fff;
+        }
+
+        .approval-desc {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: pre-line;
+            border: 1px solid var(--ap-border);
+        }
+
+        .approval-files {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .approval-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid var(--ap-border);
+            text-decoration: none;
+            color: inherit;
+            background: #fff;
+        }
+
+        .approval-file-ic {
+            background: var(--ap-primary-soft);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
         }
 
         .text-wrap-mobile {
-            white-space: normal !important;
-            text-align: right;
-            max-width: 100% !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
         }
 
-        .approval-table td[data-label="Sự kiện"] {
-            background: var(--ap-primary-soft);
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
+        .text-center-desktop {
+            text-align: center;
         }
 
-        .approval-table td[data-label="Sự kiện"]::before {
-            margin-bottom: 4px;
+        .action-cell {
+            text-align: center;
         }
-    }
-</style>
 
+        .approval-action-dropdown {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .approval-action-toggle {
+            padding: 0;
+            line-height: 1;
+            color: #2563eb;
+        }
+
+        .approval-action-toggle i {
+            font-size: 18px;
+        }
+
+        .approval-action-dropdown .dropdown-menu {
+            border-radius: 8px;
+            font-size: 0.86rem;
+            min-width: 140px;
+        }
+
+        @media (max-width: 991.98px) {
+            .approval-table,
+            .approval-table thead,
+            .approval-table tbody,
+            .approval-table tr,
+            .approval-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .approval-table thead {
+                display: none;
+            }
+
+            .approval-table tbody tr {
+                margin-bottom: 1.2rem;
+                border: 1px solid var(--ap-border) !important;
+                border-radius: 12px;
+                background: #fff;
+                position: relative;
+            }
+
+            .approval-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                padding: 10px 14px !important;
+                border-bottom: 1px solid var(--ap-border) !important;
+                border-top: none !important;
+            }
+
+            .approval-table tbody td:last-child {
+                border-bottom: none !important;
+                background: #f8fbff;
+            }
+
+            .approval-table td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 600;
+                color: #64748b;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+
+            .text-wrap-mobile {
+                white-space: normal !important;
+                text-align: right;
+                max-width: 100% !important;
+            }
+
+            .approval-table td[data-label="Sự kiện"] {
+                background: var(--ap-primary-soft);
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .approval-table td[data-label="Sự kiện"]::before {
+                margin-bottom: 4px;
+            }
+        }
+    </style>
 
     <script>
         function apGetModal(id) {
@@ -851,6 +888,14 @@
 
         window.addEventListener('close-password-modal', () =>
             bootstrap.Modal.getInstance(document.getElementById('modalPassword'))?.hide()
+        );
+
+        window.addEventListener('open-conflict-modal', () =>
+            apGetModal('modalConflict')?.show()
+        );
+
+        window.addEventListener('close-conflict-modal', () =>
+            bootstrap.Modal.getInstance(document.getElementById('modalConflict'))?.hide()
         );
     </script>
 </div>
