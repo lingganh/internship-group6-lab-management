@@ -13,6 +13,7 @@
         @include('pages.client.equipment.issues.issues-block', [
             'equipmentId' => $equipmentId,
             'issues' => $issues,
+            'labItems' => $labItems,
         ])
     </div>
 </x-admin-layout>

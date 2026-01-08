@@ -60,6 +60,22 @@
                                                 Tạo {{ $issue->created_at->diffForHumans() }}
                                             @endif
                                         </div>
+                                        @php
+                                            $req = $issue->requestItem?->request;
+                                            $lab = $req?->labEvent?->lab ?? $req?->lab;
+
+                                            // fallback: nếu ticket cũ không đi từ phiếu, mà thiết bị chỉ thuộc 1 lab
+                                            if (!$lab && isset($labItems) && $labItems->count() === 1) {
+                                                $lab = $labItems->first()?->lab;
+                                            }
+                                        @endphp
+
+                                        @if ($lab)
+                                            <div class="small text-muted">
+                                                Phòng:
+                                                {{ $lab->name ?? 'Lab #' . $lab->id }}{{ $lab->code ? ' (' . $lab->code . ')' : '' }}
+                                            </div>
+                                        @endif
 
 
                                     </div>
@@ -100,6 +116,11 @@
                                 <p class="mt-2 mb-1">
                                     {{ $issue->description }}
                                 </p>
+
+                                {{-- Số lượng hỏng --}}
+                                <div class="small text-muted mt-1">
+                                    Số lượng hỏng: <span class="fw-semibold">{{ $issue->broken_quantity ?? 1 }}</span>
+                                </div>
 
                                 {{-- Ảnh đính kèm --}}
                                 @if (is_array($issue->images) && count($issue->images))
@@ -284,7 +305,8 @@
 </div>
 
 {{-- Model tạo báo hỏng --}}
-<div class="modal fade" id="createIssueModal" tabindex="-1" aria-labelledby="createIssueModalLabel" aria-hidden="true">
+<div class="modal fade" id="createIssueModal" tabindex="-1" aria-labelledby="createIssueModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form action="{{ route('client.equipment.issues.store', ['equipment' => $equipmentId]) }}" method="POST"
@@ -298,6 +320,7 @@
                 </div>
 
                 <div class="modal-body">
+
                     {{-- Hiển thị lỗi validate --}}
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -310,6 +333,70 @@
                     @endif
 
 
+                    @php
+                        $labItems = $labItems ?? collect();
+                        $first = $labItems->first();
+                        $defaultActual = $first ? max(0, (int) $first->quantity - (int) $first->broken_quantity) : 0;
+                    @endphp
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Phòng/Lab <span class="text-danger">*</span></label>
+                            <select name="lab_id" id="lab_id_select"
+                                class="form-select @error('lab_id') is-invalid @enderror" required>
+                                @foreach ($labItems as $li)
+                                    @php
+                                        $liActual = max(0, (int) $li->quantity - (int) $li->broken_quantity);
+                                    @endphp
+
+                                    <option value="{{ $li->lab_id }}" data-actual="{{ $liActual }}"
+                                        {{ (int) old('lab_id', $first?->lab_id) === (int) $li->lab_id ? 'selected' : '' }}>
+                                        {{ $li->lab->name ?? 'Lab #' . $li->lab_id }} ({{ $li->lab->code ?? '' }}) —
+                                        Thực: {{ $liActual }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+                            @error('lab_id')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Số lượng thực</label>
+                            <input id="actual_qty" class="form-control" value="{{ $defaultActual }}" disabled>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Số lượng hỏng <span class="text-danger">*</span></label>
+                            <input id="broken_qty" type="number" name="broken_quantity"
+                                class="form-control @error('broken_quantity') is-invalid @enderror" min="1"
+                                max="{{ max(1, $defaultActual) }}" value="{{ old('broken_quantity', 1) }}" required>
+                            @error('broken_quantity')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const sel = document.getElementById('lab_id_select');
+                            const actual = document.getElementById('actual_qty');
+                            const broken = document.getElementById('broken_qty');
+                            if (!sel || !actual || !broken) return;
+
+                            function sync() {
+                                const opt = sel.options[sel.selectedIndex];
+                                const a = parseInt(opt.dataset.actual || '0', 10);
+                                actual.value = a;
+                                broken.max = (a > 0 ? a : 1);
+                                if (parseInt(broken.value || '1', 10) > a && a > 0) broken.value = a;
+                            }
+
+                            sel.addEventListener('change', sync);
+                            sync();
+                        });
+                    </script>
 
                     <div class="mb-3">
                         <label class="form-label">Mô tả chi tiết<span class="text-danger">*</span></label>

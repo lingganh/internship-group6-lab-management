@@ -18,6 +18,7 @@ class EquipmentIssueRequestItem extends Model
     protected $fillable = [
         'request_id',
         'equipment_id',
+        'broken_quantity',
         'equipment_issue_id',
         'description',
         'images',

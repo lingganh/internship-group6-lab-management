@@ -1,58 +1,93 @@
+@php $locked = $alreadySubmitted; @endphp
 <div class="row">
     <div class="col-md-12 col-12">
         <div class="card">
             <div class="card-header bold">
                 <i class="ph-info"></i>
-                Thông tin báo hỏng
+                Thông tin
             </div>
             <div class="card-body">
-                {{-- Mô tả chung (bắt buộc) --}}
+                {{-- Feedback (bắt buộc) --}}
                 <div class="mb-3">
-                    <label class="form-label">Mô tả chung <span class="text-danger">*</span></label>
-                    <textarea class="form-control" rows="3" wire:model.live="commonDescription" placeholder="Nhập mô tả chung..."></textarea>
-                    @error('commonDescription')
+                    <label class="form-label">Feedback <span class="text-danger">*</span></label>
+
+                    <textarea class="form-control" rows="3" wire:model.live="feedback" @disabled($locked)
+                        placeholder="Nhập ý kiến phản hồi..."></textarea>
+
+                    @error('feedback')
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
+
+                    @if ($locked)
+                        <div class="small text-success mt-2">
+                            Bạn đã gửi phản hồi cho lịch này rồi.
+                        </div>
+                    @endif
                 </div>
 
-                {{-- Chọn thiết bị --}}
-                <div class="mb-3">
-                    <label class="form-label">Thiết bị <span class="text-danger">*</span></label>
-                    <select class="form-select" wire:model.live="selectedEquipmentId">
-                        <option value="">-- Chọn thiết bị --</option>
-                        @foreach ($this->selectableEquipmentOptions as $opt)
-                            <option value="{{ $opt['id'] }}">{{ $opt['label'] }}</option>
-                        @endforeach
-                    </select>
-                    @error('selectedEquipmentId')
-                        <div class="text-danger small mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                {{-- Chỉ hiện khi đã chọn thiết bị --}}
-                @if ($selectedEquipmentId)
+                @if (!$locked)
+                    {{-- Chọn thiết bị --}}
                     <div class="mb-3">
-                        <label class="form-label">Mô tả chi tiết <span class="text-danger">*</span></label>
-                        <textarea class="form-control" rows="3" wire:model.live="description" placeholder="Mô tả lỗi của thiết bị..."></textarea>
-                        @error('description')
+                        <label class="form-label">Thiết bị</label>
+
+                        <select class="form-select" wire:model.live="selectedEquipmentId">
+                            <option value="">-- Chọn thiết bị báo hỏng--</option>
+                            @foreach ($this->selectableEquipmentOptions as $opt)
+                                <option value="{{ $opt['id'] }}">{{ $opt['label'] }}</option>
+                            @endforeach
+                        </select>
+
+                        @error('selectedEquipmentId')
                             <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Ảnh minh hoạ (tối đa 2 ảnh)</label>
-                        <input type="file" class="form-control" wire:model="images" multiple accept="image/*">
-                        @error('images')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
-                        @error('images.*')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    {{-- Chỉ hiện khi đã chọn thiết bị --}}
+                    @if ($selectedEquipmentId)
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả chi tiết <span class="text-danger">*</span></label>
+                            <textarea class="form-control" rows="3" wire:model.live="description" placeholder="Mô tả lỗi của thiết bị..."></textarea>
 
-                    <button type="button" class="btn btn-success" wire:click="addItem">
-                        Thêm thiết bị vào danh sách báo hỏng
-                    </button>
+                            @error('description')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Số lượng thực</label>
+                                <input class="form-control" value="{{ $selectedActualQuantity ?? 0 }}" disabled>
+                                <div class="small text-muted mt-1">
+                                    Tổng: {{ $selectedTotalQuantity ?? 0 }} · Đang hỏng:
+                                    {{ $selectedBrokenQuantityCurrent ?? 0 }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Số lượng hỏng <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" min="1"
+                                    max="{{ $selectedActualQuantity ?? 1 }}" wire:model.live="brokenQuantity">
+                                @error('brokenQuantity')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ảnh minh hoạ (tối đa 2 ảnh)</label>
+                            <input type="file" class="form-control" wire:model="images" multiple accept="image/*">
+
+                            @error('images')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                            @error('images.*')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <button type="button" class="btn btn-success" wire:click="addItem">
+                            Thêm thiết bị vào danh sách báo hỏng
+                        </button>
+                    @endif
+                @else
                 @endif
 
             </div>
@@ -93,10 +128,12 @@
                                             </button>
 
                                             {{-- Xóa hàng --}}
-                                            <button type="button" class="btn btn-sm btn-danger"
-                                                wire:click="removeItem({{ $index }})">
-                                                <i class="ph-trash me-1"></i> Xóa
-                                            </button>
+                                            @if (!$alreadySubmitted)
+                                                <button type="button" class="btn btn-sm btn-danger"
+                                                    wire:click="removeItem({{ $index }})">
+                                                    <i class="ph-trash me-1"></i> Xóa
+                                                </button>
+                                            @endif
                                         </div>
                                     </td>
 

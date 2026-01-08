@@ -86,10 +86,22 @@
                                             <i class="bi bi-x-circle-fill"></i>
                                         </button>
 
+                                        @php
+                                            $canOpenFeedback = $this->canFeedback($item) || filled($item->feedback);
+
+                                            $canSendFeedback = $this->canFeedback($item);
+
+                                            $tooltip = $canSendFeedback
+                                                ? 'Gửi phản hồi'
+                                                : (filled($item->feedback)
+                                                    ? 'Xem phản hồi'
+                                                    : 'Chưa thể phản hồi');
+                                        @endphp
+
                                         <button type="button" wire:click="openFeedback({{ $item->id }})"
-                                            class="icon-pill icon-feedback {{ $canFeedback ? 'active-icon' : 'disabled-icon' }}"
-                                            @disabled(!$canFeedback) data-bs-toggle="tooltip"
-                                            title="{{ $canFeedback ? 'Gửi phản hồi' : 'Chưa thể phản hồi' }}">
+                                            class="icon-pill icon-feedback {{ $canOpenFeedback ? 'active-icon' : 'disabled-icon' }}"
+                                            @disabled(!$canOpenFeedback) data-bs-toggle="tooltip"
+                                            title="{{ $tooltip }}">
                                             <i class="bi bi-chat-dots-fill"></i>
                                         </button>
 
@@ -176,9 +188,19 @@
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
 
                         {{-- Nút này gọi sang parent, parent dispatch xuống child --}}
-                        <button type="button" class="btn btn-primary" wire:click="submitIssueRequest">
-                            Gửi
-                        </button>
+                        @php
+                            $locked = filled($selectedEvent?->feedback);
+                        @endphp
+
+                        @if ($locked)
+                            <button type="button" class="btn btn-secondary" disabled>Đã phản hồi</button>
+                        @else
+                            <button type="button" class="btn btn-primary"
+                                wire:click="$dispatch('submitIssueRequest')">Gửi</button>
+                        @endif
+
+
+
                     </div>
 
 

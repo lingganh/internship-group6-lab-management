@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\EquipmentIssueRequest;
 use App\Models\EquipmentIssueRequestItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use App\Models\LabEquipmentItem;
 
 class EquipmentIssueController extends Controller
 {
@@ -22,14 +24,25 @@ class EquipmentIssueController extends Controller
     public function index($equipmentId)
     {
         // Lấy danh sách báo hỏng theo thiết bị, mới nhất trước, phân trang
-        $issues = EquipmentIssue::with(['reporter', 'logs.changer']) // Theo người báo cáo
+        $issues = EquipmentIssue::with([
+            'reporter',
+            'logs.changer',
+            'requestItem.request.lab:id,name,code',
+            'requestItem.request.labEvent.lab:id,name,code',
+        ])
             ->where('equipment_id', $equipmentId)
             ->orderByDesc('created_at')
             ->paginate(5);
 
+        $labItems = LabEquipmentItem::with('lab:id,name,code')
+            ->where('equipment_id', $equipmentId)
+            ->get();
+
+
         return view('pages.client.equipment.issues.index', [
             'equipmentId' => $equipmentId,
             'issues'      => $issues,
+            'labItems'    => $labItems,
         ]);
     }
 
@@ -38,9 +51,11 @@ class EquipmentIssueController extends Controller
      */
     public function store(Request $request, $equipmentId)
     {
-        // 1) Validate: chỉ cần mô tả + ảnh
+        // 1) Validate
         $data = $request->validate([
+            'lab_id'          => 'required|exists:labs,id',
             'description' => 'required|string|min:3',
+            'broken_quantity' => 'required|integer|min:1',
             'images'      => 'nullable|array',
             'images.*'    => 'image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ]);
@@ -69,36 +84,69 @@ class EquipmentIssueController extends Controller
 
         $createdRequest = null;
 
-        DB::transaction(function () use ($user, $equipmentId, $data, $tempPaths, &$createdRequest) {
+        try {
+            DB::transaction(function () use ($user, $equipmentId, $data, $tempPaths, &$createdRequest) {
 
-            // 3) Tạo phiếu tổng (description = null)
-            $createdRequest = EquipmentIssueRequest::create([
-                'user_id'     => $user->id,
-                'description' => null,
-                'status'      => EquipmentIssueRequest::STATUS_PENDING,
-                'items_count' => 1,
-            ]);
+                $qtyBroken = (int) $data['broken_quantity'];
+                if ($qtyBroken < 1) $qtyBroken = 1;
 
-            // 4) Move ảnh từ temp -> folder theo request_id
-            $finalImages = [];
+                $labItem = LabEquipmentItem::where('lab_id', (int)$data['lab_id'])
+                    ->where('equipment_id', $equipmentId)
+                    ->lockForUpdate()
+                    ->first();
 
+                if (! $labItem) {
+                    throw ValidationException::withMessages([
+                        'lab_id' => 'Thiết bị không thuộc phòng/lab đã chọn.',
+                    ]);
+                }
+
+                $available = (int) $labItem->actual_quantity;
+                if ($qtyBroken > $available) {
+                    throw ValidationException::withMessages([
+                        'broken_quantity' => "Số lượng hỏng ({$qtyBroken}) không được vượt quá số lượng thực ({$available}).",
+                    ]);
+                }
+
+                // 3) Tạo phiếu tổng (description = null)
+                $createdRequest = EquipmentIssueRequest::create([
+                    'user_id'     => $user->id,
+                    'lab_event_id' => null,
+                    'lab_id'      => (int)$data['lab_id'],   // +
+                    'description' => null,
+                    'status'      => EquipmentIssueRequest::STATUS_PENDING,
+                    'items_count' => 1,
+                ]);
+
+                // 4) Move ảnh từ temp -> folder theo request_id
+                $finalImages = [];
+
+                foreach ($tempPaths as $tempPath) {
+                    $filename = basename($tempPath);
+                    $finalPath = "equipment_issue_requests/{$createdRequest->id}/{$filename}";
+
+                    Storage::disk('public')->move($tempPath, $finalPath);
+                    $finalImages[] = $finalPath; // lưu path 0 có "storage/" 
+                }
+
+                // 5) Tạo item chi tiết
+                EquipmentIssueRequestItem::create([
+                    'request_id'   => $createdRequest->id,
+                    'equipment_id' => $equipmentId,
+                    'broken_quantity' => $qtyBroken,
+                    'description'  => trim($data['description']),
+                    'images'       => $finalImages,
+                    'status'       => EquipmentIssueRequestItem::STATUS_PENDING,
+                ]);
+            });
+        } catch (ValidationException $e) {
+            // nếu đã upload temp, nên dọn để khỏi rác
             foreach ($tempPaths as $tempPath) {
-                $filename = basename($tempPath);
-                $finalPath = "equipment_issue_requests/{$createdRequest->id}/{$filename}";
-
-                Storage::disk('public')->move($tempPath, $finalPath);
-                $finalImages[] = $finalPath; // lưu path 0 có "storage/" 
+                if ($tempPath) Storage::disk('public')->delete($tempPath);
             }
 
-            // 5) Tạo item chi tiết
-            EquipmentIssueRequestItem::create([
-                'request_id'   => $createdRequest->id,
-                'equipment_id' => $equipmentId,
-                'description'  => trim($data['description']),
-                'images'       => $finalImages,
-                'status'       => EquipmentIssueRequestItem::STATUS_PENDING,
-            ]);
-        });
+            return back()->withErrors($e->errors())->withInput();
+        }
 
         if (! $createdRequest) {
             return redirect()->back()->with('error', 'Không thể tạo phiếu báo hỏng.');
@@ -150,6 +198,9 @@ class EquipmentIssueController extends Controller
         $message = $desc !== '' ? $desc : ('Có ' . ($req->items_count ?? 1) . ' thiết bị được báo hỏng.');
 
         foreach ($admins as $admin) {
+            // if ($sender && $admin->id === $sender->id) {
+            //     continue;
+            // }
             Notification::create([
                 'user_id' => $admin->id,
                 'type'    => 'equipment_issue_request',

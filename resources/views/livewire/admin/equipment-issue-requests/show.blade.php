@@ -1,4 +1,16 @@
 <div>
+    @if (session()->has('error'))
+        <div class="alert alert-danger mb-3">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if (session()->has('success'))
+        <div class="alert alert-success mb-3">
+            {{ session('success') }}
+        </div>
+    @endif
+
     {{-- Thông tin phiếu tổng --}}
     <div class="card mb-3">
         <div class="card-body d-flex justify-content-between">
@@ -107,7 +119,7 @@
                         @if (!blank($ev->description))
                             <div class="mt-2">
                                 <div class="text-muted fs-sm">Nội dung sử dụng</div>
-                                <div class="border rounded p-2 bg-light" style="white-space: pre-wrap;">
+                                <div class="border rounded p-3 bg-light">
                                     {{ $ev->description }}
                                 </div>
                             </div>
@@ -121,10 +133,10 @@
 
                 {{-- Cột phải: mô tả chung (feedback) --}}
                 <div class="col-lg-6">
-                    <div class="text-muted fs-sm mb-1">Mô tả chung</div>
+                    <div class="text-muted fs-sm mb-1">Phản hồi</div>
 
                     @if (!blank($request->description))
-                        <div class="border rounded p-3 bg-light" style="white-space: pre-wrap;">
+                        <div class="border rounded p-3 bg-light">
                             {{ $request->description }}
                         </div>
                     @else
@@ -149,6 +161,7 @@
                         <th>STT</th>
                         <th class="text-start">THIẾT BỊ</th>
                         <th>MÔ TẢ</th>
+                        <th>SL HỎNG</th>
                         <th>TRẠNG THÁI</th>
                         <th>TICKET</th>
                         <th class="text-center">HÀNH ĐỘNG</th>
@@ -172,7 +185,7 @@
                                     {{ \Illuminate\Support\Str::limit((string) $item->description, 50) }}
                                 </span>
                             </td>
-
+                            <td>{{ $item->broken_quantity ?? 1 }}</td>
                             <td>
                                 @php $st = $item->status; @endphp
                                 @if ($st === \App\Models\EquipmentIssueRequestItem::STATUS_PENDING)
@@ -189,9 +202,8 @@
                             {{-- Ticket đã sinh ra --}}
                             <td>
                                 @if ($item->equipment_issue_id)
-                                    {{-- Tạm thời cho admin nhảy sang trang "Báo hỏng & lịch sử xử lý" của thiết bị --}}
-                                    <a href="{{ route('client.equipment.issues.index', $item->equipment_id) }}"
-                                        target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('admin.equipment.edit', $item->equipment_id) }}" target="_blank"
+                                        class="btn btn-sm btn-outline-primary">
                                         <i class="ph-ticket me-1"></i> Xem phiếu
                                     </a>
                                 @else
@@ -217,14 +229,14 @@
                                         {{-- Chấp nhận --}}
                                         <button type="button" class="btn btn-sm btn-outline-success"
                                             wire:click="approveItem({{ $item->id }})"
-                                            onclick="confirm('Chấp nhận tạo báo hỏng cho thiết bị này?') || event.stopImmediatePropagation()">
+                                            wire:confirm="Chấp nhận tạo báo hỏng cho thiết bị này?">
                                             <i class="ph-check me-1"></i>Chấp nhận
                                         </button>
 
                                         {{-- Từ chối --}}
                                         <button type="button" class="btn btn-sm btn-outline-danger"
                                             wire:click="rejectItem({{ $item->id }})"
-                                            onclick="confirm('Từ chối báo hỏng cho thiết bị này?') || event.stopImmediatePropagation()">
+                                            wire:confirm="Từ chối báo hỏng cho thiết bị này?">
                                             <i class="ph-x me-1"></i>Từ chối
                                         </button>
                                     @else
@@ -270,6 +282,8 @@
                         <div>
                             {{ $selectedItem->description }}
                         </div>
+                        <p><strong>Số lượng hỏng:</strong> {{ $selectedItem->broken_quantity ?? 1 }}</p>
+
                         @php
                             $images = is_array($selectedItem->images)
                                 ? $selectedItem->images

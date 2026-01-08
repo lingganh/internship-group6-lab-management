@@ -5,20 +5,29 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Lab;
 use App\Models\Equipment;
+use App\Models\LabEquipmentItem;
 
 class EquipmentSeeder extends Seeder
 {
     public function run(): void
     {
-        if (Lab::query()->count() === 0) {
-            throw new \RuntimeException('Chưa có labs. Hãy chạy LabSeeder trước.');
-        }
+        $equipments = Equipment::factory()->count(40)->create();
 
-        // Ví dụ: mỗi lab 20 thiết bị
-        foreach (Lab::query()->pluck('id') as $labId) {
-            Equipment::factory()->count(20)->create([
-                'lab_id' => $labId,
-            ]);
+        $labs = Lab::query()->get();
+
+        foreach ($labs as $lab) {
+            $pickCount = min(10, $equipments->count());
+            if ($pickCount <= 0) continue;
+
+            $equipments->random($pickCount)->each(function ($eq) use ($lab) {
+                $qty = rand(5, 30);
+                $broken = rand(0, min(3, $qty));
+
+                LabEquipmentItem::updateOrCreate(
+                    ['lab_id' => $lab->id, 'equipment_id' => $eq->id],
+                    ['quantity' => $qty, 'broken_quantity' => $broken]
+                );
+            });
         }
     }
 }

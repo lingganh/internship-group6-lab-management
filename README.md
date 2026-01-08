@@ -46,6 +46,6 @@
 back-end
 	# 2 terminal
 	 php artisan serve
-	 php artisan reverb:start --debug
+	 php artisan reverb:start 
 	
 - Login with default admin account : admin and password: 123456aA@

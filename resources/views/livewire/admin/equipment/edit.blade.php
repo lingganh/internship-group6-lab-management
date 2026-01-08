@@ -7,7 +7,9 @@
                         Thiết bị - <span class="fw-normal">Danh sách thiết bị </span>
                     </h4>
 
-                    <a href="#page_header" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
+                    <a href="#page_header"
+                        class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                        data-bs-toggle="collapse">
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
@@ -17,12 +19,14 @@
             <div class="page-header-content d-lg-flex border-top">
                 <div class="d-flex">
                     <div class="breadcrumb py-2">
-                        <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
-                        <a href="{{route('equipment.index')}}" class="breadcrumb-item">Danh sách thiết bị </a>
+                        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item"><i class="ph-house"></i></a>
+                        <a href="{{ route('equipment.index') }}" class="breadcrumb-item">Danh sách thiết bị </a>
                         <span class="breadcrumb-item active">Chỉnh sửa thiết bị</span>
                     </div>
 
-                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
+                    <a href="#breadcrumb_elements"
+                        class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                        data-bs-toggle="collapse">
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
@@ -42,81 +46,116 @@
 
                     <div class="mb-3">
                         <label for="name" class="form-label">Tên thiết bị <span class="text-danger">*</span></label>
-                        <input wire:model.lazy="name" type="text" id="name" class="form-control @error('name') is-invalid @enderror">
-                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <input wire:model.lazy="name" type="text" id="name"
+                            class="form-control @error('name') is-invalid @enderror">
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
 
                     <div class="mb-3">
                         <label for="code" class="form-label">Mã thiết bị <span class="text-danger">*</span></label>
-                        <input wire:model.lazy="code" type="text" id="code" class="form-control @error('code') is-invalid @enderror">
-                        @error('code') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <input wire:model.lazy="code" type="text" id="code"
+                            class="form-control @error('code') is-invalid @enderror">
+                        @error('code')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
 
                     <div class="mb-3">
-                        <label for="type" class="form-label">Loại thiết bị <span class="text-danger">*</span></label>
-                        <input wire:model.lazy="type" type="text" id="type" class="form-control @error('type') is-invalid @enderror">
-                        @error('type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <label for="type" class="form-label">Loại thiết bị <span
+                                class="text-danger">*</span></label>
+                        <input wire:model.lazy="type" type="text" id="type"
+                            class="form-control @error('type') is-invalid @enderror">
+                        @error('type')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
 
                     <div class="mb-3">
                         <label for="lab_id" class="form-label">Phòng Lab <span class="text-danger">*</span></label>
-                        <select wire:model.lazy="lab_id" id="lab_id" class="form-select @error('lab_id') is-invalid @enderror">
+                        <select wire:model.lazy="lab_id" id="lab_id"
+                            class="form-select @error('lab_id') is-invalid @enderror">
                             <option value="">-- Chọn phòng lab --</option>
-                            @foreach($labs as $lab)
+                            @foreach ($labs as $lab)
                                 <option value="{{ $lab->id }}">{{ $lab->name }}</option>
                             @endforeach
                         </select>
-                        @error('lab_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @error('lab_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
 
                     <div class="mb-3">
                         <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                        <select wire:model.lazy="status" id="status" class="form-select @error('status') is-invalid @enderror">
+                        <select wire:model.lazy="status" id="status"
+                            class="form-select @error('status') is-invalid @enderror">
                             <option value="available">Available</option>
                             <option value="in_use">In Use</option>
                             <option value="maintenance">Maintenance</option>
                             <option value="broken">Broken</option>
                         </select>
-                        @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @error('status')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label for="purchased_date" class="form-label">Ngày sửa</label>
-                        <input wire:model.lazy="purchased_date" type="date" id="purchased_date" class="form-control @error('purchased_date') is-invalid @enderror">
-                        @error('purchased_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <input wire:model.lazy="purchased_date" type="date" id="purchased_date"
+                            class="form-control @error('purchased_date') is-invalid @enderror">
+                        @error('purchased_date')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label for="specifications" class="form-label">Thông số kỹ thuật </label>
-                        <textarea wire:model.lazy="specifications" id="specifications" rows="3" class="form-control @error('specifications') is-invalid @enderror"></textarea>
-                        @error('specifications') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <textarea wire:model.lazy="specifications" id="specifications" rows="3"
+                            class="form-control @error('specifications') is-invalid @enderror"></textarea>
+                        @error('specifications')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label for="notes" class="form-label">Ghi chú</label>
-                        <textarea wire:model.lazy="notes" id="notes" rows="3" class="form-control @error('notes') is-invalid @enderror"></textarea>
-                        @error('notes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <textarea wire:model.lazy="notes" id="notes" rows="3"
+                            class="form-control @error('notes') is-invalid @enderror"></textarea>
+                        @error('notes')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label for="quantity" class="form-label">Số lượng tổng <span class="text-danger">*</span></label>
-                        <input wire:model.lazy="quantity" type="number" min="0" id="quantity" class="form-control @error('quantity') is-invalid @enderror">
-                        @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <label for="quantity" class="form-label">Số lượng tổng <span
+                                class="text-danger">*</span></label>
+                        <input wire:model.lazy="quantity" type="number" min="0" id="quantity"
+                            class="form-control @error('quantity') is-invalid @enderror">
+                        @error('quantity')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label for="broken_quantity" class="form-label">Số lượng hỏng <span class="text-danger">*</span></label>
-                        <input wire:model.lazy="broken_quantity" type="number" min="0" max="{{ $quantity }}" id="broken_quantity" class="form-control @error('broken_quantity') is-invalid @enderror">
-                        @error('broken_quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <label for="broken_quantity" class="form-label">Số lượng hỏng <span
+                                class="text-danger">*</span></label>
+                        <input wire:model.lazy="broken_quantity" type="number" min="0"
+                            max="{{ $quantity }}" id="broken_quantity"
+                            class="form-control @error('broken_quantity') is-invalid @enderror">
+                        @error('broken_quantity')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label for="actual_quantity" class="form-label">Số lượng thực</label>
-                        <input wire:model="actual_quantity" type="number" id="actual_quantity" readonly class="form-control">
+                        <input wire:model="actual_quantity" type="number" id="actual_quantity" readonly
+                            class="form-control">
                     </div>
                 </div>
             </div>
@@ -143,4 +182,11 @@
         </div>
     </div>
 
+    <div class="content">
+        @include('pages.client.equipment.issues.issues-block', [
+            'equipmentId' => $equipmentId,
+            'issues' => $issues,
+            'labItems' => $labItems,
+        ])
+    </div>
 </div>

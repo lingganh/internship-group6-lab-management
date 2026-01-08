@@ -14,6 +14,7 @@ class EquipmentIssue extends Model
         'equipment_id',
         'reported_by',
         'title',
+        'broken_quantity',
         'description',
         'images',
         'status',
@@ -56,5 +57,10 @@ class EquipmentIssue extends Model
     {
         return $this->hasMany(EquipmentIssueLog::class, 'equipment_issue_id')
             ->orderByDesc('created_at');
+    }
+
+    public function requestItem()
+    {
+        return $this->hasOne(\App\Models\EquipmentIssueRequestItem::class, 'equipment_issue_id');
     }
 }

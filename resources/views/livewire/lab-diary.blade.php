@@ -1,5 +1,36 @@
 <div>
-    {{-- SESSION TOAST PAYLOAD (đọc từ session flash) --}}
+    <div>
+        <div class="page-header page-header-light shadow">
+            <div class="page-header-content d-lg-flex">
+                <div class="d-flex">
+                    <h4 class="page-title mb-0">
+                        Nhật ký sử dụng
+                    </h4>
+
+                    <a href="#page_header"
+                        class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                        data-bs-toggle="collapse">
+                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="page-header-content d-lg-flex border-top">
+                <div class="d-flex">
+                    <div class="breadcrumb py-2">
+                        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item"><i class="ph-house"></i></a>
+                        <span class="breadcrumb-item active">Nhật ký sử dụng </span>
+                    </div>
+
+                    <a href="#breadcrumb_elements"
+                        class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                        data-bs-toggle="collapse">
+                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
     <div id="toastPayload" data-success="{{ session('success') }}" data-error="{{ session('error') }}"
         data-warning="{{ session('warning') }}" data-info="{{ session('info') }}" style="display:none"></div>
 
@@ -14,89 +45,6 @@
                             </div>
                         </div>
                     </div>
-  <div>
-        <div class="page-header page-header-light shadow">
-            <div class="page-header-content d-lg-flex">
-                <div class="d-flex">
-                    <h4 class="page-title mb-0">
-                        Nhật ký sử dụng
-                    </h4>
-
-                    <a href="#page_header"
-                       class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                       data-bs-toggle="collapse">
-                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="page-header-content d-lg-flex border-top">
-                <div class="d-flex">
-                    <div class="breadcrumb py-2">
-                        <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
-                        <span class="breadcrumb-item active">Nhật ký sử dụng </span>
-                    </div>
-
-                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
-                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                    </a>
-                </div>
-
-            </div>
-        </div>
-    </div>
-   <div
-    id="toastPayload"
-    data-success="{{ session('success') }}"
-    data-error="{{ session('error') }}"
-    data-warning="{{ session('warning') }}"
-    data-info="{{ session('info') }}"
-    style="display:none"
-  ></div>
-
-  <div class="container-fluid py-4 diary-page">
-    <div class="row justify-content-center">
-      <div class="col-12 col-xxl-11">
-        <div class="card border-0 diary-card">
-          <div class="card-header bg-white border-0 pb-0">
-            <div class="d-flex flex-row align-items-center justify-content-between gap-3">
-              <div>
-                <h4 class="mb-0 fw-bold text-dark">Nhật ký sử dụng</h4>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-body pt-3">
-            <div class="diary-filters mb-3">
-              <div class="row g-2 g-md-3 align-items-end">
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                  <select wire:model.live="filterLabCode" class="form-select diary-control">
-                    <option value="">Tất cả</option>
-                    @foreach($labs as $lab)
-                      <option wire:key="lab-{{ $lab->code }}" value="{{ $lab->code }}">{{ $lab->name }} ({{ $lab->code }})</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                {{-- <div class="col-12 col-md-2">
-                  <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                  <select wire:model.live="filterStatus" class="form-select diary-control">
-                    <option value="">Tất cả</option>
-                    <option value="pending">Chờ duyệt</option>
-                    <option value="approved">Đã duyệt</option>
-                    <option value="cancelled">Đã từ chối</option>
-                  </select>
-                </div> --}}
-
-                <div class="col-12 col-md-2">
-                  <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
-                  <input type="date" wire:model.live="filterFrom" class="form-control diary-control">
-                </div>
-
-                <div class="col-12 col-md-2">
-                  <label class="form-label small fw-semibold text-dark mb-1">Đến ngày</label>
-                  <input type="date" wire:model.live="filterTo" class="form-control diary-control">
-                </div>
 
                     <div class="card-body pt-3">
                         <div class="diary-filters mb-3">
@@ -112,15 +60,15 @@
                                     </select>
                                 </div>
 
-                                <div class="col-12 col-md-2">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                                    <select wire:model.live="filterStatus" class="form-select diary-control">
-                                        <option value="">Tất cả</option>
-                                        <option value="pending">Chờ duyệt</option>
-                                        <option value="approved">Đã duyệt</option>
-                                        <option value="cancelled">Đã từ chối</option>
-                                    </select>
-                                </div>
+                                {{-- <div class="col-12 col-md-2">
+                  <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
+                  <select wire:model.live="filterStatus" class="form-select diary-control">
+                    <option value="">Tất cả</option>
+                    <option value="pending">Chờ duyệt</option>
+                    <option value="approved">Đã duyệt</option>
+                    <option value="cancelled">Đã từ chối</option>
+                  </select>
+                </div> --}}
 
                                 <div class="col-12 col-md-2">
                                     <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
@@ -188,6 +136,9 @@
                                                     <span class="badge diary-pill diary-pill-pending">Chờ duyệt</span>
                                                 @elseif($item->status === 'approved')
                                                     <span class="badge diary-pill diary-pill-approved">Đã duyệt</span>
+                                                @elseif($item->status === 'completed')
+                                                    <span class="badge diary-pill diary-pill-approved">Đã hoàn
+                                                        thành</span>
                                                 @else
                                                     <span class="badge diary-pill diary-pill-cancelled">Từ chối</span>
                                                 @endif
@@ -216,72 +167,6 @@
                         </div>
                     </div>
                 </div>
-              </div>
-            </div>
-
-            <div class="table-responsive diary-table-wrap">
-              <table class="table align-middle mb-0 diary-table">
-                <thead>
-                  <tr>
-                    <th style="min-width: 280px;">Nội dung</th>
-                    <th style="min-width: 160px;">Phòng</th>
-                    <th style="min-width: 180px;">Người đăng ký</th>
-                    <th style="min-width: 210px;">Thời gian</th>
-                    <th class="text-center" style="width: 150px;">Trạng thái</th>
-                    <th class="text-end" style="width: 170px;">Hành động</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  @forelse($events as $item)
-                    <tr wire:key="event-{{ $item->id }}">
-                      <td>
-                        <div class="fw-semibold text-dark text-truncate" style="max-width: 520px;">{{ $item->title }}</div>
-                        <div class="small text-muted">#{{ $item->id }} • {{ $this->categoryLabel($item->category) }}</div>
-                      </td>
-
-                      <td>
-                        <div class="fw-semibold text-dark">{{ $item->lab?->name ?? ($item->lab_code ?? 'N/A') }}</div>
-                        <div class="small text-muted">{{ $item->lab_code ?? '-' }}</div>
-                      </td>
-
-                      <td>
-                        <div class="fw-semibold text-dark">{{ $item->user?->full_name ?? 'N/A' }}</div>
-                        <div class="small text-muted">{{ $item->user?->email ?? '' }}</div>
-                      </td>
-
-                      <td>
-                        <div class="fw-semibold text-dark">{{ $item->start->format('d/m/Y') }}</div>
-                        <div class="small text-muted">{{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}</div>
-                      </td>
-
-                      <td class="text-center">
-                        @if($item->status === 'pending')
-                          <span class="badge diary-pill diary-pill-pending">Chờ duyệt</span>
-                        @elseif($item->status === 'approved')
-                          <span class="badge diary-pill diary-pill-approved">Đã duyệt</span>
-                        @elseif($item->status === 'completed')
-                          <span class="badge diary-pill diary-pill-approved">Đã hoàn thành</span>  
-                        @else
-                          <span class="badge diary-pill diary-pill-cancelled">Từ chối</span>
-                        @endif
-                      </td>
-
-                      <td class="text-end">
-                        <button wire:click="viewEvent({{ $item->id }})" class="btn btn-sm diary-btn diary-btn-primary" type="button">
-                          Chi tiết
-                        </button>
-                      </td>
-                    </tr>
-                  @empty
-                    <tr>
-                      <td colspan="6" class="text-center py-5">
-                        <div class="text-muted">Không có dữ liệu phù hợp.</div>
-                      </td>
-                    </tr>
-                  @endforelse
-                </tbody>
-              </table>
             </div>
         </div>
 
@@ -297,27 +182,6 @@
                     </div>
                     <button type="button" class="btn-close ms-2 mt-1" data-bs-dismiss="toast"
                         aria-label="Close"></button>
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
-                  <input wire:model.defer="edit.start" type="datetime-local" class="form-control diary-control">
-                  @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
-                  <input wire:model.defer="edit.end" type="datetime-local" class="form-control diary-control">
-                  @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                  <select wire:model.defer="edit.status" class="form-select diary-control">
-                    <option value="pending">Chờ duyệt</option>
-                    <option value="approved">Đã duyệt</option>
-                    <option value="cancelled">Từ chối</option>
-                    <option value="completed">Đã hoàn thành</option>
-                  </select>
-                  @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                 </div>
             </div>
         </div>
@@ -400,6 +264,7 @@
                                         <option value="pending">Chờ duyệt</option>
                                         <option value="approved">Đã duyệt</option>
                                         <option value="cancelled">Từ chối</option>
+                                        <option value="completed">Đã hoàn thành</option>
                                     </select>
                                     @error('edit.status')
                                         <div class="small text-danger mt-1">{{ $message }}</div>
@@ -414,39 +279,44 @@
                                     @enderror
                                 </div>
 
-                                {{-- <div class="col-12">
-                  <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
-                  <textarea wire:model.defer="edit.feedback" class="form-control diary-control" rows="3"></textarea>
-                  @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
+                                    <textarea wire:model.defer="edit.feedback" class="form-control diary-control" rows="3"></textarea>
+                                    @error('edit.feedback')
+                                        <div class="small text-danger mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
 
-                <div class="col-12">
-                  <div class="diary-filebox">
-                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                      <div class="fw-bold text-dark">File đính kèm</div>
-                      <div class="small text-muted">{{ optional($selectedEvent->files)->count() ?? 0 }} file</div>
-                    </div>
+                                <div class="col-12">
+                                    <div class="diary-filebox">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                            <div class="fw-bold text-dark">File đính kèm</div>
+                                            <div class="small text-muted">
+                                                {{ optional($selectedEvent->files)->count() ?? 0 }} file</div>
+                                        </div>
 
-                    @if ($selectedEvent->files && $selectedEvent->files->count())
-                      <div class="diary-filelist">
-                        @foreach ($selectedEvent->files as $f)
-                          @php
-                            $p = $f->path ?? $f->file_path ?? $f->url ?? '';
-                            $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
-                            $n = $f->name ?? $f->original_name ?? basename((string)$p) ?? 'file';
-                          @endphp
-                          <a class="diary-fileitem" href="{{ $u }}" target="_blank" rel="noopener">
-                            <span class="diary-filedot"></span>
-                            <span class="diary-filename">{{ $n }}</span>
-                          </a>
-                        @endforeach
-                      </div>
-                    @else
-                      <div class="small text-muted">Chưa có file.</div>
-                    @endif
-                  </div>
-                </div> --}}
-
+                                        @if ($selectedEvent->files && $selectedEvent->files->count())
+                                            <div class="diary-filelist">
+                                                @foreach ($selectedEvent->files as $f)
+                                                    @php
+                                                        $p = $f->path ?? ($f->file_path ?? ($f->url ?? ''));
+                                                        $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
+                                                        $n =
+                                                            $f->name ??
+                                                            ($f->original_name ?? (basename((string) $p) ?? 'file'));
+                                                    @endphp
+                                                    <a class="diary-fileitem" href="{{ $u }}"
+                                                        target="_blank" rel="noopener">
+                                                        <span class="diary-filedot"></span>
+                                                        <span class="diary-filename">{{ $n }}</span>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="small text-muted">Chưa có file.</div>
+                                        @endif
+                                    </div>
+                                </div>
                                 <div class="col-12">
                                     <div class="diary-filebox">
                                         <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
@@ -498,7 +368,7 @@
 
                                                             <div class="small text-muted mt-1 text-truncate"
                                                                 style="max-width: 620px;">
-                                                                Mô tả chung:
+                                                                Phản hồi:
                                                                 {{ \Illuminate\Support\Str::limit((string) ($req->description ?? ''), 120) }}
                                                             </div>
                                                         </span>

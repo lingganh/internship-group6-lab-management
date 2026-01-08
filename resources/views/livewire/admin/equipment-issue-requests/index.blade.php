@@ -31,7 +31,7 @@
                     <tr class="table-light">
                         <th>STT</th>
                         <th class="text-start">NGƯỜI BÁO HỎNG</th>
-                        <th>MÔ TẢ CHUNG</th>
+                        <th>PHẢN HỒI</th>
                         <th>SỐ THIẾT BỊ</th>
                         <th>NGÀY TẠO</th>
                         <th>TRẠNG THÁI</th>

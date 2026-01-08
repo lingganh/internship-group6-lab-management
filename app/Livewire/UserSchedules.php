@@ -19,6 +19,9 @@ class UserSchedules extends Component
     public $comment = '';
     public ?int $selectedEventId = null;
     public string $feedbackModalKey = '';
+    public bool $feedbackLocked = false;
+
+    public ?LabEvent $selectedEvent = null;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -77,29 +80,33 @@ class UserSchedules extends Component
         $this->dispatch('open-modal', id: 'detailModal');
     }
 
-    public function openFeedback($eventId): void
+    public function openFeedback(int $eventId): void
     {
-        $event = LabEvent::find($eventId);
+        $event = LabEvent::with('lab')->findOrFail($eventId);
 
-        if (! $event) {
-            $this->dispatch('toaster', 'Không tìm thấy lịch');
-            return;
-        }
+        $this->selectedEventId = $event->id;
+        $this->selectedEvent   = $event;
 
-        if (! $this->canFeedback($event)) {
+        $locked = filled($event->feedback);
+
+        if (! $locked && ! $this->canFeedback($event)) {
             $this->dispatch('toaster', 'Chưa thể phản hồi');
             return;
         }
 
-        $this->selectedEventId = (int) $eventId;
-
         $this->feedbackSuccessMessage = null;
+
         // mở modal
         $this->dispatch('open-modal', id: 'feedbackModal');
 
-        // bắn sự kiện để component con reset + load theo event mới
-        $this->dispatch('initIssueFromEvent', eventId: $this->selectedEventId);
+        // load dữ liệu cho component con
+        $this->dispatch('initIssueFromEvent', eventId: $event->id);
+
+        if ($locked) {
+            $this->dispatch('toaster', 'Lịch này bạn đã gửi phản hồi rồi. Bạn chỉ xem lại thôi.');
+        }
     }
+
 
     public function cancelSchedule($id): void
     {
@@ -179,10 +186,8 @@ class UserSchedules extends Component
     {
         $this->feedbackSuccessMessage = 'Đã gửi ý kiến phản hồi. Vui lòng chờ admin xử lý.';
 
-        // toast
         $this->dispatch('toaster', 'Đã gửi phản hồi');
 
-        // đóng modal 
         $this->dispatch('close-modal', id: 'feedbackModal');
     }
 }

@@ -2,36 +2,49 @@
     use App\Models\User;
 
     $currentUser = auth()->user();
+
     $notifications = collect();
     $newNotifications = collect();
     $oldNotifications = collect();
     $unreadCount = 0;
+
     $senders = collect();
 
+    // giới hạn hiển thị
+    $limit = 5;
+    $newLimited = collect();
+    $newRest = collect();
+    $newMore = 0;
+
+    $oldLimited = collect();
+    $oldRest = collect();
+    $oldMore = 0;
+
     if ($currentUser) {
+        // lấy nhiều hơn để "xem thêm" có dữ liệu
         $notifications = $currentUser->notifications()->latest()->take(50)->get();
 
         $newNotifications = $notifications->whereNull('read_at');
         $oldNotifications = $notifications->whereNotNull('read_at');
         $unreadCount = $newNotifications->count();
 
-        $limit = 5;
-
+        // tính list giới hạn + phần còn lại
         $newLimited = $newNotifications->take($limit);
-        $newMore = $newNotifications->count() - $newLimited->count();
         $newRest = $newNotifications->slice($limit);
+        $newMore = max(0, $newNotifications->count() - $newLimited->count());
 
         $oldLimited = $oldNotifications->take($limit);
-        $oldMore = $oldNotifications->count() - $oldLimited->count();
         $oldRest = $oldNotifications->slice($limit);
+        $oldMore = max(0, $oldNotifications->count() - $oldLimited->count());
 
+        // load sender để show avatar/name
         $senderIds = $notifications->pluck('data.sender_id')->filter()->unique()->all();
-
         if (!empty($senderIds)) {
             $senders = User::whereIn('id', $senderIds)->get()->keyBy('id');
         }
     }
 @endphp
+
 
 {{-- OFFCANVAS (bên phải màn hình) --}}
 <div class="offcanvas offcanvas-end" tabindex="-1" id="notifications" aria-modal="true" role="dialog">
@@ -116,7 +129,6 @@
 
                 <div class="collapse mt-3" id="moreNewNotifications">
                     @foreach ($newRest as $notif)
-                        {{-- copy y nguyên card notif giống phía trên --}}
                         @php
                             $senderId = $notif->data['sender_id'] ?? null;
                             $sender = $senderId ? $senders[$senderId] ?? null : null;

@@ -10,6 +10,8 @@ use App\Models\EquipmentIssueLog;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\Role as RoleEnum;
 use Illuminate\Support\Facades\DB;
+use App\Models\EquipmentIssueRequestItem;
+use App\Models\LabEquipmentItem;
 
 class EquipmentIssueController extends Controller
 {
@@ -31,17 +33,19 @@ class EquipmentIssueController extends Controller
         ]);
 
         $oldStatus = $issue->status;
+        $newStatus = $data['status'];
 
-        DB::transaction(function () use ($issue, $user, $data, $oldStatus) {
+        $qtyUpdated = false;
+        $qtyMessage = null;
+
+        DB::transaction(function () use ($issue, $user, $data, $oldStatus, $newStatus, &$qtyUpdated, &$qtyMessage) {
 
             // 1) Cập nhật phiếu báo hỏng
-            $issue->status           = $data['status'];
+            $issue->status           = $newStatus;
             $issue->resolution_notes = $data['resolution_notes'] ?? null;
 
-            if (in_array($data['status'], ['resolved', 'closed'], true)) {
-                if (!$issue->resolved_at) {
-                    $issue->resolved_at = now();
-                }
+            if (in_array($newStatus, ['resolved', 'closed'], true)) {
+                $issue->resolved_at = $issue->resolved_at ?: now();
             } else {
                 $issue->resolved_at = null;
             }
@@ -57,39 +61,75 @@ class EquipmentIssueController extends Controller
                 'notes'              => $issue->resolution_notes,
             ]);
 
-            // 3) Cập nhật trạng thái thiết bị
-            $equipment = $issue->equipment;
-            if (!$equipment) {
+            /**
+             * 3) Cập nhật số lượng theo phòng (lab_equipment_items)
+             * - pending/in_progress -> resolved/closed: giảm broken_quantity
+             * - resolved/closed -> pending/in_progress: tăng broken_quantity (mở lại)
+             */
+            $fromOpen   = in_array($oldStatus, ['pending', 'in_progress'], true);
+            $toClosed   = in_array($newStatus, ['resolved', 'closed'], true);
+            $fromClosed = in_array($oldStatus, ['resolved', 'closed'], true);
+            $toOpen     = in_array($newStatus, ['pending', 'in_progress'], true);
+
+            // chỉ xử lý khi có chuyển trạng thái "qua lại" giữa open <-> closed
+            if (!(($fromOpen && $toClosed) || ($fromClosed && $toOpen))) {
                 return;
             }
 
-            // Nếu issue này đang ở trạng thái "mở" -> chắc chắn thiết bị đang hỏng
-            if (in_array($issue->status, ['pending', 'in_progress'], true)) {
-                $equipment->status = 'broken';
-                $equipment->save();
+            $reqItem = EquipmentIssueRequestItem::with(['request.labEvent.lab'])
+                ->where('equipment_issue_id', $issue->id)
+                ->first();
+
+            if (!$reqItem) {
+                $qtyMessage = 'Không tìm thấy request-item liên kết để cập nhật số lượng.';
                 return;
             }
 
-            // Nếu issue này chuyển sang resolved/closed:
-            // kiểm tra xem còn issue nào đang mở cho thiết bị này không
-            $hasOpenIssues = EquipmentIssue::where('equipment_id', $equipment->id)
-                ->whereIn('status', ['pending', 'in_progress'])
-                ->exists();
+            $qty = (int) ($reqItem->broken_quantity ?? 1);
+            if ($qty < 1) $qty = 1;
 
-            if ($hasOpenIssues) {
-                // vẫn còn issue mở -> giữ trạng thái hỏng
-                $equipment->status = 'broken';
-            } else {
-                // không còn issue mở -> cho thiết bị về trạng thái bình thường
-                // ĐỔI 'available' cho đúng với giá trị enum trong migration equipment
-                $equipment->status = 'available';
+            $labId = $reqItem->request?->labEvent?->lab?->id
+                ?? $reqItem->request?->lab_id;
+
+
+            if (!$labId) {
+                $qtyMessage = 'Phiếu không gắn lab_event_id / lab_id nên không xác định được phòng để cập nhật số lượng.';
+                return;
             }
 
-            $equipment->save();
+            $labItem = LabEquipmentItem::where('lab_id', $labId)
+                ->where('equipment_id', $issue->equipment_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$labItem) {
+                $qtyMessage = 'Không tìm thấy thiết bị trong phòng tương ứng để cập nhật số lượng.';
+                return;
+            }
+
+            $currentBroken = (int) $labItem->broken_quantity;
+            $maxQty        = (int) $labItem->quantity;
+
+            if ($fromOpen && $toClosed) {
+                $labItem->broken_quantity = max(0, $currentBroken - $qty);
+                $labItem->save();
+                $qtyUpdated = true;
+                return;
+            }
+
+            if ($fromClosed && $toOpen) {
+                $labItem->broken_quantity = min($maxQty, $currentBroken + $qty);
+                $labItem->save();
+                $qtyUpdated = true;
+                return;
+            }
         });
 
-        return redirect()
-            ->back()
-            ->with('success', "Đã cập nhật trạng thái báo hỏng phiếu #{$issue->id}.");
+        $msg = "Đã cập nhật trạng thái báo hỏng phiếu #{$issue->id}.";
+        if (!$qtyUpdated && $qtyMessage) {
+            $msg .= " (Lưu ý: {$qtyMessage})";
+        }
+
+        return redirect()->back()->with('success', $msg);
     }
 }

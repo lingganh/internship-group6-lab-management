@@ -15,6 +15,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Models\LabEquipmentItem;
 
 class CreateFromEvent extends Component
 {
@@ -27,12 +28,19 @@ class CreateFromEvent extends Component
     public array $equipmentOptions = [];
     public ?int $selectedEquipmentId = null;
 
-    public string $commonDescription = ''; // mô tả chung
     public string $description = '';       // mô tả từng thiết bị 
     public array $images = [];
     public array $items = [];
 
+    public string $feedback = '';
+    public bool $alreadySubmitted = false;
+
     public ?array $previewItem = null;
+
+    public int $brokenQuantity = 1;
+    public ?int $selectedActualQuantity = null;
+    public ?int $selectedTotalQuantity = null;
+    public ?int $selectedBrokenQuantityCurrent = null;
 
     protected $listeners = [
         'submitIssueRequest' => 'saveRequest',
@@ -48,14 +56,15 @@ class CreateFromEvent extends Component
     protected function rules(): array
     {
         return [
-            'commonDescription'     => ['required', 'string', 'min:5'],
+            'feedback'     => ['required', 'string', 'min:5'],
 
-            'selectedEquipmentId'   => [
+            'selectedEquipmentId' => [
                 'required',
                 'integer',
-                Rule::exists('equipment', 'id')->when($this->labId, function ($rule) {
-                    return $rule->where('lab_id', $this->labId);
-                }),
+                $this->labId
+                    ? Rule::exists('lab_equipment_items', 'equipment_id')
+                    ->where(fn($q) => $q->where('lab_id', $this->labId))
+                    : Rule::exists('equipment', 'id'),
             ],
 
             'description'           => ['required', 'string', 'min:3'],
@@ -68,7 +77,7 @@ class CreateFromEvent extends Component
 
     private function loadEvent(int $eventId): void
     {
-        // reset toàn bộ state theo event cũ
+        // reset state
         $this->resetValidation();
         $this->resetErrorBag();
 
@@ -79,29 +88,70 @@ class CreateFromEvent extends Component
         $this->description = '';
         $this->images = [];
 
-        $this->commonDescription = '';
+        $this->feedback = '';
+        $this->alreadySubmitted = false;
 
         $this->labEventId = $eventId;
-        $this->event = \App\Models\LabEvent::with('lab')->findOrFail($eventId);
 
+        // load event + lab
+        $this->event = \App\Models\LabEvent::with('lab')->findOrFail($eventId);
         $this->labId = $this->event->lab?->id;
 
+        // feedback + lock
+        $this->feedback = (string) ($this->event->feedback ?? '');
+        $this->alreadySubmitted = filled($this->event->feedback);
+
+        //  Nếu đã gửi -> load lại phiếu + items để hiển thị, rồi khóa form
+        if ($this->alreadySubmitted) {
+            $req = EquipmentIssueRequest::with(['items.equipment:id,name,code'])
+                ->where('lab_event_id', $eventId)
+                ->latest('id')
+                ->first();
+
+            if ($req) {
+
+                $this->items = $req->items->map(function ($it) {
+                    $label = $it->equipment
+                        ? ($it->equipment->name . ' (' . $it->equipment->code . ')')
+                        : ('#' . $it->equipment_id);
+
+                    return [
+                        'equipment_id'    => (int) $it->equipment_id,
+                        'equipment_label' => $label,
+                        'broken_quantity'  => (int) ($it->broken_quantity ?? 1),
+                        'description'     => (string) ($it->description ?? ''),
+                        'images'          => (array) ($it->images ?? []),
+                    ];
+                })->values()->all();
+            }
+
+            $this->equipmentOptions = []; // khóa dropdown
+            return;
+        }
+
+        // chưa gửi mà event không có lab
         if (! $this->labId) {
             $this->equipmentOptions = [];
             $this->addError('selectedEquipmentId', 'Sự kiện này chưa gắn phòng/lab hợp lệ.');
             return;
         }
 
-        $this->equipmentOptions = \App\Models\Equipment::query()
+        // load thiết bị theo lab
+        $this->equipmentOptions = LabEquipmentItem::query()
+            ->with('equipment:id,name,code')
             ->where('lab_id', $this->labId)
-            ->orderBy('name')
-            ->get(['id', 'name', 'code'])
-            ->map(fn($e) => [
-                'id'    => $e->id,
-                'label' => $e->name . ' (' . $e->code . ')',
+            ->where('actual_quantity', '>', 0)
+            ->get()
+            ->filter(fn($item) => $item->equipment)
+            ->sortBy(fn($item) => $item->equipment->name)
+            ->map(fn($item) => [
+                'id'    => $item->equipment_id,
+                'label' => $item->equipment->name . ' (' . $item->equipment->code . ')',
             ])
+            ->values()
             ->all();
     }
+
 
 
     #[On('initIssueFromEvent')]
@@ -112,10 +162,27 @@ class CreateFromEvent extends Component
 
     public function updatedSelectedEquipmentId(): void
     {
-        // Đổi thiết bị thì reset phần chi tiết + ảnh 
         $this->description = '';
         $this->images = [];
-        $this->resetValidation(['selectedEquipmentId', 'description', 'images']);
+        $this->brokenQuantity = 1;
+
+        $this->selectedActualQuantity = null;
+        $this->selectedTotalQuantity = null;
+        $this->selectedBrokenQuantityCurrent = null;
+
+        if ($this->labId && $this->selectedEquipmentId) {
+            $labItem = LabEquipmentItem::where('lab_id', $this->labId)
+                ->where('equipment_id', $this->selectedEquipmentId)
+                ->first();
+
+            if ($labItem) {
+                $this->selectedActualQuantity = (int) $labItem->actual_quantity;
+                $this->selectedTotalQuantity = (int) $labItem->quantity;
+                $this->selectedBrokenQuantityCurrent = (int) $labItem->broken_quantity;
+            }
+        }
+
+        $this->resetValidation(['selectedEquipmentId', 'description', 'images', 'brokenQuantity']);
     }
 
     private function resetFormState(): void
@@ -126,7 +193,7 @@ class CreateFromEvent extends Component
             'labId',
             'equipmentOptions',
             'selectedEquipmentId',
-            'commonDescription',
+            'feedback',
             'description',
             'images',
             'items',
@@ -138,7 +205,28 @@ class CreateFromEvent extends Component
 
     public function addItem(): void
     {
-        $this->validate();
+        $this->validate([
+            'selectedEquipmentId' => $this->rules()['selectedEquipmentId'],
+            'description'         => ['required', 'string', 'min:3'],
+            'brokenQuantity'      => ['required', 'integer', 'min:1'],
+            'images'              => ['nullable', 'array', 'max:2'],
+            'images.*'            => ['image', 'mimes:jpg,jpeg,png,gif,webp', 'max:2048'],
+        ]);
+
+        $labItem = LabEquipmentItem::where('lab_id', $this->labId)
+            ->where('equipment_id', $this->selectedEquipmentId)
+            ->first();
+
+        if (! $labItem) {
+            $this->addError('selectedEquipmentId', 'Thiết bị này không thuộc phòng/lab của sự kiện.');
+            return;
+        }
+
+        $available = (int) $labItem->actual_quantity;
+        if ($this->brokenQuantity > $available) {
+            $this->addError('brokenQuantity', "Số lượng hỏng không được vượt quá số lượng thực ({$available}).");
+            return;
+        }
 
         // chống trùng thiết bị
         if (collect($this->items)->contains(fn($i) => (int)$i['equipment_id'] === (int)$this->selectedEquipmentId)) {
@@ -158,13 +246,17 @@ class CreateFromEvent extends Component
             'equipment_id'    => (int) $equipment->id,
             'equipment_label' => $equipment->name . ' (' . $equipment->code . ')',
             'description'     => trim($this->description),
+            'broken_quantity' => (int) $this->brokenQuantity,
             'images'          => $storedImages,
         ];
 
-        // reset input item (không reset commonDescription)
         $this->selectedEquipmentId = null;
         $this->description = '';
         $this->images = [];
+        $this->brokenQuantity = 1;
+        $this->selectedActualQuantity = null;
+        $this->selectedTotalQuantity = null;
+        $this->selectedBrokenQuantityCurrent = null;
 
         $this->resetValidation(['selectedEquipmentId', 'description', 'images', 'images.*']);
     }
@@ -190,23 +282,48 @@ class CreateFromEvent extends Component
 
     public function saveRequest(): void
     {
-        $this->validateOnly('commonDescription');
-
-        if (count($this->items) === 0) {
-            $this->addError('items', 'Bạn phải thêm ít nhất 1 thiết bị.');
+        if ($this->alreadySubmitted) {
+            $this->dispatch('toaster', 'Bạn đã gửi phản hồi rồi.');
+            return;
+        }
+        if ($this->event && filled($this->event->feedback)) {
+            $this->dispatch('toaster', 'Bạn đã gửi phản hồi cho lịch này rồi.');
             return;
         }
 
+        if (EquipmentIssueRequest::where('lab_event_id', $this->labEventId)->exists()) {
+            $this->dispatch('toaster', 'Lịch này đã có phiếu phản hồi rồi.');
+            return;
+        }
+
+        $this->validate([
+            'feedback' => ['required', 'string', 'min:5'],
+        ]);
+
+
+        // if (count($this->items) === 0) {
+        //     $this->addError('items', 'Bạn phải thêm ít nhất 1 thiết bị.');
+        //     return;
+        // }
+
         $user = Auth::user();
         $createdRequest = null;
+
+        $this->event->update([
+            'feedback' => trim($this->feedback),
+        ]);
 
         DB::transaction(function () use ($user, &$createdRequest) {
             $createdRequest = EquipmentIssueRequest::create([
                 'user_id'      => $user->id,
                 'lab_event_id' => $this->labEventId,
-                'description'  => trim($this->commonDescription),
+                'description'  => trim($this->feedback),
                 'status'       => 'pending',
                 'items_count'  => count($this->items),
+            ]);
+
+            LabEvent::whereKey($this->labEventId)->update([
+                'feedback' => trim($this->feedback),
             ]);
 
             foreach ($this->items as $item) {
@@ -224,6 +341,7 @@ class CreateFromEvent extends Component
                 $createdRequest->items()->create([
                     'equipment_id' => $item['equipment_id'],
                     'description'  => $item['description'],
+                    'broken_quantity'  => (int)($item['broken_quantity'] ?? 1),
                     'images'       => $newPaths,
                     'status'       => 'pending',
                 ]);
@@ -232,7 +350,9 @@ class CreateFromEvent extends Component
             $this->notifyAdminsNewRequest($createdRequest);
         });
 
-        $this->reset(['commonDescription', 'selectedEquipmentId', 'description', 'images', 'items']);
+        $this->reset(['selectedEquipmentId', 'description', 'images', 'items']);
+        $this->alreadySubmitted = true;
+
         $this->resetValidation();
 
         if (! $createdRequest) {
@@ -262,7 +382,7 @@ class CreateFromEvent extends Component
 
         foreach ($admins as $admin) {
             Notification::create([
-                'user_id' => $admin->id, 
+                'user_id' => $admin->id,
                 'type'    => 'equipment_issue_request',
                 'title'   => 'Đã tạo phiếu phản hồi sử dụng phòng mới!',
                 'message' => $desc !== '' ? $desc : ('Có ' . $request->items_count . ' thiết bị được báo hỏng.'),

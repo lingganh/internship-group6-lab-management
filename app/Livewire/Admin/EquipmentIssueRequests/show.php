@@ -8,6 +8,7 @@ use Livewire\Component;
 use App\Models\EquipmentIssue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LabEquipmentItem;
 
 
 class Show extends Component
@@ -47,7 +48,6 @@ class Show extends Component
     // Chấp nhận báo hỏng từ thiết bị
     public function approveItem(int $itemId)
     {
-        // Tìm item trong collection đã load
         $item = $this->request->items->firstWhere('id', $itemId);
 
         if (! $item) {
@@ -55,70 +55,112 @@ class Show extends Component
             return;
         }
 
-        // Chỉ xử lý nếu còn pending
         if ($item->status !== EquipmentIssueRequestItem::STATUS_PENDING) {
             session()->flash('error', 'Mục này đã được xử lý trước đó.');
             return;
         }
 
-        DB::transaction(function () use ($item) {
-            // Chuẩn hóa lại path ảnh cho phù hợp với asset()
-            $rawImages  = is_array($item->images) ? $item->images : [];
-            $imagePaths = [];
+        $event = $this->request->labEvent()
+            ->with('lab:id,code')
+            ->first();
 
-            foreach ($rawImages as $path) {
-                if (! $path) {
-                    continue;
+        $labId = $event?->lab?->id ?? $this->request->lab_id;
+
+
+        if ($this->request->lab_event_id && ! $labId) {
+            session()->flash('error', 'Phiếu có gắn sự kiện nhưng LabEvent không map được sang Lab (lab_code sai hoặc không tồn tại labs.code).');
+            return;
+        }
+
+        $qtyBroken = (int) ($item->broken_quantity ?? 1);
+        if ($qtyBroken < 1) $qtyBroken = 1;
+
+        try {
+            DB::transaction(function () use ($item, $labId, $qtyBroken) {
+
+                $rawImages  = is_array($item->images) ? $item->images : [];
+                $imagePaths = [];
+
+                foreach ($rawImages as $path) {
+                    if (! $path) continue;
+
+                    if (str_starts_with($path, 'uploads/')) {
+                        $imagePaths[] = $path;
+                    } elseif (str_starts_with($path, 'equipment_issue_requests/')) {
+                        $imagePaths[] = 'storage/' . $path;
+                    } else {
+                        $imagePaths[] = $path;
+                    }
                 }
 
-                // Ảnh từ form báo hỏng 1 thiết bị (uploads/...) -> giữ nguyên
-                if (str_starts_with($path, 'uploads/')) {
-                    $imagePaths[] = $path;
+                $labItemQuery = LabEquipmentItem::query()
+                    ->where('equipment_id', $item->equipment_id);
+
+                if ($labId) {
+                    $labItem = (clone $labItemQuery)
+                        ->where('lab_id', $labId)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $labItem) {
+                        throw new \RuntimeException('Không tìm thấy thiết bị này trong phòng/lab của phiếu để cập nhật số lượng.');
+                    }
+                } else {
+                    $distinctLabs = (clone $labItemQuery)
+                        ->distinct('lab_id')
+                        ->count('lab_id');
+
+                    if ($distinctLabs !== 1) {
+                        throw new \RuntimeException('Không xác định được phòng/lab để cập nhật số lượng (thiết bị có thể thuộc nhiều lab).');
+                    }
+
+                    $labItem = (clone $labItemQuery)
+                        ->lockForUpdate()
+                        ->first();
                 }
-                // Ảnh từ phiếu nhiều thiết bị (equipment_issue_requests/...) -> thêm "storage/"
-                elseif (str_starts_with($path, 'equipment_issue_requests/')) {
-                    $imagePaths[] = 'storage/' . $path;
+
+                if (! $labItem) {
+                    throw new \RuntimeException('Không tìm thấy thiết bị này trong phòng để cập nhật số lượng.');
                 }
-                // fallback
-                else {
-                    $imagePaths[] = $path;
+
+                $available = max(0, (int)$labItem->quantity - (int)$labItem->broken_quantity);
+
+                if ($qtyBroken > $available) {
+                    throw new \RuntimeException("Số lượng hỏng ({$qtyBroken}) vượt quá số lượng thực còn lại ({$available}).");
                 }
-            }
 
-            // 1. Tạo record EquipmentIssue 
-            $issue = EquipmentIssue::create([
-                'equipment_id'     => $item->equipment_id,
-                'reported_by'      => $this->request->user_id,   // người gửi phiếu
-                'title'            => null,
-                'description'      => $item->description,
-                'images'           => $imagePaths,               
-                'status'           => 'pending',                 // theo module báo hỏng 1 thiết bị
-                'priority'    => null,
-                'assigned_to'      => null,
-                'resolved_at'      => null,
-                'resolution_notes' => null,
-            ]);
+                $labItem->broken_quantity = (int) $labItem->broken_quantity + $qtyBroken;
+                $labItem->save();
 
-            // 2. Cập nhật trạng thái thiết bị test_equipments
-            if ($item->equipment) {
-                $item->equipment->status = 'broken';
-                $item->equipment->save();
-            }
+                $issue = EquipmentIssue::create([
+                    'equipment_id'     => $item->equipment_id,
+                    // 'broken_quantity'  => $qtyBroken, // bật nếu bạn đã add cột vào equipment_issues
+                    'reported_by'      => $this->request->user_id,
+                    'title'            => null,
+                    'description'      => $item->description,
+                    'images'           => $imagePaths,
+                    'status'           => 'pending',
+                    'priority'         => null,
+                    'assigned_to'      => null,
+                    'resolved_at'      => null,
+                    'resolution_notes' => null,
+                ]);
 
-            // 3. Gắn link sang ticket + đánh dấu approved
-            $item->equipment_issue_id = $issue->id;
-            $item->status             = EquipmentIssueRequestItem::STATUS_APPROVED;
-            $item->save();
+                $item->equipment_issue_id = $issue->id;
+                $item->status = EquipmentIssueRequestItem::STATUS_APPROVED;
+                $item->save();
 
-            // 4. Cập nhật trạng thái phiếu tổng
-            $this->refreshRequestStatus();
-        });
+                $this->refreshRequestStatus();
+            });
 
-        // Reload lại request + quan hệ để UI cập nhật
-        $this->request->refresh()->load(['user', 'items.equipment']);
+            $this->request->refresh()->load(['user', 'items.equipment', 'labEvent.lab']);
 
-        session()->flash('success', 'Đã chấp nhận báo hỏng cho thiết bị.');
+            session()->flash('success', 'Đã chấp nhận báo hỏng và cập nhật số lượng thiết bị.');
+        } catch (\Throwable $e) {
+            session()->flash('error', $e->getMessage());
+        }
     }
+
 
 
     // từ chối báo hỏng 
@@ -173,7 +215,7 @@ class Show extends Component
                 // Có ít nhất 1 cái được chấp nhận -> coi như phiếu hoàn thành
                 $this->request->status = EquipmentIssueRequest::STATUS_COMPLETED;
             } else {
-                // Không pending, không approved -> khả năng là toàn bộ bị reject
+                // Không pending, không approved ->  toàn bộ bị reject
                 $this->request->status = EquipmentIssueRequest::STATUS_CANCELLED;
             }
         }

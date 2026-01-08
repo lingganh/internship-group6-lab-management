@@ -9,11 +9,10 @@ class Equipment extends Model
 {
     use HasFactory;
 
-  
+
 
     protected $table = 'equipment';
     protected $fillable  = [
-        'lab_id',
         'name',
         'code',
         'type',
@@ -23,7 +22,6 @@ class Equipment extends Model
         'notes',
     ];
     protected $casts = [
-        'specifications' => 'array',
         'purchased_date' => 'date',
     ];
 

@@ -12,6 +12,7 @@ class EquipmentIssueRequest extends Model
     protected $fillable = [
         'user_id',
         'lab_event_id',
+        'lab_id',
         'description',
         'status',
         'items_count',
@@ -35,5 +36,9 @@ class EquipmentIssueRequest extends Model
     public function labEvent()
     {
         return $this->belongsTo(\App\Models\LabEvent::class, 'lab_event_id');
+    }
+    public function lab()
+    {
+        return $this->belongsTo(Lab::class, 'lab_id');
     }
 }
