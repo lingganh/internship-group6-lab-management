@@ -17,15 +17,18 @@
             <div class="page-header-content d-lg-flex border-top">
                 <div class="d-flex">
                     <div class="breadcrumb py-2">
-                        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item"><i class="ph-house"></i></a>
+                        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item">
+                            <i class="ph-house"></i>
+                        </a>
                         <span class="breadcrumb-item active">Đăng ký lịch </span>
                     </div>
 
-                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
+                    <a href="#breadcrumb_elements"
+                       class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                       data-bs-toggle="collapse">
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
@@ -46,39 +49,53 @@
 
                     <div class="card-body pt-3">
                         <div class="row g-3">
-
+                            {{-- Tiêu đề + phân loại --}}
                             <div class="col-12 col-md-8">
                                 <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
-                                <input wire:model.defer="form.title" type="text" class="form-control register-control" placeholder="Nhập tiêu đề...">
-                                @error('form.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                <input wire:model.defer="form.title"
+                                       type="text"
+                                       class="form-control register-control"
+                                       placeholder="Nhập tiêu đề...">
+                                @error('form.title')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold text-dark mb-1">Phân loại</label>
-                                <select wire:model.defer="form.category" class="form-select register-control">
+                                <select wire:model.defer="form.category"
+                                        class="form-select register-control">
                                     <option value="work">Làm việc / Nghiên cứu</option>
                                     <option value="seminar">Hội thảo / Seminar</option>
                                     <option value="other">Khác</option>
                                 </select>
-                                @error('form.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('form.category')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            {{-- Phòng, người đăng ký, nhóm --}}
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                                <select wire:model.defer="form.lab_code" class="form-select register-control">
+                                <select wire:model.defer="form.lab_code"
+                                        class="form-select register-control">
                                     <option value="">Chọn phòng...</option>
                                     @foreach($labs as $lab)
-                                        <option wire:key="lab-reg-{{ $lab->code }}" value="{{ $lab->code }}">
+                                        <option wire:key="{{ $lab->code }}"
+                                                value="{{ $lab->code }}">
                                             {{ $lab->name }} ({{ $lab->code }})
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('form.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('form.lab_code')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold text-dark mb-1">Người đăng ký</label>
-                                <select wire:model.defer="form.user_id" class="form-select register-control">
+                                <select wire:model.defer="form.user_id"
+                                        class="form-select register-control">
                                     <option value="">Chọn người dùng...</option>
                                     @foreach($users as $u)
                                         <option wire:key="u-{{ $u->id }}" value="{{ $u->id }}">
@@ -86,12 +103,15 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('form.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('form.user_id')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho</label>
-                                <select wire:model.defer="form.group_id" class="form-select register-control">
+                                <select wire:model.defer="form.group_id"
+                                        class="form-select register-control">
                                     <option value="">Chọn nhóm / lớp...</option>
                                     @foreach($groups as $g)
                                         <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
@@ -99,46 +119,104 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('form.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('form.group_id')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            {{-- Thời gian --}}
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
-                                <input wire:model.defer="form.start" type="datetime-local" class="form-control register-control">
-                                @error('form.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                <input wire:model.defer="form.start"
+                                       type="datetime-local"
+                                       class="form-control register-control">
+                                @error('form.start')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
-                                <input wire:model.defer="form.end" type="datetime-local" class="form-control register-control">
-                                @error('form.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                <input wire:model.defer="form.end"
+                                       type="datetime-local"
+                                       class="form-control register-control">
+                                @error('form.end')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            {{-- Trạng thái --}}
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                                <select wire:model.defer="form.status" class="form-select register-control">
+                                <select wire:model.defer="form.status"
+                                        class="form-select register-control">
                                     <option value="approved">Đã duyệt</option>
                                     <option value="pending">Chờ duyệt</option>
                                     <option value="cancelled">Từ chối</option>
                                 </select>
-                                @error('form.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('form.status')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            {{-- Màu --}}
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold text-dark mb-1">Màu</label>
                                 <div class="d-flex align-items-center gap-2">
-                                    <input wire:model.defer="form.color" type="color" class="form-control form-control-color register-color">
-                                    <input wire:model.defer="form.color" type="text" class="form-control register-control" placeholder="#2563eb">
+                                    <input wire:model.defer="form.color"
+                                           type="color"
+                                           class="form-control form-control-color register-color">
+                                    <input wire:model.defer="form.color"
+                                           type="text"
+                                           class="form-control register-control"
+                                           placeholder="#2563eb">
                                 </div>
-                                @error('form.color') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('form.color')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            {{-- Lặp lịch --}}
+                            <div class="col-12 col-md-3">
+                                <label class="form-label small fw-semibold text-dark mb-1">Lặp lại</label>
+                                <select wire:model.defer="form.repeat_type"
+                                        class="form-select register-control">
+                                    <option value="">Không lặp</option>
+                                    <option value="daily">Mỗi ngày</option>
+                                    <option value="weekly">Mỗi tuần</option>
+                                    <option value="monthly">Mỗi tháng</option>
+                                </select>
+                                @error('form.repeat_type')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                <label class="form-label small fw-semibold text-dark mb-1">Lặp đến</label>
+                                <input wire:model.defer="form.repeat_until"
+                                       type="date"
+                                       class="form-control register-control">
+                                @error('form.repeat_until')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
+                                <div class="small text-muted mt-1">
+                                    Nếu để trống: chỉ tạo 1 lịch duy nhất.
+                                </div>
+                            </div>
+
+                            {{-- Mô tả --}}
                             <div class="col-12">
                                 <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
-                                <textarea wire:model.defer="form.description" class="form-control register-control" rows="4" placeholder="Nhập mô tả..."></textarea>
-                                @error('form.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                <textarea wire:model.defer="form.description"
+                                          class="form-control register-control"
+                                          rows="4"
+                                          placeholder="Nhập mô tả..."></textarea>
+                                @error('form.description')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
 
+                            {{-- File đính kèm + list + xóa --}}
                             <div class="col-12">
                                 <label class="form-label small fw-semibold text-dark mb-1">Tệp đính kèm</label>
                                 <input
@@ -148,8 +226,12 @@
                                     multiple
                                     wire:key="upload-input-{{ $uploadIteration }}"
                                 >
-                                @error('uploads') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                @error('uploads.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                @error('uploads')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
+                                @error('uploads.*')
+                                <div class="small text-danger mt-1">{{ $message }}</div>
+                                @enderror
 
                                 {{-- @if(!empty($uploads))
                                     <div class="mt-2 register-files">
@@ -159,17 +241,22 @@
                                                     <span class="me-2">📎</span>
                                                     {{ method_exists($f, 'getClientOriginalName') ? $f->getClientOriginalName() : 'Tệp' }}
                                                 </div>
-                                                <button type="button" class="btn register-file-remove" wire:click="removeUpload({{ $i }})">×</button>
+                                                <button type="button"
+                                                        class="btn register-file-remove"
+                                                        wire:click="removeUpload({{ $i }})">
+                                                    ×
+                                                </button>
                                             </div>
                                         @endforeach
                                     </div>
                                 @endif --}}
                             </div>
-
                         </div>
 
                         <div class="d-flex justify-content-end mt-3">
-                            <button wire:click="createEvent" type="button" class="btn register-btn register-btn-success">
+                            <button wire:click="createEvent"
+                                    type="button"
+                                    class="btn register-btn register-btn-success">
                                 Tạo lịch
                             </button>
                         </div>
@@ -179,6 +266,7 @@
             </div>
         </div>
 
+        {{-- Toast --}}
         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
             <div id="apToast" class="toast border-0 shadow-sm" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-body d-flex align-items-start gap-2">
@@ -187,7 +275,49 @@
                         <div id="apToastMsg" class="fw-semibold text-dark"></div>
                         <div id="apToastSub" class="small text-muted mt-1"></div>
                     </div>
-                    <button type="button" class="btn-close ms-2 mt-1" data-bs-dismiss="toast" aria-label="Close"></button>
+                    <button type="button"
+                            class="btn-close ms-2 mt-1"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal báo trùng lịch (khi status = approved & có conflict) --}}
+         <div wire:ignore.self class="modal fade" id="modalConflict" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 register-card">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark mb-1">⚠️ Cảnh báo trùng khung giờ</h5>
+                        <button type="button" class="btn-close mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <div class="alert alert-warning border-0 mb-3" style="background: rgba(234, 179, 8, 0.1); border-radius: 12px;">
+                            <div class="small text-dark mb-2">
+                                Khung giờ bạn chọn <strong>bị trùng</strong> với một lịch <b>đã duyệt</b> trong cùng phòng lab.
+                            </div>
+                        </div>
+                        
+                        <div class="small text-muted mb-2 fw-semibold">Bạn có thể:</div>
+                        <ul class="small text-muted ps-3 mb-3">
+                            <li class="mb-1">Đổi phòng hoặc đổi khung giờ khác</li>
+                            <li class="mb-1">Chuyển trạng thái sang <b>"Chờ duyệt"</b> rồi tạo lại</li>
+                            <li class="mb-0">Hoặc nhấn <b>"Vẫn Duyệt"</b> bên dưới để bỏ qua cảnh báo</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button"
+                                class="btn register-btn register-btn-ghost"
+                                data-bs-dismiss="modal">
+                            Hủy
+                        </button>
+                        <button type="button"
+                                class="btn register-btn register-btn-warning"
+                                wire:click="createEvent"
+                                data-bs-dismiss="modal">
+                            Vẫn Duyệt
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -323,6 +453,13 @@
             window.addEventListener('toast', (e) => {
                 const d = (e && e.detail) ? e.detail : {};
                 apToast(d.type || 'info', d.message || '', d.sub || '');
+            });
+
+            // Modal trùng lịch cho register
+            window.addEventListener('open-conflict-modal', () => {
+                const el = document.getElementById('modalConflict');
+                if (!el) return;
+                bootstrap.Modal.getOrCreateInstance(el).show();
             });
         </script>
     @endonce
