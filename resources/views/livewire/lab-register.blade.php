@@ -151,7 +151,7 @@
                                 @error('uploads') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                 @error('uploads.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
 
-                                @if(!empty($uploads))
+                                {{-- @if(!empty($uploads))
                                     <div class="mt-2 register-files">
                                         @foreach($uploads as $i => $f)
                                             <div class="register-file" wire:key="up-{{ $i }}">
@@ -163,7 +163,7 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                @endif
+                                @endif --}}
                             </div>
 
                         </div>

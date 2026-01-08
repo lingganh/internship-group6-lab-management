@@ -195,160 +195,219 @@
         </div>
 
         {{-- Modal Details --}}
-         <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 diary-modal">
-          <div class="modal-header border-0 pb-0">
-            <div class="w-100 d-flex align-items-start gap-2">
-              <div class="me-auto">
-                <h5 class="modal-title fw-bold text-dark mb-1">Chỉnh sửa</h5>
-              </div>
-              <button type="button" class="btn-close mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-          </div>
-
-          <div class="modal-body pt-3">
-            @if($selectedEvent)
-              <div class="row g-3">
-                <div class="col-12 col-md-8">
-                  <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
-                  <input wire:model.defer="edit.title" type="text" class="form-control diary-control">
-                  @error('edit.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-4">
-                  <label class="form-label small fw-semibold text-dark mb-1">Phân loại</label>
-                  <select wire:model.defer="edit.category" class="form-select diary-control">
-                    <option value="work">Làm việc / nghiên cứu</option>
-                    <option value="seminar">Hội thảo / seminar</option>
-                    <option value="other">Khác</option>
-                  </select>
-                  @error('edit.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                  <select wire:model.defer="edit.lab_code" class="form-select diary-control">
-                    <option value="">Chọn phòng...</option>
-                    @foreach($labs as $lab)
-                      <option wire:key="lab-edit-{{ $lab->code }}" value="{{ $lab->code }}">{{ $lab->name }} ({{ $lab->code }})</option>
-                    @endforeach
-                  </select>
-                  @error('edit.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
-                  <input wire:model.defer="edit.start" type="datetime-local" class="form-control diary-control">
-                  @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-3">
-                  <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
-                  <input wire:model.defer="edit.end" type="datetime-local" class="form-control diary-control">
-                  @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                  <select wire:model.defer="edit.status" class="form-select diary-control">
-                    <option value="pending">Chờ duyệt</option>
-                    <option value="approved">Đã duyệt</option>
-                    <option value="cancelled">Từ chối</option>
-                    <option value="completed">Đã hoàn thành</option>
-                  </select>
-                  @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12 col-md-3">
-                    <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
-                    <select wire:model.defer="edit.user_id" class="form-select diary-control">
-                      <option value="">Chọn người dùng...</option>
-                      @foreach($users as $u)
-                        <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
-                          {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
-                        </option>
-                      @endforeach
-                    </select>
-                    @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                  </div>
-
-                  <div class="col-12 col-md-3">
-                    <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho</label>
-                    <select wire:model.defer="edit.group_id" class="form-select diary-control">
-                      <option value="">Chọn nhóm / lớp...</option>
-                      @foreach($groups as $g)
-                        <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
-                          {{ $g->name ?? ('Group #'.$g->id) }}
-                        </option>
-                      @endforeach
-                    </select>
-                    @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                  </div>
-
-
-                <div class="col-12">
-                  <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
-                  <textarea wire:model.defer="edit.description" class="form-control diary-control" rows="3"></textarea>
-                  @error('edit.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12">
-                  <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
-                  <textarea wire:model.defer="edit.feedback" class="form-control diary-control" rows="3"></textarea>
-                  @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="col-12">
-                  <div class="diary-filebox">
-                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                      <div class="fw-bold text-dark">File đính kèm</div>
-                      <div class="small text-muted">{{ optional($selectedEvent->files)->count() ?? 0 }} file</div>
+        <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 diary-modal">
+                    <div class="modal-header border-0 pb-0">
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-1">Chi tiết nhật ký</h5>
+                            <div class="small text-muted">Xem và chỉnh sửa nhật ký sử dụng phòng lab.</div>
+                        </div>
+                        <button type="button" class="btn-close mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    @if($selectedEvent->files && $selectedEvent->files->count())
-                      <div class="diary-filelist">
-                        @foreach($selectedEvent->files as $f)
-                          @php
-                            $p = $f->path ?? $f->file_path ?? $f->url ?? '';
-                            $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
-                            $n = $f->name ?? $f->original_name ?? basename((string)$p) ?? 'file';
-                          @endphp
-                          <a class="diary-fileitem" href="{{ $u }}" target="_blank" rel="noopener">
-                            <span class="diary-filedot"></span>
-                            <span class="diary-filename">{{ $n }}</span>
-                          </a>
-                        @endforeach
-                      </div>
-                    @else
-                      <div class="small text-muted">Chưa có file.</div>
-                    @endif
-                  </div>
+                    <div class="modal-body pt-3">
+                        @if($selectedEvent)
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
+                                        <input wire:model.defer="edit.title" type="text" class="form-control diary-control">
+                                        @error('edit.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Phân loại</label>
+                                        <select wire:model.defer="edit.category" class="form-select diary-control">
+                                            <option value="work">Làm việc / nghiên cứu</option>
+                                            <option value="seminar">Hội thảo / seminar</option>
+                                            <option value="other">Khác</option>
+                                        </select>
+                                        @error('edit.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
+                                        <select wire:model.defer="edit.lab_code" class="form-select diary-control">
+                                            <option value="">Chọn phòng...</option>
+                                            @foreach($labs as $lab)
+                                                <option wire:key="lab-edit-{{ $lab->code }}" value="{{ $lab->code }}">
+                                                    {{ $lab->name }} ({{ $lab->code }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('edit.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
+                                        <input wire:model.defer="edit.start" type="datetime-local" class="form-control diary-control">
+                                        @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
+                                        <input wire:model.defer="edit.end" type="datetime-local" class="form-control diary-control">
+                                        @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
+                                        <select wire:model.defer="edit.status" class="form-select diary-control">
+                                            <option value="pending">Chờ duyệt</option>
+                                            <option value="approved">Đã duyệt</option>
+                                            <option value="cancelled">Từ chối</option>
+                                            <option value="completed">Đã hoàn thành</option>
+                                        </select>
+                                        @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
+                                        <select wire:model.defer="edit.user_id" class="form-select diary-control">
+                                            <option value="">Chọn người dùng...</option>
+                                            @foreach($users as $u)
+                                                <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
+                                                    {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho nhóm</label>
+                                        <select wire:model.defer="edit.group_id" class="form-select diary-control">
+                                            <option value="">Chọn nhóm / lớp...</option>
+                                            @foreach($groups as $g)
+                                                <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
+                                                    {{ $g->name ?? ('Group #'.$g->id) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
+                                        <textarea wire:model.defer="edit.description"
+                                                  class="form-control diary-control"
+                                                  rows="3"></textarea>
+                                        @error('edit.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
+                                        <textarea wire:model.defer="edit.feedback"
+                                                  class="form-control diary-control"
+                                                  rows="3"></textarea>
+                                        @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                {{-- File hiện tại --}}
+                                <div class="col-12">
+                                    <div class="diary-filebox">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                            <div class="fw-bold text-dark">File đính kèm</div>
+                                            <div class="small text-muted">
+                                                {{ optional($selectedEvent->files)->count() ?? 0 }} file
+                                            </div>
+                                        </div>
+
+                                        @if($selectedEvent->files && $selectedEvent->files->count())
+                                            <div class="diary-files">
+                                                @foreach($selectedEvent->files as $f)
+                                                    @php
+                                                        $p = $f->path ?? $f->file_path ?? $f->url ?? '';
+                                                        $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
+                                                        $n = $f->name ?? $f->file_name ?? $f->original_name ?? basename((string)$p) ?? 'file';
+                                                    @endphp
+                                                    <div class="diary-file">
+                                                        <a class="diary-file-link" href="{{ $u }}" target="_blank" rel="noopener">
+                                                            <div class="diary-file-ic">
+                                                                <i class="ph-file-text"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="small fw-semibold text-dark text-truncate">
+                                                                    {{ $n }}
+                                                                </div>
+                                                                <div class="small text-muted">
+                                                                    {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
+                                                                </div>
+                                                            </div>
+                                                        </a>
+
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-link text-danger diary-file-delete"
+                                                            wire:click="deleteFile({{ $f->id }})">
+                                                            Xóa
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="small text-muted">Chưa có file.</div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- Thêm file mới --}}
+                                <div class="col-12">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
+                                        <input type="file" wire:model="newFiles" multiple class="form-control diary-control">
+                                        <div class="small text-muted mt-1">
+                                            Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>.
+                                        </div>
+                                        @error('newFiles') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+                        <div class="d-flex w-100 justify-content-between align-items-center gap-2">
+                            <button type="button" class="btn diary-btn diary-btn-ghost" data-bs-dismiss="modal">
+                                Đóng
+                            </button>
+
+                            <div class="d-flex gap-2">
+                                <button wire:click="openDeleteConfirm" type="button" class="btn diary-btn diary-btn-danger">
+                                    Xóa
+                                </button>
+
+                                <button wire:click="updateEvent" type="button" class="btn diary-btn diary-btn-success">
+                                    Lưu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-
-              </div>
-            @endif
-          </div>
-
-          <div class="modal-footer border-0 pt-0">
-            <div class="d-flex w-100 justify-content-between align-items-center gap-2">
-              <button type="button" class="btn diary-btn diary-btn-ghost" data-bs-dismiss="modal">Đóng</button>
-
-              <div class="d-flex gap-2">
-                <button wire:click="openDeleteConfirm" type="button" class="btn diary-btn diary-btn-danger">
-                  Xóa
-                </button>
-
-                <button wire:click="updateEvent" type="button" class="btn diary-btn diary-btn-success">
-                  Lưu
-                </button>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-
 
         {{-- Modal Confirm --}}
         <div wire:ignore.self
@@ -454,20 +513,9 @@
             display: inline-flex;
         }
 
-        .diary-pill-pending {
-            background: var(--d-warn-soft);
-            color: #7a4b00;
-        }
-
-        .diary-pill-approved {
-            background: var(--d-success-soft);
-            color: #0f6a2e;
-        }
-
-        .diary-pill-cancelled {
-            background: var(--d-danger-soft);
-            color: #8a1414;
-        }
+        .diary-pill-pending { background: var(--d-warn-soft); color: #7a4b00; }
+        .diary-pill-approved { background: var(--d-success-soft); color: #0f6a2e; }
+        .diary-pill-cancelled { background: var(--d-danger-soft); color: #8a1414; }
 
         .diary-btn {
             border-radius: 12px;
@@ -499,13 +547,8 @@
             color: var(--d-muted);
         }
 
-        .text-center-desktop {
-            text-align: center;
-        }
-
-        .text-end-desktop {
-            text-align: right;
-        }
+        .text-center-desktop { text-align: center; }
+        .text-end-desktop { text-align: right; }
 
         .text-wrap-mobile {
             white-space: nowrap;
@@ -514,15 +557,20 @@
             max-width: 320px;
         }
 
+        /* các field trong modal: bỏ bo, giữ form-control bo tròn thôi */
         .diary-info {
-            border: 1px solid var(--d-border);
-            border-radius: 14px;
-            padding: 10px 12px;
-            background: #fff;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            background: transparent;
         }
 
+        /* box file duy nhất có bo tròn */
         .diary-filebox {
             background: #f8fafc;
+            border-radius: 14px;
+            border: 1px solid var(--d-border);
+            padding: 10px 12px;
         }
 
         .diary-files {
@@ -538,9 +586,16 @@
             padding: 8px;
             border-radius: 10px;
             border: 1px solid var(--d-border);
+            background: #fff;
+        }
+
+        .diary-file-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
             color: inherit;
-            background: #fff;
+            flex: 1;
         }
 
         .diary-file-ic {
@@ -553,7 +608,17 @@
             border-radius: 6px;
         }
 
-        /* RESPONSIVE CARD STYLE */
+        .diary-file-delete {
+            font-size: 0.8rem;
+            white-space: nowrap;
+            padding-right: 0;
+        }
+
+        .diary-modal {
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
         @media (max-width: 991.98px) {
             .diary-table,
             .diary-table thead,
@@ -564,9 +629,7 @@
                 width: 100%;
             }
 
-            .diary-table thead {
-                display: none;
-            }
+            .diary-table thead { display: none; }
 
             .diary-table tbody tr {
                 margin-bottom: 1rem;
@@ -620,13 +683,8 @@
                 margin-bottom: 4px;
             }
 
-            .w-100-mobile {
-                width: 100%;
-            }
-
-            .diary-page {
-                padding: 10px !important;
-            }
+            .w-100-mobile { width: 100%; }
+            .diary-page { padding: 10px !important; }
         }
 
         .ap-toast-ic {
@@ -639,11 +697,6 @@
             background: var(--d-primary-soft);
             color: var(--d-primary);
             font-weight: bold;
-        }
-
-        .diary-modal {
-            border-radius: 20px;
-            overflow: hidden;
         }
     </style>
 

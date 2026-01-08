@@ -4,14 +4,19 @@ namespace App\Livewire;
 
 use App\Models\Lab;
 use App\Models\LabEvent;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\LabEventFile;
 use App\Models\User;
 use App\Models\Group;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class LabDiary extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     public $filterLabCode = '';
     public $filterStatus = '';
@@ -35,6 +40,9 @@ class LabDiary extends Component
         'group_id' => '',
     ];
 
+    // File mới upload trong modal
+    public $newFiles = [];
+
     protected $paginationTheme = 'bootstrap';
 
     protected $queryString = [
@@ -55,26 +63,11 @@ class LabDiary extends Component
         };
     }
 
-    public function updatingFilterLabCode()
-    {
-        $this->resetPage();
-    }
-    public function updatingFilterStatus()
-    {
-        $this->resetPage();
-    }
-    public function updatingFilterFrom()
-    {
-        $this->resetPage();
-    }
-    public function updatingFilterTo()
-    {
-        $this->resetPage();
-    }
-    public function updatingKeyword()
-    {
-        $this->resetPage();
-    }
+    public function updatingFilterLabCode() { $this->resetPage(); }
+    public function updatingFilterStatus()  { $this->resetPage(); }
+    public function updatingFilterFrom()    { $this->resetPage(); }
+    public function updatingFilterTo()      { $this->resetPage(); }
+    public function updatingKeyword()       { $this->resetPage(); }
 
     private function hasConflict(string $labCode, string $start, string $end, ?int $ignoreId = null): bool
     {
@@ -93,29 +86,32 @@ class LabDiary extends Component
         $this->selectedEvent = LabEvent::with(['user', 'files', 'lab', 'group'])->findOrFail($id);
 
         $this->edit = [
-            'title' => (string) ($this->selectedEvent->title ?? ''),
-            'category' => (string) ($this->selectedEvent->category ?? 'work'),
-            'lab_code' => (string) ($this->selectedEvent->lab_code ?? ''),
-            'start' => $this->selectedEvent->start ? $this->selectedEvent->start->format('Y-m-d\TH:i') : '',
-            'end' => $this->selectedEvent->end ? $this->selectedEvent->end->format('Y-m-d\TH:i') : '',
+            'title'       => (string) ($this->selectedEvent->title ?? ''),
+            'category'    => (string) ($this->selectedEvent->category ?? 'work'),
+            'lab_code'    => (string) ($this->selectedEvent->lab_code ?? ''),
+            'start'       => $this->selectedEvent->start ? $this->selectedEvent->start->format('Y-m-d\TH:i') : '',
+            'end'         => $this->selectedEvent->end ? $this->selectedEvent->end->format('Y-m-d\TH:i') : '',
             'description' => (string) ($this->selectedEvent->description ?? ''),
-            'color' => (string) ($this->selectedEvent->color ?? '#3498db'),
-            'status' => (string) ($this->selectedEvent->status ?? 'pending'),
-            'user_id' => (string) ($this->selectedEvent->user_id ?? ''),
-            'group_id' => (string) ($this->selectedEvent->group_id ?? ''),
-            'feedback' => (string) ($this->selectedEvent->feedback ?? ''),
+            'color'       => (string) ($this->selectedEvent->color ?? '#3498db'),
+            'status'      => (string) ($this->selectedEvent->status ?? 'pending'),
+            'user_id'     => (string) ($this->selectedEvent->user_id ?? ''),
+            'group_id'    => (string) ($this->selectedEvent->group_id ?? $this->selectedEvent->registered_for ?? ''),
+            'feedback'    => (string) ($this->selectedEvent->feedback ?? ''),
         ];
+
+        $this->newFiles = [];
 
         $this->dispatch('open-details-modal');
     }
 
-
     public function openDeleteConfirm()
     {
-        if (!$this->selectedEvent)
+        if (!$this->selectedEvent) {
             return;
+        }
         $this->dispatch('open-confirm-modal');
     }
+
     private function flashToast(string $type, string $message)
     {
         session()->flash($type, $message);
@@ -124,24 +120,31 @@ class LabDiary extends Component
 
     public function updateEvent()
     {
-        if (!$this->selectedEvent)
+        if (!$this->selectedEvent) {
             return;
+        }
 
         $this->validate([
-            'edit.title' => 'required|string|max:255',
-            'edit.category' => 'required|string|max:50',
-            'edit.lab_code' => 'required|string|max:50',
-            'edit.start' => 'required|date',
-            'edit.end' => 'required|date',
+            'edit.title'       => 'required|string|max:255',
+            'edit.category'    => 'required|string|max:50',
+            'edit.lab_code'    => 'required|string|max:50',
+            'edit.start'       => 'required|date',
+            'edit.end'         => 'required|date',
             'edit.description' => 'nullable|string|max:5000',
-            'edit.status' => 'required|in:pending,approved,cancelled',
-            'edit.feedback' => 'nullable|string|max:2000',
-            'edit.user_id' => 'nullable|exists:users,id',
-            'edit.group_id' => 'nullable|exists:groups,id',
+            'edit.status'      => 'required|in:pending,approved,cancelled,completed',
+            'edit.feedback'    => 'nullable|string|max:2000',
+            'edit.user_id'     => 'nullable|exists:users,id',
+            'edit.group_id'    => 'nullable|exists:groups,id',
+            'newFiles.*'       => 'nullable|file|max:5120', // 5MB/file
         ]);
 
-        if ($this->edit['status'] === 'approved') {
-            if ($this->hasConflict($this->edit['lab_code'], $this->edit['start'], $this->edit['end'], $this->selectedEvent->id)) {
+        if (in_array($this->edit['status'], ['approved', 'completed'])) {
+            if ($this->hasConflict(
+                $this->edit['lab_code'],
+                $this->edit['start'],
+                $this->edit['end'],
+                $this->selectedEvent->id
+            )) {
                 $this->flashToast('error', 'Khung giờ này đã có lịch được duyệt trong phòng.');
                 return;
             }
@@ -150,18 +153,38 @@ class LabDiary extends Component
         $ev = LabEvent::findOrFail($this->selectedEvent->id);
 
         $ev->update([
-            'title' => $this->edit['title'],
-            'category' => $this->edit['category'],
-            'lab_code' => $this->edit['lab_code'],
-            'start' => $this->edit['start'],
-            'end' => $this->edit['end'],
-            'description' => $this->edit['description'] ?: null,
-            'status' => $this->edit['status'],
-            'user_id' => $this->edit['user_id'] ?: null,
+            'title'          => $this->edit['title'],
+            'category'       => $this->edit['category'],
+            'lab_code'       => $this->edit['lab_code'],
+            'start'          => $this->edit['start'],
+            'end'            => $this->edit['end'],
+            'description'    => $this->edit['description'] ?: null,
+            'status'         => $this->edit['status'],
+            'user_id'        => $this->edit['user_id'] ?: null,
             'registered_for' => $this->edit['group_id'] ?: null,
-            'feedback' => trim((string) $this->edit['feedback']) !== '' ? trim((string) $this->edit['feedback']) : null,
+            'feedback'       => trim((string) $this->edit['feedback']) !== '' ? trim((string) $this->edit['feedback']) : null,
         ]);
 
+        // Lưu file mới (nếu có)
+        if (!empty($this->newFiles)) {
+            foreach ($this->newFiles as $file) {
+                try {
+                    $path = $file->store('lab_files', 'public');
+
+                    LabEventFile::create([
+                        'lab_event_id' => $ev->id,
+                        'file_name'    => $file->getClientOriginalName(),
+                        'file_path'    => $path,
+                        'file_type'    => $file->getClientMimeType(),
+                        'file_size'    => $file->getSize(),
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Diary upload error: ' . $e->getMessage());
+                }
+            }
+        }
+
+        $this->newFiles = [];
         $this->selectedEvent = null;
 
         $this->dispatch('close-details-modal');
@@ -170,8 +193,9 @@ class LabDiary extends Component
 
     public function deleteEvent()
     {
-        if (!$this->selectedEvent)
+        if (!$this->selectedEvent) {
             return;
+        }
 
         $id = $this->selectedEvent->id;
 
@@ -184,6 +208,19 @@ class LabDiary extends Component
             return;
         }
 
+        // Xóa file đính kèm
+        $files = LabEventFile::where('lab_event_id', $id)->get();
+        foreach ($files as $file) {
+            try {
+                if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Delete diary file error: ' . $e->getMessage());
+            }
+            $file->delete();
+        }
+
         $ev->delete();
 
         $this->selectedEvent = null;
@@ -194,6 +231,38 @@ class LabDiary extends Component
         $this->flashToast('success', "Đã xóa lịch #{$id}.");
     }
 
+    /**
+     * Xóa 1 file cũ trong modal chi tiết
+     */
+    public function deleteFile(int $fileId)
+    {
+        if (!$this->selectedEvent) {
+            return;
+        }
+
+        $file = LabEventFile::where('lab_event_id', $this->selectedEvent->id)
+            ->where('id', $fileId)
+            ->first();
+
+        if (!$file) {
+            $this->flashToast('warning', 'File đã bị xóa trước đó.');
+            return;
+        }
+
+        try {
+            if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+            $file->delete();
+
+             $this->selectedEvent = $this->selectedEvent->fresh('files');
+
+            $this->flashToast('success', 'Đã xóa file đính kèm.');
+        } catch (\Throwable $e) {
+            Log::error('Delete diary file error: ' . $e->getMessage());
+            $this->flashToast('error', 'Xóa file thất bại, vui lòng thử lại.');
+        }
+    }
 
     public function render()
     {
@@ -212,18 +281,24 @@ class LabDiary extends Component
                 'user:id,full_name,email',
                 'lab:code,name',
                 'group:id,name',
+                'files',
             ])
             ->where('status', 'completed')
             ->where('end', '<', now())
             ->orderByDesc('start');
-        if ($this->filterLabCode !== '')
+
+        if ($this->filterLabCode !== '') {
             $q->where('lab_code', $this->filterLabCode);
-        if ($this->filterStatus !== '')
+        }
+        if ($this->filterStatus !== '') {
             $q->where('status', $this->filterStatus);
-        if ($this->filterFrom !== '')
+        }
+        if ($this->filterFrom !== '') {
             $q->whereDate('start', '>=', $this->filterFrom);
-        if ($this->filterTo !== '')
+        }
+        if ($this->filterTo !== '') {
             $q->whereDate('start', '<=', $this->filterTo);
+        }
 
         if (trim($this->keyword) !== '') {
             $kw = trim($this->keyword);
