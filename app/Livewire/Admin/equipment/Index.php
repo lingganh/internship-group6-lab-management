@@ -50,7 +50,7 @@ class Index extends Component
         $this->dispatch(
             'openModel',
             type: 'warning',
-            title: 'Bạn có chắc chắn muốn xóa thiết bị này không?',
+            title: 'Bạn có muốn xóa thiết bị này không?',
             confirmEvent: 'confirmDeleteEquipment'
         );
     }
