@@ -371,16 +371,42 @@
                                     </div>
                                 </div>
 
-                                {{-- Thêm file mới --}}
+                                {{-- Thêm file mới + preview file mới --}}
                                 <div class="col-12">
                                     <div class="diary-info">
                                         <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
                                         <input type="file" wire:model="newFiles" multiple class="form-control diary-control">
                                         <div class="small text-muted mt-1">
-                                            Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>.
+                                            Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>
                                         </div>
                                         @error('newFiles') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+
+                                        @if($newFiles && count($newFiles))
+                                            <div class="diary-newfiles mt-2">
+                                                @foreach($newFiles as $idx => $file)
+                                                    <div class="diary-file">
+                                                        <div class="diary-file-ic">
+                                                            <i class="ph-paperclip"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="small fw-semibold text-dark text-truncate">
+                                                                {{ $file->getClientOriginalName() }}
+                                                            </div>
+                                                            <div class="small text-muted">
+                                                                {{ number_format($file->getSize() / 1024, 1) }} KB
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-link text-danger diary-file-delete"
+                                                            wire:click="removeNewFile({{ $idx }})">
+                                                            Bỏ
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -557,7 +583,6 @@
             max-width: 320px;
         }
 
-        /* các field trong modal: bỏ bo, giữ form-control bo tròn thôi */
         .diary-info {
             border: none;
             border-radius: 0;
@@ -565,7 +590,6 @@
             background: transparent;
         }
 
-        /* box file duy nhất có bo tròn */
         .diary-filebox {
             background: #f8fafc;
             border-radius: 14px;
@@ -612,6 +636,12 @@
             font-size: 0.8rem;
             white-space: nowrap;
             padding-right: 0;
+        }
+
+        .diary-newfiles {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
         }
 
         .diary-modal {
