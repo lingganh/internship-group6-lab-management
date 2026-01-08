@@ -32,7 +32,6 @@
             <ul class="nav nav-sidebar" data-nav-type="accordion">
                 <li class="nav-item">
                     <a href="{{route('admin.coming-soon')}}"
-                    <a href="{{route('admin.dashboard')}}"
                        class="nav-link">
                         <i class="ph-house"></i>
                         <span>Dashboard</span>

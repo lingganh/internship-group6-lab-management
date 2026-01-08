@@ -23,8 +23,6 @@ use App\Livewire\Admin\Lab\Edit as LabEdit;
 //login sso
 Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
-Route::get('auth/redirect', [AuthenticateController::class, 'redirectToSSO'])->name('sso.redirect');
-Route::get('auth/callback', [AuthenticateController::class, 'handleSSOCallback'])->name('sso.callback');
 Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleLogout');
 
 Route::get('login', [AuthenticateController::class, 'showLoginForm'])->name('login');
@@ -33,7 +31,6 @@ Route::get('forgot-password', [AuthenticateController::class, 'forgotPassword'])
 Route::get('set-password/{token}', [AuthenticateController::class, 'setPassword'])->name('setPassword');
 
 Route::get('/', LabCalendar::class )->name('home');;
-Route::get('/', LabCalendar::class)->name('home');;
 
 Route::get('bookings', [LabCalendar::class, 'getAllBookings']);
 
@@ -43,21 +40,23 @@ Route::middleware('auth')->group(function () {
     Route::delete('bookings/{id}', [LabCalendar::class, 'destroy']);
     Route::patch('bookings/{id}/approve', [LabCalendar::class, 'approve']);
     Route::get('/my-schedules', UserSchedules::class)->name('user.schedules');
+
 });
 
 Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('events.calendar');
 
 Route::middleware('checkAuth')->group(function () {
-    Route::get('/thong-tin-tai-khoan', [ClientController::class, 'infoUser'])->name('client.info-user');
-    Route::get('/doi-mat-khau', [ClientController::class, 'changePassword'])->name('client.change-password');
-    Route::get('/xac-thuc-2-lop', [ClientController::class, 'twoFactor'])->middleware(
+    Route::get('/thong-tin-tai-khoan',[ClientController::class,'infoUser'])->name('client.info-user');
+    Route::get('/doi-mat-khau',[ClientController::class,'changePassword'])->name('client.change-password');
+    Route::get('/xac-thuc-2-lop',[ClientController::class,'twoFactor'])->middleware(
         when(
             Features::canManageTwoFactorAuthentication()
-                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+            && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
             ['password.confirm'],
             [],
         ),
     )->name('client.two-factor');
+
 });
 
 Route::middleware('role:admin')->group(function () {
@@ -73,9 +72,9 @@ Route::middleware('role:admin')->group(function () {
         });
 
         Route::prefix('groups')->group(function () {
-            Route::get('/', [GroupController::class, 'index'])->name('admin.groups.index');
-            Route::get('/create', [GroupController::class, 'create'])->name('admin.groups.create');
-            Route::get('/edit/{id}', [GroupController::class, 'edit'])->name('admin.groups.edit');
+            Route::get('/',[GroupController::class, 'index'] )->name('admin.groups.index');
+            Route::get('/create',[GroupController::class, 'create'] )->name('admin.groups.create');
+            Route::get('/edit/{id}',[GroupController::class, 'edit'] )->name('admin.groups.edit');
         });
         Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
         Route::get('/approval', Approval::class)->name('admin.approval');
@@ -91,4 +90,4 @@ Route::middleware('role:admin')->group(function () {
 
 
 
-Route::get('coming-soon', fn() => view('coming-soon'))->name('admin.coming-soon');
+Route::get('coming-soon', fn () => view('coming-soon'))->name('admin.coming-soon');
