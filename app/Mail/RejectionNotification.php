@@ -40,7 +40,7 @@ class RejectionNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.lab_rejection',
+            view: 'mail.lab_rejection',
         );
     }
 
