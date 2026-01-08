@@ -4,8 +4,8 @@
             <div class="d-flex">
                 <h4 class="page-title mb-0">Nhật ký sử dụng</h4>
                 <a href="#page_header"
-                   class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                   data-bs-toggle="collapse">
+                    class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                    data-bs-toggle="collapse">
                     <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                 </a>
             </div>
@@ -22,12 +22,8 @@
         </div>
     </div>
 
-    <div id="toastPayload"
-         data-success="{{ session('success') }}"
-         data-error="{{ session('error') }}"
-         data-warning="{{ session('warning') }}"
-         data-info="{{ session('info') }}"
-         style="display:none"></div>
+    <div id="toastPayload" data-success="{{ session('success') }}" data-error="{{ session('error') }}"
+        data-warning="{{ session('warning') }}" data-info="{{ session('info') }}" style="display:none"></div>
 
     <div class="container-fluid py-4 diary-page">
         <div class="row justify-content-center">
@@ -44,7 +40,7 @@
                                     <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
                                     <select wire:model.live="filterLabCode" class="form-select diary-control">
                                         <option value="">Tất cả</option>
-                                        @foreach($labs as $lab)
+                                        @foreach ($labs as $lab)
                                             <option wire:key="lab-{{ $lab->code }}" value="{{ $lab->code }}">
                                                 {{ $lab->name }} ({{ $lab->code }})
                                             </option>
@@ -54,24 +50,19 @@
 
                                 <div class="col-6 col-md-2">
                                     <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
-                                    <input type="date"
-                                           wire:model.live="filterFrom"
-                                           class="form-control diary-control">
+                                    <input type="date" wire:model.live="filterFrom"
+                                        class="form-control diary-control">
                                 </div>
 
                                 <div class="col-6 col-md-2">
                                     <label class="form-label small fw-semibold text-dark mb-1">Đến ngày</label>
-                                    <input type="date"
-                                           wire:model.live="filterTo"
-                                           class="form-control diary-control">
+                                    <input type="date" wire:model.live="filterTo" class="form-control diary-control">
                                 </div>
 
                                 <div class="col-12 col-md-5">
                                     <label class="form-label small fw-semibold text-dark mb-1">Từ khóa</label>
-                                    <input type="text"
-                                           wire:model.live="keyword"
-                                           class="form-control diary-control"
-                                           placeholder="Tiêu đề / mô tả / feedback...">
+                                    <input type="text" wire:model.live="keyword" class="form-control diary-control"
+                                        placeholder="Tiêu đề / mô tả / feedback...">
                                 </div>
                             </div>
                         </div>
@@ -123,12 +114,13 @@
                                                     {{ $item->start->format('d/m/Y') }}
                                                 </div>
                                                 <div class="small text-muted">
-                                                    {{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}
+                                                    {{ $item->start->format('H:i') }} –
+                                                    {{ $item->end->format('H:i') }}
                                                 </div>
                                             </td>
 
                                             <td data-label="Trạng thái" class="text-center-desktop">
-                                                @if($item->status === 'pending')
+                                                @if ($item->status === 'pending')
                                                     <span class="badge diary-pill diary-pill-pending">
                                                         Chờ duyệt
                                                     </span>
@@ -148,8 +140,7 @@
                                             </td>
 
                                             <td class="text-end-desktop action-cell">
-                                                <button
-                                                    wire:click="viewEvent({{ $item->id }})"
+                                                <button wire:click="viewEvent({{ $item->id }})"
                                                     class="btn btn-sm diary-btn diary-btn-primary w-100-mobile"
                                                     type="button">
                                                     Chi tiết
@@ -179,17 +170,16 @@
 
         {{-- Toast --}}
         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
-            <div id="apToast" class="toast border-0 shadow-sm" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="apToast" class="toast border-0 shadow-sm" role="alert" aria-live="assertive"
+                aria-atomic="true">
                 <div class="toast-body d-flex align-items-start gap-2">
                     <div id="apToastIcon" class="ap-toast-ic"></div>
                     <div class="flex-grow-1">
                         <div id="apToastMsg" class="fw-semibold text-dark"></div>
                         <div id="apToastSub" class="small text-muted mt-1"></div>
                     </div>
-                    <button type="button"
-                            class="btn-close ms-2 mt-1"
-                            data-bs-dismiss="toast"
-                            aria-label="Close"></button>
+                    <button type="button" class="btn-close ms-2 mt-1" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
                 </div>
             </div>
         </div>
@@ -203,17 +193,21 @@
                             <h5 class="modal-title fw-bold text-dark mb-1">Chi tiết nhật ký</h5>
                             <div class="small text-muted">Xem và chỉnh sửa nhật ký sử dụng phòng lab.</div>
                         </div>
-                        <button type="button" class="btn-close mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close mt-1" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body pt-3">
-                        @if($selectedEvent)
+                        @if ($selectedEvent)
                             <div class="row g-3">
                                 <div class="col-12 col-md-8">
                                     <div class="diary-info">
                                         <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
-                                        <input wire:model.defer="edit.title" type="text" class="form-control diary-control">
-                                        @error('edit.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        <input wire:model.defer="edit.title" type="text"
+                                            class="form-control diary-control">
+                                        @error('edit.title')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -225,7 +219,9 @@
                                             <option value="seminar">Hội thảo / seminar</option>
                                             <option value="other">Khác</option>
                                         </select>
-                                        @error('edit.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('edit.category')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -234,29 +230,38 @@
                                         <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
                                         <select wire:model.defer="edit.lab_code" class="form-select diary-control">
                                             <option value="">Chọn phòng...</option>
-                                            @foreach($labs as $lab)
-                                                <option wire:key="lab-edit-{{ $lab->code }}" value="{{ $lab->code }}">
+                                            @foreach ($labs as $lab)
+                                                <option wire:key="lab-edit-{{ $lab->code }}"
+                                                    value="{{ $lab->code }}">
                                                     {{ $lab->name }} ({{ $lab->code }})
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('edit.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('edit.lab_code')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
                                 <div class="col-6 col-md-3">
                                     <div class="diary-info">
                                         <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
-                                        <input wire:model.defer="edit.start" type="datetime-local" class="form-control diary-control">
-                                        @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        <input wire:model.defer="edit.start" type="datetime-local"
+                                            class="form-control diary-control">
+                                        @error('edit.start')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
                                 <div class="col-6 col-md-3">
                                     <div class="diary-info">
                                         <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
-                                        <input wire:model.defer="edit.end" type="datetime-local" class="form-control diary-control">
-                                        @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        <input wire:model.defer="edit.end" type="datetime-local"
+                                            class="form-control diary-control">
+                                        @error('edit.end')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -269,7 +274,9 @@
                                             <option value="cancelled">Từ chối</option>
                                             <option value="completed">Đã hoàn thành</option>
                                         </select>
-                                        @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('edit.status')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -278,48 +285,55 @@
                                         <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
                                         <select wire:model.defer="edit.user_id" class="form-select diary-control">
                                             <option value="">Chọn người dùng...</option>
-                                            @foreach($users as $u)
-                                                <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
-                                                    {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
+                                            @foreach ($users as $u)
+                                                <option wire:key="user-{{ $u->id }}"
+                                                    value="{{ $u->id }}">
+                                                    {{ $u->full_name ?? ($u->name ?? 'User #' . $u->id) }}{{ $u->email ? ' (' . $u->email . ')' : '' }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('edit.user_id')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
                                 <div class="col-12 col-md-4">
                                     <div class="diary-info">
-                                        <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho nhóm</label>
+                                        <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho
+                                            nhóm</label>
                                         <select wire:model.defer="edit.group_id" class="form-select diary-control">
                                             <option value="">Chọn nhóm / lớp...</option>
-                                            @foreach($groups as $g)
-                                                <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
-                                                    {{ $g->name ?? ('Group #'.$g->id) }}
+                                            @foreach ($groups as $g)
+                                                <option wire:key="group-{{ $g->id }}"
+                                                    value="{{ $g->id }}">
+                                                    {{ $g->name ?? 'Group #' . $g->id }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('edit.group_id')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
                                 <div class="col-12">
                                     <div class="diary-info">
                                         <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
-                                        <textarea wire:model.defer="edit.description"
-                                                  class="form-control diary-control"
-                                                  rows="3"></textarea>
-                                        @error('edit.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        <textarea wire:model.defer="edit.description" class="form-control diary-control" rows="3"></textarea>
+                                        @error('edit.description')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
                                 <div class="col-12">
                                     <div class="diary-info">
                                         <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
-                                        <textarea wire:model.defer="edit.feedback"
-                                                  class="form-control diary-control"
-                                                  rows="3"></textarea>
-                                        @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        <textarea wire:model.defer="edit.feedback" class="form-control diary-control" rows="3"></textarea>
+                                        @error('edit.feedback')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -333,16 +347,21 @@
                                             </div>
                                         </div>
 
-                                        @if($selectedEvent->files && $selectedEvent->files->count())
+                                        @if ($selectedEvent->files && $selectedEvent->files->count())
                                             <div class="diary-files">
-                                                @foreach($selectedEvent->files as $f)
+                                                @foreach ($selectedEvent->files as $f)
                                                     @php
-                                                        $p = $f->path ?? $f->file_path ?? $f->url ?? '';
+                                                        $p = $f->path ?? ($f->file_path ?? ($f->url ?? ''));
                                                         $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
-                                                        $n = $f->name ?? $f->file_name ?? $f->original_name ?? basename((string)$p) ?? 'file';
+                                                        $n =
+                                                            $f->name ??
+                                                            ($f->file_name ??
+                                                                ($f->original_name ??
+                                                                    (basename((string) $p) ?? 'file')));
                                                     @endphp
                                                     <div class="diary-file">
-                                                        <a class="diary-file-link" href="{{ $u }}" target="_blank" rel="noopener">
+                                                        <a class="diary-file-link" href="{{ $u }}"
+                                                            target="_blank" rel="noopener">
                                                             <div class="diary-file-ic">
                                                                 <i class="ph-file-text"></i>
                                                             </div>
@@ -351,13 +370,12 @@
                                                                     {{ $n }}
                                                                 </div>
                                                                 <div class="small text-muted">
-                                                                    {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
+                                                                    {{ $f->file_size ? number_format($f->file_size / 1024, 1) . ' KB' : 'Tệp đính kèm' }}
                                                                 </div>
                                                             </div>
                                                         </a>
 
-                                                        <button
-                                                            type="button"
+                                                        <button type="button"
                                                             class="btn btn-sm btn-link text-danger diary-file-delete"
                                                             wire:click="deleteFile({{ $f->id }})">
                                                             Xóa
@@ -374,17 +392,23 @@
                                 {{-- Thêm file mới + preview file mới --}}
                                 <div class="col-12">
                                     <div class="diary-info">
-                                        <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
-                                        <input type="file" wire:model="newFiles" multiple class="form-control diary-control">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Thêm file
+                                            mới</label>
+                                        <input type="file" wire:model="newFiles" multiple
+                                            class="form-control diary-control">
                                         <div class="small text-muted mt-1">
                                             Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>
                                         </div>
-                                        @error('newFiles') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                        @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('newFiles')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
+                                        @error('newFiles.*')
+                                            <div class="small text-danger mt-1">{{ $message }}</div>
+                                        @enderror
 
-                                        @if($newFiles && count($newFiles))
+                                        @if ($newFiles && count($newFiles))
                                             <div class="diary-newfiles mt-2">
-                                                @foreach($newFiles as $idx => $file)
+                                                @foreach ($newFiles as $idx => $file)
                                                     <div class="diary-file">
                                                         <div class="diary-file-ic">
                                                             <i class="ph-paperclip"></i>
@@ -397,8 +421,7 @@
                                                                 {{ number_format($file->getSize() / 1024, 1) }} KB
                                                             </div>
                                                         </div>
-                                                        <button
-                                                            type="button"
+                                                        <button type="button"
                                                             class="btn btn-sm btn-link text-danger diary-file-delete"
                                                             wire:click="removeNewFile({{ $idx }})">
                                                             Bỏ
@@ -409,6 +432,79 @@
                                         @endif
                                     </div>
                                 </div>
+                                {{-- Phiếu báo hỏng của lần sử dụng này --}}
+                                <div class="col-12">
+                                    @php
+                                        $reqs = $selectedEvent->issueRequests ?? collect();
+                                    @endphp
+
+                                    <div class="diary-filebox">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                            <div class="fw-bold text-dark">Phiếu báo hỏng</div>
+                                            <div class="small text-muted">{{ $reqs->count() }} phiếu</div>
+                                        </div>
+
+                                        @if ($reqs->count())
+                                            <div class="diary-files">
+                                                @foreach ($reqs as $req)
+                                                    @php
+                                                        $st = (string) ($req->status ?? '');
+                                                        $stLabel = match ($st) {
+                                                            'pending' => 'Chờ xử lý',
+                                                            'in_review' => 'Đang xử lý',
+                                                            'completed' => 'Hoàn tất',
+                                                            'cancelled' => 'Đã hủy',
+                                                            default => $st !== '' ? $st : '—',
+                                                        };
+                                                        $stClass = match ($st) {
+                                                            'pending',
+                                                            'in_review'
+                                                                => 'badge diary-pill diary-pill-pending',
+                                                            'completed' => 'badge diary-pill diary-pill-approved',
+                                                            'cancelled' => 'badge diary-pill diary-pill-cancelled',
+                                                            default => 'badge bg-secondary',
+                                                        };
+                                                        $desc = \Illuminate\Support\Str::limit(
+                                                            (string) ($req->description ?? ''),
+                                                            120,
+                                                        );
+                                                    @endphp
+
+                                                    <div class="diary-file">
+                                                        <a class="diary-file-link"
+                                                            href="{{ route('admin.equipment-issue-requests.show', $req->id) }}"
+                                                            target="_blank" rel="noopener">
+                                                            <div class="diary-file-ic">
+                                                                <i class="ph-file-text"></i>
+                                                            </div>
+
+                                                            <div class="flex-grow-1">
+                                                                <div class="small fw-semibold text-dark">
+                                                                    Phiếu #{{ $req->id }}
+                                                                    • {{ (int) ($req->items_count ?? 0) }} thiết bị
+                                                                    •
+                                                                    {{ optional($req->created_at)->format('d/m/Y H:i') }}
+                                                                </div>
+
+                                                                <div class="small text-muted text-truncate"
+                                                                    style="max-width: 620px;">
+                                                                    {{ $desc !== '' ? $desc : '—' }}
+                                                                </div>
+                                                            </div>
+
+                                                            <span
+                                                                class="{{ $stClass }}">{{ $stLabel }}</span>
+                                                        </a>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="small text-muted">Chưa có phiếu báo hỏng cho lần sử dụng này.
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
                             </div>
                         @endif
                     </div>
@@ -420,11 +516,13 @@
                             </button>
 
                             <div class="d-flex gap-2">
-                                <button wire:click="openDeleteConfirm" type="button" class="btn diary-btn diary-btn-danger">
+                                <button wire:click="openDeleteConfirm" type="button"
+                                    class="btn diary-btn diary-btn-danger">
                                     Xóa
                                 </button>
 
-                                <button wire:click="updateEvent" type="button" class="btn diary-btn diary-btn-success">
+                                <button wire:click="updateEvent" type="button"
+                                    class="btn diary-btn diary-btn-success">
                                     Lưu
                                 </button>
                             </div>
@@ -436,11 +534,7 @@
         </div>
 
         {{-- Modal Confirm --}}
-        <div wire:ignore.self
-             class="modal fade"
-             id="modalConfirm"
-             tabindex="-1"
-             aria-hidden="true">
+        <div wire:ignore.self class="modal fade" id="modalConfirm" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-sm modal-dialog-centered">
                 <div class="modal-content border-0 diary-modal">
                     <div class="modal-header border-0 pb-0">
@@ -452,15 +546,10 @@
                         Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa?
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button"
-                                class="btn diary-btn diary-btn-ghost"
-                                data-bs-dismiss="modal">
+                        <button type="button" class="btn diary-btn diary-btn-ghost" data-bs-dismiss="modal">
                             Hủy
                         </button>
-                        <button
-                            wire:click="deleteEvent"
-                            type="button"
-                            class="btn diary-btn diary-btn-danger">
+                        <button wire:click="deleteEvent" type="button" class="btn diary-btn diary-btn-danger">
                             Xác nhận xóa
                         </button>
                     </div>
@@ -539,9 +628,20 @@
             display: inline-flex;
         }
 
-        .diary-pill-pending { background: var(--d-warn-soft); color: #7a4b00; }
-        .diary-pill-approved { background: var(--d-success-soft); color: #0f6a2e; }
-        .diary-pill-cancelled { background: var(--d-danger-soft); color: #8a1414; }
+        .diary-pill-pending {
+            background: var(--d-warn-soft);
+            color: #7a4b00;
+        }
+
+        .diary-pill-approved {
+            background: var(--d-success-soft);
+            color: #0f6a2e;
+        }
+
+        .diary-pill-cancelled {
+            background: var(--d-danger-soft);
+            color: #8a1414;
+        }
 
         .diary-btn {
             border-radius: 12px;
@@ -573,8 +673,13 @@
             color: var(--d-muted);
         }
 
-        .text-center-desktop { text-align: center; }
-        .text-end-desktop { text-align: right; }
+        .text-center-desktop {
+            text-align: center;
+        }
+
+        .text-end-desktop {
+            text-align: right;
+        }
 
         .text-wrap-mobile {
             white-space: nowrap;
@@ -650,6 +755,7 @@
         }
 
         @media (max-width: 991.98px) {
+
             .diary-table,
             .diary-table thead,
             .diary-table tbody,
@@ -659,7 +765,9 @@
                 width: 100%;
             }
 
-            .diary-table thead { display: none; }
+            .diary-table thead {
+                display: none;
+            }
 
             .diary-table tbody tr {
                 margin-bottom: 1rem;
@@ -713,8 +821,13 @@
                 margin-bottom: 4px;
             }
 
-            .w-100-mobile { width: 100%; }
-            .diary-page { padding: 10px !important; }
+            .w-100-mobile {
+                width: 100%;
+            }
+
+            .diary-page {
+                padding: 10px !important;
+            }
         }
 
         .ap-toast-ic {
@@ -737,9 +850,9 @@
             document.getElementById('apToastMsg').textContent = msg;
             document.getElementById('apToastSub').textContent = sub || '';
             const icon = document.getElementById('apToastIcon');
-            icon.textContent = type === 'success'
-                ? '✓'
-                : (type === 'error' ? '!' : 'i');
+            icon.textContent = type === 'success' ?
+                '✓' :
+                (type === 'error' ? '!' : 'i');
             bootstrap.Toast.getOrCreateInstance(toastEl).show();
         }
 
