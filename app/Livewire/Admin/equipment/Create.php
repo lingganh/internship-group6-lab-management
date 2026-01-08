@@ -40,6 +40,17 @@ class Create extends Component
     }
 
 
+    protected function messages()
+    {
+        return [
+            'lab_id.required' => 'Vui lòng chọn phòng Lab.',
+            'lab_id.exists'   => 'Phòng Lab không hợp lệ.',
+
+            'name.required'   => 'Tên thiết bị không được bỏ trống.',
+            'code.required'   => 'Mã thiết bị không được bỏ trống.',
+            'type.required'   => 'Loại thiết bị không được bỏ trống.',
+        ];
+    }
 
     public function save()
     {
