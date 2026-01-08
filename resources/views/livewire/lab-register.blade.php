@@ -491,8 +491,7 @@
 
     @once
         <script>
-            // chỉ mở modal, toast dùng event 'alert' global sẵn của m
-            window.addEventListener('open-conflict-modal', () => {
+             window.addEventListener('open-conflict-modal', () => {
                 const el = document.getElementById('modalConflict');
                 if (!el) return;
                 bootstrap.Modal.getOrCreateInstance(el).show();
