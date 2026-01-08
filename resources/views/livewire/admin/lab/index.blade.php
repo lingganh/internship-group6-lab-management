@@ -116,7 +116,7 @@
                             </td>
                         </tr>
                     @empty
-                        <x-table-empty :colspan="9" />
+                        <x-table-empty :colspan="7" />
                     @endforelse
 
 
@@ -126,5 +126,3 @@
         </div>
     </div>
 </div>
-
-
