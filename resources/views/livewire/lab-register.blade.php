@@ -24,8 +24,8 @@
             <div class="col-12 col-xxl-10">
                 <div class="card border-0 register-card">
                     <div class="card-header bg-white border-0 pb-0">
-                        <h4 class="fw-bold text-dark mb-0">Tạo lịch (Admin)</h4>
-                        <div class="small text-muted mt-1">Lịch được tạo sẽ tự động duyệt.</div>
+                        <h4 class="fw-bold text-dark mb-0">Tạo lịch </h4>
+                        {{-- <div class="small text-muted mt-1">Lịch được tạo sẽ tự động duyệt.</div> --}}
                     </div>
 
                     <div class="card-body pt-3">
