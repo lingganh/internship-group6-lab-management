@@ -5,16 +5,19 @@ let hiddenCategories = new Set()
 let hiddenStatuses = new Set()
 let selectedRoomFilter = ''
 
+// Màu cố định theo TRẠNG THÁI
+const statusColors = {
+  pending: '#f59e0b',   // vàng cam
+  approved: '#10b981',  // xanh lá
+  completed: '#6366f1', // xanh tím
+  cancelled: '#ef4444'  // đỏ
+}
+
+// fallback theo loại (dùng cho legend / khi không có status)
 const categoryColors = {
   work: '#bc307bff',
   seminar: '#c4b517ff',
   other: '#4d6d41ff'
-}
-
-const statusColors = {
-  pending: '#ffc107',
-  approved: '#28a745',
-  completed: '#1870bdff'
 }
 
 const categoryNames = {
@@ -76,6 +79,7 @@ function initCalendar() {
 
   const calendarEl = document.getElementById('calendar')
   if (!calendarEl) return
+
   const canCreate = window.LAB_USER && window.LAB_USER.logged_in
 
   calendar = new FullCalendar.Calendar(calendarEl, {
@@ -136,28 +140,27 @@ function initCalendar() {
       el.style.willChange = 'transform'
     },
 
+    // CONTENT: bỏ chip loại sự kiện, badge trạng thái chỉ icon
     eventContent: function (arg) {
       const event = arg.event
       const props = event.extendedProps || {}
 
       const status = props.status || 'pending'
       const roomName = props.roomName || ''
-      let statusText = 'Chờ duyệt'
+
       let statusIcon = '<i class="fa-solid fa-clock"></i>'
+      let statusTitle = 'Chờ duyệt'
 
       if (status === 'approved') {
-        statusText = 'Đã duyệt'
         statusIcon = '<i class="fa-solid fa-circle-check"></i>'
+        statusTitle = 'Đã duyệt'
       } else if (status === 'completed') {
-        statusText = 'Đã hoàn thành'
         statusIcon = '<i class="fa-solid fa-check-double"></i>'
+        statusTitle = 'Đã hoàn thành'
       } else if (status === 'cancelled') {
-        statusText = 'Đã hủy'
         statusIcon = '<i class="fa-solid fa-ban"></i>'
+        statusTitle = 'Đã hủy'
       }
-
-      const cat = props.category || 'work'
-      const catText = categoryNames[cat] || cat
 
       const color = props._color || event.backgroundColor || '#3788d8'
       const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
@@ -166,10 +169,27 @@ function initCalendar() {
       const html = `
         <div class="fc-event-main-custom" style="padding:6px 8px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-            <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;">${arg.timeText || ''}</div>
-            <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;font-weight:800;line-height:1;">
-              <span class="fc-status-icon" style="font-size:11px;display:inline-flex;align-items:center;">${statusIcon}</span>
-              <span>${statusText}</span>
+            <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;">
+              ${arg.timeText || ''}
+            </div>
+
+            <!-- Badge trạng thái chỉ icon -->
+            <span
+              title="${statusTitle}"
+              style="
+                margin-left:auto;
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                width:22px;
+                height:22px;
+                border-radius:999px;
+                background:${chipBg};
+                border:1px solid ${chipBorder};
+                font-size:11px;
+              "
+            >
+              ${statusIcon}
             </span>
           </div>
 
@@ -177,21 +197,14 @@ function initCalendar() {
             ${event.title || ''}
           </div>
 
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            ${
-              roomName
-                ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;font-weight:700;line-height:1;">
-                     <i class="fa-solid fa-door-open" style="font-size:10px;"></i>
-                     <span>${roomName}</span>
-                   </span>`
-                : ''
-            }
-
-            <span style="display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;font-weight:700;line-height:1;">
-              <span style="width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.75);"></span>
-              <span>${catText}</span>
-            </span>
-          </div>
+          ${
+            roomName
+              ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;">
+                   <i class="fa-solid fa-door-open" style="font-size:10px;"></i>
+                   <span>${roomName}</span>
+                 </div>`
+              : ''
+          }
         </div>
       `
       return { html }
@@ -278,14 +291,35 @@ function initFiltersAndButtons() {
   }
 
   setMinDateForInputs()
+  initRepeatControls()
 }
 
 function setMinDateForInputs() {
   const today = new Date().toISOString().split('T')[0]
   const startDateInput = document.getElementById('eventStartDate')
   const endDateInput = document.getElementById('eventEndDate')
+  const repeatUntilInput = document.getElementById('eventRepeatUntil')
   if (startDateInput) startDateInput.setAttribute('min', today)
   if (endDateInput) endDateInput.setAttribute('min', today)
+  if (repeatUntilInput) repeatUntilInput.setAttribute('min', today)
+}
+
+function initRepeatControls() {
+  const repeatTypeSelect = document.getElementById('eventRepeatType')
+  const weekdaySection = document.getElementById('weekdaySection')
+
+  if (!repeatTypeSelect || !weekdaySection) return
+
+  repeatTypeSelect.addEventListener('change', function () {
+    if (this.value === 'weekly') {
+      weekdaySection.style.display = 'block'
+    } else {
+      weekdaySection.style.display = 'none'
+      document.querySelectorAll('.repeat-day-checkbox').forEach((cb) => {
+        cb.checked = false
+      })
+    }
+  })
 }
 
 async function loadEvent() {
@@ -318,7 +352,7 @@ async function loadEvent() {
       const roomCode = item.lab_code != null ? String(item.lab_code) : null
       const roomName = roomCode ? roomMap[roomCode] || roomCode : null
 
-      const color = item.color || categoryColors[safeCategory] || '#3788d8'
+      const bgColor = statusColors[status] || categoryColors[safeCategory] || '#3788d8'
 
       const registeredFor = item.registered_for != null ? String(item.registered_for) : ''
       const registeredForName = registeredFor ? groupMap[registeredFor] || registeredFor : ''
@@ -333,7 +367,7 @@ async function loadEvent() {
         status: status,
         roomCode: roomCode,
         roomName: roomName,
-        color: color,
+        color: bgColor,
         user_id: item.user_id || item.userId || null,
         registered_for: registeredFor,
         registeredForName: registeredForName
@@ -369,7 +403,7 @@ function updateCalendar() {
           : new Date(e.end)
         : new Date(startDate.getTime() + 60 * 60 * 1000)
 
-      const bg = e.color || categoryColors[e.category] || '#3788d8'
+      const bg = statusColors[e.status] || e.color || categoryColors[e.category] || '#3788d8'
       const tx = readableTextColor(bg)
 
       calendar.addEvent({
@@ -398,13 +432,19 @@ function updateCalendar() {
 }
 
 function openCreateModal(start = null, end = null) {
+  const form = document.getElementById('eventForm')
+  if (form) form.reset()
+
   document.getElementById('modalTitle').textContent = 'Tạo sự kiện mới'
-  document.getElementById('eventForm').reset()
   document.getElementById('eventId').value = ''
-  resetColorPicker()
 
   const now = new Date()
   const today = now.toISOString().split('T')[0]
+
+  const startDateInput = document.getElementById('eventStartDate')
+  const startTimeInput = document.getElementById('eventStartTime')
+  const endDateInput = document.getElementById('eventEndDate')
+  const endTimeInput = document.getElementById('eventEndTime')
 
   if (start) {
     const startDate = new Date(start)
@@ -413,30 +453,45 @@ function openCreateModal(start = null, end = null) {
       return
     }
 
-    document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]
-    document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5)
+    if (startDateInput) startDateInput.value = startDate.toISOString().split('T')[0]
+    if (startTimeInput) startTimeInput.value = startDate.toTimeString().slice(0, 5)
 
     if (end) {
       const endDate = new Date(end)
-      document.getElementById('eventEndDate').value = endDate.toISOString().split('T')[0]
-      document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
+      if (endDateInput) endDateInput.value = endDate.toISOString().split('T')[0]
+      if (endTimeInput) endTimeInput.value = endDate.toTimeString().slice(0, 5)
     } else {
       const endAuto = new Date(startDate.getTime() + 60 * 60 * 1000)
-      document.getElementById('eventEndDate').value = endAuto.toISOString().split('T')[0]
-      document.getElementById('eventEndTime').value = endAuto.toTimeString().slice(0, 5)
+      if (endDateInput) endDateInput.value = endAuto.toISOString().split('T')[0]
+      if (endTimeInput) endTimeInput.value = endAuto.toTimeString().slice(0, 5)
     }
   } else {
-    document.getElementById('eventStartDate').value = today
-    document.getElementById('eventStartTime').value = '09:00'
-    document.getElementById('eventEndDate').value = today
-    document.getElementById('eventEndTime').value = '10:00'
+    if (startDateInput) startDateInput.value = today
+    if (startTimeInput) startTimeInput.value = '09:00'
+    if (endDateInput) endDateInput.value = today
+    if (endTimeInput) endTimeInput.value = '10:00'
   }
 
-  document.getElementById('eventModal').classList.add('active')
+  // reset repeat
+  const repeatTypeSelect = document.getElementById('eventRepeatType')
+  const repeatUntilInput = document.getElementById('eventRepeatUntil')
+  const weekdaySection = document.getElementById('weekdaySection')
+  if (repeatTypeSelect) repeatTypeSelect.value = ''
+  if (repeatUntilInput) repeatUntilInput.value = ''
+  if (weekdaySection) {
+    weekdaySection.style.display = 'none'
+    document.querySelectorAll('.repeat-day-checkbox').forEach((cb) => {
+      cb.checked = false
+    })
+  }
+
+  const modal = document.getElementById('eventModal')
+  if (modal) modal.classList.add('active')
 }
 
 function closeModal() {
-  document.getElementById('eventModal').classList.remove('active')
+  const modal = document.getElementById('eventModal')
+  if (modal) modal.classList.remove('active')
 }
 
 async function saveEvent() {
@@ -452,6 +507,10 @@ async function saveEvent() {
   const endDate = document.getElementById('eventEndDate').value
   const endTime = document.getElementById('eventEndTime').value
   const description = document.getElementById('eventDescription').value.trim()
+
+  const repeatType = document.getElementById('eventRepeatType').value
+  const repeatUntil = document.getElementById('eventRepeatUntil').value
+  const repeatDays = Array.from(document.querySelectorAll('.repeat-day-checkbox:checked')).map((cb) => cb.value)
 
   if (!title || !labCode || !startDate || !startTime || !endDate || !endTime) {
     toastr.error('Vui lòng điền đầy đủ thông tin bắt buộc.')
@@ -470,6 +529,11 @@ async function saveEvent() {
   formData.append('end', end)
   formData.append('description', description)
   formData.append('registered_for', registeredFor)
+
+  // gửi thông tin lặp giống bên admin register
+  formData.append('repeat_type', repeatType || '')
+  formData.append('repeat_until', repeatUntil || '')
+  repeatDays.forEach((d) => formData.append('repeat_days[]', d))
 
   const filesEl = document.getElementById('eventFiles')
   const files = filesEl ? filesEl.files : null
@@ -521,7 +585,9 @@ function showEventDetails(eventData) {
   currentEventId = eventData.id
 
   document.getElementById('detailTitle').textContent = eventData.title
-  document.getElementById('detailTime').textContent = `${formatDateTime(eventData.start)} - ${formatDateTime(eventData.end)}`
+  document.getElementById('detailTime').textContent = `${formatDateTime(eventData.start)} - ${formatDateTime(
+    eventData.end
+  )}`
 
   const roomName = eventData.extendedProps.roomName || ''
   document.getElementById('detailRoom').textContent = roomName
@@ -551,7 +617,8 @@ function showEventDetails(eventData) {
     seminar: 'Hội thảo / seminar',
     other: 'Khác'
   }
-  document.getElementById('detailCategory').textContent = categoryLabels[eventData.extendedProps.category] || eventData.extendedProps.category
+  document.getElementById('detailCategory').textContent =
+    categoryLabels[eventData.extendedProps.category] || eventData.extendedProps.category
 
   const statusLabels = {
     pending: 'Chờ duyệt',
@@ -559,14 +626,16 @@ function showEventDetails(eventData) {
     completed: 'Đã hoàn thành',
     cancelled: 'Đã hủy'
   }
-  document.getElementById('detailStatus').textContent = statusLabels[eventData.extendedProps.status] || eventData.extendedProps.status
+  const status = eventData.extendedProps.status || 'pending'
+  document.getElementById('detailStatus').textContent = statusLabels[status] || status
 
   const pendingIcon = document.getElementById('statusPendingIcon')
   const approvedIcon = document.getElementById('statusApprovedIcon')
   const completedIcon = document.getElementById('statusCompletedIcon')
-  if (pendingIcon) pendingIcon.style.display = eventData.extendedProps.status === 'pending' ? 'inline' : 'none'
-  if (approvedIcon) approvedIcon.style.display = eventData.extendedProps.status === 'approved' ? 'inline' : 'none'
-  if (completedIcon) completedIcon.style.display = eventData.extendedProps.status === 'completed' ? 'inline' : 'none'
+
+  if (pendingIcon) pendingIcon.style.display = status === 'pending' ? 'inline' : 'none'
+  if (approvedIcon) approvedIcon.style.display = status === 'approved' ? 'inline' : 'none'
+  if (completedIcon) completedIcon.style.display = status === 'completed' ? 'inline' : 'none'
 
   const canEdit = checkPermission(eventData)
   const editBtn = document.getElementById('editEventBtn')
@@ -575,43 +644,13 @@ function showEventDetails(eventData) {
   if (editBtn) editBtn.style.display = canEdit ? 'inline-flex' : 'none'
   if (deleteBtn) deleteBtn.style.display = canEdit ? 'inline-flex' : 'none'
 
-  document.getElementById('detailModal').classList.add('active')
+  const modal = document.getElementById('detailModal')
+  if (modal) modal.classList.add('active')
 }
 
 function closeDetailModal() {
-  document.getElementById('detailModal').classList.remove('active')
-  // currentEventId = null
-}
-
-function editEvent() {
-  const eventData = calendar.getEventById(currentEventId)
-  if (!eventData) return
-
-  if (!checkPermission(eventData)) {
-    toastr.error('Bạn không có quyền chỉnh sửa sự kiện này.')
-    return
-  }
-
-  closeDetailModal()
-
-  document.getElementById('modalTitle').textContent = 'Chỉnh sửa sự kiện'
-  document.getElementById('eventId').value = eventData.id
-  document.getElementById('eventTitle').value = eventData.title
-  document.getElementById('eventCategory').value = eventData.extendedProps.category || 'work'
-  document.getElementById('eventColor').value = eventData.backgroundColor || '#039be5'
-  document.getElementById('eventRoom').value = eventData.extendedProps.roomCode || ''
-  document.getElementById('eventRegisteredFor').value = eventData.extendedProps.registered_for || ''
-  document.getElementById('eventDescription').value = eventData.extendedProps.description || ''
-
-  const startDate = new Date(eventData.start)
-  const endDate = new Date(eventData.end || new Date(startDate.getTime() + 60 * 60 * 1000))
-
-  document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]
-  document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5)
-  document.getElementById('eventEndDate').value = endDate.toISOString().split('T')[0]
-  document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
-
-  document.getElementById('eventModal').classList.add('active')
+  const modal = document.getElementById('detailModal')
+  if (modal) modal.classList.remove('active')
 }
 
 function deleteEvent() {
@@ -624,7 +663,8 @@ function deleteEvent() {
   }
 
   closeDetailModal()
-  document.getElementById('confirmDeleteModal').classList.add('active')
+  const confirmModal = document.getElementById('confirmDeleteModal')
+  if (confirmModal) confirmModal.classList.add('active')
 }
 
 function formatDateTime(dateString) {
@@ -638,7 +678,8 @@ function formatDateTime(dateString) {
 }
 
 function closeConfirmDelete() {
-  document.getElementById('confirmDeleteModal').classList.remove('active')
+  const modal = document.getElementById('confirmDeleteModal')
+  if (modal) modal.classList.remove('active')
 }
 
 async function confirmDelete() {
@@ -736,7 +777,9 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
 
     if (!response.ok) {
       const msg =
-        (result && (result.message || (result.errors && Object.values(result.errors)[0] && Object.values(result.errors)[0][0]))) ||
+        (result &&
+          (result.message ||
+            (result.errors && Object.values(result.errors)[0] && Object.values(result.errors)[0][0]))) ||
         'Không thể cập nhật thời gian.'
       if (window.toastr) toastr.error(msg)
       if (infoCtx && typeof infoCtx.revert === 'function') infoCtx.revert()
@@ -752,90 +795,9 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
   }
 }
 
-function resetColorPicker() {
-  const colorInput = document.getElementById('eventColor')
-  const customBtn = document.getElementById('customColorWrapper')
-
-  if (colorInput) colorInput.value = '#d50000'
-
-  document.querySelectorAll('.color-circle').forEach((c) => c.classList.remove('active'))
-
-  const firstColor = document.querySelector('.color-circle[data-color="#d50000"]')
-  if (firstColor) firstColor.classList.add('active')
-
-  if (customBtn) {
-    customBtn.style.backgroundColor = '#fff'
-    customBtn.classList.remove('has-value', 'active')
-
-    const checkIcon = customBtn.querySelector('.fa-check')
-    if (checkIcon) checkIcon.remove()
-
-    const plusIcon = customBtn.querySelector('.fa-plus')
-    if (plusIcon) plusIcon.style.display = 'block'
-  }
-}
-
-function setColorValue(color) {
-  const colorInput = document.getElementById('eventColor')
-  const customBtn = document.getElementById('customColorWrapper')
-
-  if (colorInput) colorInput.value = color
-
-  document.querySelectorAll('.color-circle').forEach((c) => c.classList.remove('active'))
-
-  const presetColor = document.querySelector(`.color-circle[data-color="${color}"]`)
-  if (presetColor) {
-    presetColor.classList.add('active')
-    if (customBtn) {
-      customBtn.style.backgroundColor = '#fff'
-      customBtn.classList.remove('has-value', 'active')
-      const checkIcon = customBtn.querySelector('.fa-check')
-      if (checkIcon) checkIcon.remove()
-      const plusIcon = customBtn.querySelector('.fa-plus')
-      if (plusIcon) plusIcon.style.display = 'block'
-    }
-  } else {
-    if (customBtn) {
-      customBtn.classList.add('active', 'has-value')
-      customBtn.style.backgroundColor = color
-
-      const plusIcon = customBtn.querySelector('.fa-plus')
-      if (plusIcon) plusIcon.style.display = 'none'
-
-      let checkIcon = customBtn.querySelector('.fa-check')
-      if (!checkIcon) {
-        checkIcon = document.createElement('i')
-        checkIcon.className = 'fa-solid fa-check'
-        customBtn.appendChild(checkIcon)
-      }
-      checkIcon.style.color = isLightColor(color) ? '#3c4043' : '#fff'
-    }
-  }
-}
-
+// khởi tạo
 document.addEventListener('DOMContentLoaded', function () {
   initCalendar()
-
-  const colorCircles = document.querySelectorAll('.color-circle:not(.custom-color-btn)')
-  const customBtn = document.getElementById('customColorWrapper')
-  const colorInput = document.getElementById('eventColor')
-
-  colorCircles.forEach((circle) => {
-    circle.addEventListener('click', function () {
-      const color = this.getAttribute('data-color')
-      setColorValue(color)
-    })
-  })
-
-  if (customBtn && colorInput) {
-    customBtn.addEventListener('click', function () {
-      colorInput.click()
-    })
-
-    colorInput.addEventListener('input', function () {
-      setColorValue(this.value)
-    })
-  }
 })
 
 const eventModalEl = document.getElementById('eventModal')
@@ -898,11 +860,10 @@ function checkPermission(eventData) {
   const u = window.LAB_USER
 
   const isAdmin =
+    u.is_admin === true ||
     String(u.role_id) === '1' ||
-    String(u.roleId) === '1' ||
-    String(u.role) === '1' ||
-    String(u.is_admin) === '1' ||
-    u.is_admin === true
+    String(u.roleId || '') === '1' ||
+    String(u.role || '') === '1'
 
   if (isAdmin) return true
 

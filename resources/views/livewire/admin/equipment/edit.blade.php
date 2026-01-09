@@ -1,10 +1,10 @@
 <div>
     <x-slot name="header">
         <div class="page-header page-header-light shadow">
-            <div class="page-header-content d-lg-flex">
-                <div class="d-flex">
+            <div class="page-header-content d-flex flex-column flex-lg-row justify-content-between">
+                <div class="d-flex align-items-center mb-2 mb-lg-0">
                     <h4 class="page-title mb-0">
-                        Thiết bị - <span class="fw-normal">Danh sách thiết bị </span>
+                        Thiết bị - <span class="fw-normal">Danh sách thiết bị</span>
                     </h4>
 
                     <a href="#page_header"
@@ -13,14 +13,16 @@
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
-
             </div>
 
-            <div class="page-header-content d-lg-flex border-top">
-                <div class="d-flex">
+            <div class="page-header-content d-flex flex-column flex-lg-row justify-content-between border-top">
+                <div class="d-flex align-items-center mb-2 mb-lg-0">
                     <div class="breadcrumb py-2">
-                        <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item"><i class="ph-house"></i></a>
-                        <a href="{{ route('equipment.index') }}" class="breadcrumb-item">Danh sách thiết bị </a>
+
+
+                        <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
+                        <a href="{{route('equipment.index')}}" class="breadcrumb-item">Danh sách thiết bị</a>
+
                         <span class="breadcrumb-item active">Chỉnh sửa thiết bị</span>
                     </div>
 
@@ -30,13 +32,15 @@
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
-
             </div>
         </div>
     </x-slot>
-<br>
+
+    <br>
+
+
     <div class="row">
-        <div class="col-md-9 col-12">
+        <div class="col-md-9 col-12 mb-3 mb-md-0">
             <div class="card">
                 <div class="card-header bold">
                     <i class="ph-info"></i>
@@ -53,7 +57,6 @@
                         @enderror
                     </div>
 
-
                     <div class="mb-3">
                         <label for="code" class="form-label">Mã thiết bị <span class="text-danger">*</span></label>
                         <input wire:model.lazy="code" type="text" id="code"
@@ -62,7 +65,6 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
 
                     <div class="mb-3">
                         <label for="type" class="form-label">Loại thiết bị <span
@@ -73,7 +75,6 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
 
                     <div class="mb-3">
                         <label for="lab_id" class="form-label">Phòng Lab <span class="text-danger">*</span></label>
@@ -88,20 +89,6 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
-
-                 {{--   <div class="mb-3">
-                        <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                        <select wire:model.lazy="status" id="status"
-                            class="form-select @error('status') is-invalid @enderror">
-                            <option value="available">Available</option>
-                            <option value="in_use">In Use</option>
-                            <option value="maintenance">Maintenance</option>
-                            <option value="broken">Broken</option>
-                        </select>
-                        @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>--}}
-
                     <div class="mb-3">
                         <label for="purchased_date" class="form-label">Ngày sửa</label>
                         <input wire:model.lazy="purchased_date" type="date" id="purchased_date"
@@ -112,12 +99,11 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="specifications" class="form-label">Thông số kỹ thuật </label>
-                        <textarea wire:model.lazy="specifications" id="specifications" rows="3"
-                            class="form-control @error('specifications') is-invalid @enderror"></textarea>
-                        @error('specifications')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+
+                        <label for="specifications" class="form-label">Thông số kỹ thuật</label>
+                        <textarea wire:model.lazy="specifications" id="specifications" rows="3" class="form-control @error('specifications') is-invalid @enderror"></textarea>
+                        @error('specifications') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
                     </div>
 
                     <div class="mb-3">
@@ -155,9 +141,11 @@
                         <input wire:model="actual_quantity" type="number" id="actual_quantity" readonly
                             class="form-control">
                     </div>
+
                 </div>
             </div>
         </div>
+
 
         <div class="col-md-3 col-12">
             <div class="card">
@@ -165,14 +153,18 @@
                     <i class="ph-gear-six"></i>
                     Hành động
                 </div>
-                <div class="card-body d-flex align-items-center gap-1">
-                    <button wire:loading.remove wire:target="update" class="btn btn-primary" wire:click="update">
+
+
+                <div class="card-body d-flex align-items-center gap-2 flex-nowrap">
+                    <button wire:loading.remove wire:target="update" wire:click="update" class="btn btn-primary text-nowrap">
                         <i class="ph-floppy-disk"></i> Lưu
                     </button>
-                    <button wire:loading wire:target="update" class="btn btn-primary" disabled>
+
+                    <button wire:loading wire:target="update" class="btn btn-primary text-nowrap" disabled>
                         <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                     </button>
-                    <a href="{{ route('equipment.index') }}" class="btn btn-warning">
+
+                    <a href="{{ route('equipment.index') }}" class="btn btn-warning text-nowrap">
                         <i class="ph-arrow-counter-clockwise"></i> Trở lại
                     </a>
                 </div>
