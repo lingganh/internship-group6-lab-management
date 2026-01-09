@@ -7,10 +7,10 @@ let selectedRoomFilter = ''
 
 // Màu cố định theo TRẠNG THÁI
 const statusColors = {
-  pending: '#f59e0b',   // vàng cam
-  approved: '#10b981',  // xanh lá
-  completed: '#6366f1', // xanh tím
-  cancelled: '#ef4444'  // đỏ
+  pending: '#f59e0b',
+  approved: '#10b981',
+  completed: '#6366f1',
+  cancelled: '#ef4444'
 }
 
 // fallback theo loại (dùng cho legend / khi không có status)
@@ -73,6 +73,8 @@ function isLightColor(color) {
 function readableTextColor(bg) {
   return isLightColor(bg) ? '#1f2937' : '#ffffff'
 }
+
+/* ======================= INIT CALENDAR ======================= */
 
 function initCalendar() {
   initMiniCalendar()
@@ -140,7 +142,6 @@ function initCalendar() {
       el.style.willChange = 'transform'
     },
 
-    // CONTENT: bỏ chip loại sự kiện, badge trạng thái chỉ icon
     eventContent: function (arg) {
       const event = arg.event
       const props = event.extendedProps || {}
@@ -149,18 +150,10 @@ function initCalendar() {
       const roomName = props.roomName || ''
 
       let statusIcon = '<i class="fa-solid fa-clock"></i>'
-      let statusTitle = 'Chờ duyệt'
 
-      if (status === 'approved') {
-        statusIcon = '<i class="fa-solid fa-circle-check"></i>'
-        statusTitle = 'Đã duyệt'
-      } else if (status === 'completed') {
-        statusIcon = '<i class="fa-solid fa-check-double"></i>'
-        statusTitle = 'Đã hoàn thành'
-      } else if (status === 'cancelled') {
-        statusIcon = '<i class="fa-solid fa-ban"></i>'
-        statusTitle = 'Đã hủy'
-      }
+      if (status === 'approved') statusIcon = '<i class="fa-solid fa-circle-check"></i>'
+      else if (status === 'completed') statusIcon = '<i class="fa-solid fa-check-double"></i>'
+      else if (status === 'cancelled') statusIcon = '<i class="fa-solid fa-ban"></i>'
 
       const color = props._color || event.backgroundColor || '#3788d8'
       const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
@@ -172,10 +165,7 @@ function initCalendar() {
             <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;">
               ${arg.timeText || ''}
             </div>
-
-            <!-- Badge trạng thái chỉ icon -->
             <span
-              title="${statusTitle}"
               style="
                 margin-left:auto;
                 display:inline-flex;
@@ -250,6 +240,8 @@ function initCalendar() {
   calendar.render()
 }
 
+/* ======================= FILTERS / BUTTONS ======================= */
+
 function initFiltersAndButtons() {
   const statusCheckboxes = document.querySelectorAll('[data-filter-status]')
   statusCheckboxes.forEach((cb) => {
@@ -307,6 +299,7 @@ function setMinDateForInputs() {
 function initRepeatControls() {
   const repeatTypeSelect = document.getElementById('eventRepeatType')
   const weekdaySection = document.getElementById('weekdaySection')
+  const weekSummary = document.getElementById('weekSummary')
 
   if (!repeatTypeSelect || !weekdaySection) return
 
@@ -315,12 +308,183 @@ function initRepeatControls() {
       weekdaySection.style.display = 'block'
     } else {
       weekdaySection.style.display = 'none'
-      document.querySelectorAll('.repeat-day-checkbox').forEach((cb) => {
+      document.querySelectorAll('.weekday-checkbox').forEach((cb) => {
         cb.checked = false
       })
+      if (weekSummary) weekSummary.textContent = ''
     }
+
+    buildOccurrencesFromForm({ preview: true })
+  })
+
+  const repeatUntilInput = document.getElementById('eventRepeatUntil')
+  if (repeatUntilInput) {
+    repeatUntilInput.addEventListener('change', () => buildOccurrencesFromForm({ preview: true }))
+  }
+
+  document.querySelectorAll('.weekday-checkbox').forEach((cb) => {
+    cb.addEventListener('change', () => buildOccurrencesFromForm({ preview: true }))
+  })
+
+  const startDateInput = document.getElementById('eventStartDate')
+  const startTimeInput = document.getElementById('eventStartTime')
+  const endTimeInput = document.getElementById('eventEndTime')
+  ;[startDateInput, startTimeInput, endTimeInput].forEach((el) => {
+    if (el) el.addEventListener('change', () => buildOccurrencesFromForm({ preview: true }))
   })
 }
+
+/* =============== TÍNH LỊCH LẶP + SUMMARY BẰNG JS =============== */
+
+function buildOccurrencesFromForm(options = {}) {
+  const { preview = false, maxOccurrences = 500 } = options
+
+  const startDateStr = document.getElementById('eventStartDate')?.value || ''
+  const startTimeStr = document.getElementById('eventStartTime')?.value || ''
+  const endTimeStr = document.getElementById('eventEndTime')?.value || ''
+
+  const repeatType = document.getElementById('eventRepeatType')?.value || ''
+  const repeatUntilStr = document.getElementById('eventRepeatUntil')?.value || ''
+
+  const weekdayCheckboxes = Array.from(document.querySelectorAll('.weekday-checkbox:checked'))
+  const weekdayValues = weekdayCheckboxes.map((cb) => parseInt(cb.value, 10))
+
+  const weekSummaryEl = document.getElementById('weekSummary')
+  if (weekSummaryEl && preview) weekSummaryEl.textContent = ''
+
+  if (!startDateStr || !startTimeStr || !endTimeStr) {
+    if (weekSummaryEl && preview) weekSummaryEl.textContent = ''
+    return { ok: false, message: 'Thiếu ngày/giờ.' }
+  }
+
+  const start = new Date(`${startDateStr}T${startTimeStr}:00`)
+  const end = new Date(`${startDateStr}T${endTimeStr}:00`)
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    if (!preview && window.toastr) toastr.error('Ngày/giờ không hợp lệ.')
+    return { ok: false }
+  }
+
+  if (end <= start) {
+    if (!preview && window.toastr) toastr.error('Giờ kết thúc phải sau giờ bắt đầu.')
+    return { ok: false, message: 'end-before-start' }
+  }
+
+  const baseDurationMs = end.getTime() - start.getTime()
+
+  // Không lặp
+  if (!repeatType || !repeatUntilStr) {
+    if (preview && weekSummaryEl) {
+      weekSummaryEl.textContent = '(Sẽ tạo 1 lịch)'
+    }
+    return {
+      ok: true,
+      occurrences: [{ start: new Date(start), end: new Date(end) }]
+    }
+  }
+
+  const repeatUntil = new Date(repeatUntilStr + 'T23:59:59')
+  if (Number.isNaN(repeatUntil.getTime())) {
+    if (!preview && window.toastr) toastr.error('Ngày lặp đến không hợp lệ.')
+    return { ok: false }
+  }
+  if (repeatUntil < start) {
+    if (!preview && window.toastr) toastr.error('Ngày lặp đến phải sau hoặc bằng ngày bắt đầu.')
+    return { ok: false }
+  }
+
+  const occ = []
+
+  if (repeatType === 'daily') {
+    let cursor = new Date(start)
+    while (cursor <= repeatUntil && occ.length < maxOccurrences) {
+      const s = new Date(cursor)
+      const e = new Date(cursor.getTime() + baseDurationMs)
+      occ.push({ start: s, end: e })
+      cursor.setDate(cursor.getDate() + 1)
+    }
+  } else if (repeatType === 'weekly') {
+    if (!weekdayValues.length) {
+      if (!preview && window.toastr) toastr.error('Hãy chọn ít nhất 1 ngày trong tuần để lặp.')
+      return { ok: false }
+    }
+
+    let cursor = new Date(start)
+    cursor.setHours(0, 0, 0, 0)
+
+    while (cursor <= repeatUntil && occ.length < maxOccurrences) {
+      const dow = cursor.getDay()
+      if (weekdayValues.includes(dow)) {
+        const s = new Date(
+          cursor.getFullYear(),
+          cursor.getMonth(),
+          cursor.getDate(),
+          start.getHours(),
+          start.getMinutes(),
+          start.getSeconds()
+        )
+        const e = new Date(s.getTime() + baseDurationMs)
+        occ.push({ start: s, end: e })
+      }
+      cursor.setDate(cursor.getDate() + 1)
+    }
+  } else if (repeatType === 'monthly') {
+    let cursor = new Date(start)
+    while (cursor <= repeatUntil && occ.length < maxOccurrences) {
+      const s = new Date(cursor)
+      const e = new Date(cursor.getTime() + baseDurationMs)
+      occ.push({ start: s, end: e })
+
+      cursor.setMonth(cursor.getMonth() + 1)
+    }
+  } else {
+    return {
+      ok: true,
+      occurrences: [{ start: new Date(start), end: new Date(end) }]
+    }
+  }
+
+  if (!occ.length) {
+    if (!preview && window.toastr) toastr.error('Không tạo được lịch nào, vui lòng kiểm tra lại phần lặp.')
+    return { ok: false }
+  }
+
+  if (preview && weekSummaryEl) {
+    weekSummaryEl.textContent = `(Sẽ tạo ${occ.length} lịch)`
+  }
+
+  return { ok: true, occurrences: occ }
+}
+
+/* =============== CHECK TRÙNG LỊCH LOCAL ================= */
+
+function hasLocalConflict(occurrences, labCode, excludeEventId = null) {
+  if (!Array.isArray(occurrences) || !labCode) return false
+
+  const approvedEventsSameRoom = events.filter(
+    (e) => e.status === 'approved' && String(e.lab_code || e.roomCode) === String(labCode)
+  )
+
+  for (const occ of occurrences) {
+    const s1 = occ.start instanceof Date ? occ.start : new Date(occ.start)
+    const e1 = occ.end instanceof Date ? occ.end : new Date(occ.end)
+
+    for (const ev of approvedEventsSameRoom) {
+      if (excludeEventId && String(ev.id) === String(excludeEventId)) continue
+
+      const s2 = ev.start instanceof Date ? ev.start : new Date(ev.start)
+      const e2 = ev.end instanceof Date ? ev.end : new Date(ev.end || ev.start)
+
+      if (s1 < e2 && e1 > s2) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+/* ======================= LOAD + RENDER EVENTS ======================= */
 
 async function loadEvent() {
   try {
@@ -368,6 +532,7 @@ async function loadEvent() {
         roomCode: roomCode,
         roomName: roomName,
         color: bgColor,
+        lab_code: roomCode,
         user_id: item.user_id || item.userId || null,
         registered_for: registeredFor,
         registeredForName: registeredForName
@@ -431,6 +596,8 @@ function updateCalendar() {
   })
 }
 
+/* ======================= MODAL CREATE / EDIT ======================= */
+
 function openCreateModal(start = null, end = null) {
   const form = document.getElementById('eventForm')
   if (form) form.reset()
@@ -443,7 +610,6 @@ function openCreateModal(start = null, end = null) {
 
   const startDateInput = document.getElementById('eventStartDate')
   const startTimeInput = document.getElementById('eventStartTime')
-  const endDateInput = document.getElementById('eventEndDate')
   const endTimeInput = document.getElementById('eventEndTime')
 
   if (start) {
@@ -458,17 +624,14 @@ function openCreateModal(start = null, end = null) {
 
     if (end) {
       const endDate = new Date(end)
-      if (endDateInput) endDateInput.value = endDate.toISOString().split('T')[0]
       if (endTimeInput) endTimeInput.value = endDate.toTimeString().slice(0, 5)
     } else {
       const endAuto = new Date(startDate.getTime() + 60 * 60 * 1000)
-      if (endDateInput) endDateInput.value = endAuto.toISOString().split('T')[0]
       if (endTimeInput) endTimeInput.value = endAuto.toTimeString().slice(0, 5)
     }
   } else {
     if (startDateInput) startDateInput.value = today
     if (startTimeInput) startTimeInput.value = '09:00'
-    if (endDateInput) endDateInput.value = today
     if (endTimeInput) endTimeInput.value = '10:00'
   }
 
@@ -476,22 +639,65 @@ function openCreateModal(start = null, end = null) {
   const repeatTypeSelect = document.getElementById('eventRepeatType')
   const repeatUntilInput = document.getElementById('eventRepeatUntil')
   const weekdaySection = document.getElementById('weekdaySection')
+  const weekSummary = document.getElementById('weekSummary')
+
   if (repeatTypeSelect) repeatTypeSelect.value = ''
   if (repeatUntilInput) repeatUntilInput.value = ''
   if (weekdaySection) {
     weekdaySection.style.display = 'none'
-    document.querySelectorAll('.repeat-day-checkbox').forEach((cb) => {
+    document.querySelectorAll('.weekday-checkbox').forEach((cb) => {
       cb.checked = false
     })
   }
+  if (weekSummary) weekSummary.textContent = ''
 
   const modal = document.getElementById('eventModal')
   if (modal) modal.classList.add('active')
+
+  buildOccurrencesFromForm({ preview: true })
 }
 
 function closeModal() {
   const modal = document.getElementById('eventModal')
   if (modal) modal.classList.remove('active')
+}
+
+/* ======================= SAVE EVENT (CREATE + REPEAT) ======================= */
+
+async function sendBookingRequest(url, formData) {
+  const response = await fetch(url, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      Accept: 'application/json'
+    }
+  })
+
+  const text = await response.text()
+  const contentType = response.headers.get('content-type') || ''
+
+  if (!contentType.includes('application/json')) {
+    console.error('saveEvent response not JSON:', response.status, text)
+    if (window.toastr) toastr.error('Có lỗi xảy ra khi lưu sự kiện (server không trả JSON).')
+    return { ok: false }
+  }
+
+  let data = null
+  try {
+    data = JSON.parse(text)
+  } catch (e) {
+    console.error('saveEvent JSON parse error:', response.status, text)
+    if (window.toastr) toastr.error('Có lỗi xảy ra khi lưu sự kiện (response không phải JSON).')
+    return { ok: false }
+  }
+
+  if (!response.ok) {
+    if (window.toastr) toastr.error((data && data.message) || 'Có lỗi xảy ra khi lưu sự kiện.')
+    return { ok: false }
+  }
+
+  return { ok: true, data }
 }
 
 async function saveEvent() {
@@ -504,82 +710,146 @@ async function saveEvent() {
 
   const startDate = document.getElementById('eventStartDate').value
   const startTime = document.getElementById('eventStartTime').value
-  const endDate = document.getElementById('eventEndDate').value
   const endTime = document.getElementById('eventEndTime').value
   const description = document.getElementById('eventDescription').value.trim()
 
   const repeatType = document.getElementById('eventRepeatType').value
   const repeatUntil = document.getElementById('eventRepeatUntil').value
-  const repeatDays = Array.from(document.querySelectorAll('.repeat-day-checkbox:checked')).map((cb) => cb.value)
+  const repeatDays = Array.from(document.querySelectorAll('.weekday-checkbox:checked')).map((cb) => cb.value)
 
-  if (!title || !labCode || !startDate || !startTime || !endDate || !endTime) {
-    toastr.error('Vui lòng điền đầy đủ thông tin bắt buộc.')
+  if (!title || !labCode || !startDate || !startTime || !endTime) {
+    if (window.toastr) toastr.error('Vui lòng điền đầy đủ thông tin bắt buộc.')
     return
   }
 
-  const start = `${startDate} ${startTime}:00`
-  const end = `${endDate} ${endTime}:00`
+  // Tính toàn bộ occurrences (JS)
+  const occResult = buildOccurrencesFromForm({ preview: false, maxOccurrences: 500 })
+  if (!occResult.ok) return
 
-  const formData = new FormData()
-  formData.append('title', title)
-  formData.append('category', category)
-  formData.append('color', color)
-  formData.append('lab_code', labCode)
-  formData.append('start', start)
-  formData.append('end', end)
-  formData.append('description', description)
-  formData.append('registered_for', registeredFor)
-
-  // gửi thông tin lặp giống bên admin register
-  formData.append('repeat_type', repeatType || '')
-  formData.append('repeat_until', repeatUntil || '')
-  repeatDays.forEach((d) => formData.append('repeat_days[]', d))
-
-  const filesEl = document.getElementById('eventFiles')
-  const files = filesEl ? filesEl.files : null
-  if (files && files.length > 0) {
-    for (let i = 0; i < files.length; i++) formData.append('files[]', files[i])
+  const occurrences = occResult.occurrences || []
+  if (!occurrences.length) {
+    if (window.toastr) toastr.error('Không tạo được lịch nào, vui lòng kiểm tra lại phần lặp.')
+    return
   }
 
-  const url = eventId ? `/bookings/${eventId}` : '/bookings'
-  if (eventId) formData.append('_method', 'PUT')
+  console.log('📅 Occurrences to create:', occurrences.length)
 
-  fetch(url, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+  // Check trùng với events hiện tại (chỉ lịch approved)
+  const hasConflict = hasLocalConflict(occurrences, labCode, eventId || null)
+  console.log('⚠️ Has conflict:', hasConflict)
+  
+  if (hasConflict) {
+    const ok = window.confirm(
+      'Khung giờ bạn chọn bị trùng với một số lịch ĐÃ DUYỆT trong cùng phòng.\n' +
+        'Bạn vẫn muốn tiếp tục tạo các lịch này?'
+    )
+    if (!ok) return
+  }
+
+  const isEditing = !!eventId
+  const baseUrl = isEditing ? `/bookings/${eventId}` : '/bookings'
+
+  try {
+    if (isEditing) {
+
+      const start = `${startDate} ${startTime}:00`
+      const end = `${startDate} ${endTime}:00`
+
+      const fd = new FormData()
+      fd.append('title', title)
+      fd.append('category', category)
+      fd.append('color', color)
+      fd.append('lab_code', labCode)
+      fd.append('start', start)
+      fd.append('end', end)
+      fd.append('description', description)
+      fd.append('registered_for', registeredFor)
+      fd.append('_method', 'PUT')
+
+      fd.append('repeat_type', repeatType || '')
+      fd.append('repeat_until', repeatUntil || '')
+      repeatDays.forEach((d) => fd.append('repeat_days[]', d))
+
+      const filesEl = document.getElementById('eventFiles')
+      const files = filesEl ? filesEl.files : null
+      if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) fd.append('files[]', files[i])
+      }
+
+      const res = await sendBookingRequest(baseUrl, fd)
+      if (!res.ok) return
+
+      if (res.data && res.data.message && window.toastr) toastr.success(res.data.message)
+    } else {
+      // CREATE: tạo N lịch bằng N request
+      let successCount = 0
+      let failCount = 0
+
+      const filesEl = document.getElementById('eventFiles')
+      const files = filesEl ? filesEl.files : null
+
+      console.log(` Starting to create ${occurrences.length} events...`)
+
+      for (let i = 0; i < occurrences.length; i++) {
+        const occ = occurrences[i]
+        const s = occ.start
+        const e = occ.end
+
+        const year = s.getFullYear()
+        const month = String(s.getMonth() + 1).padStart(2, '0')
+        const day = String(s.getDate()).padStart(2, '0')
+        const sh = String(s.getHours()).padStart(2, '0')
+        const sm = String(s.getMinutes()).padStart(2, '0')
+        const eh = String(e.getHours()).padStart(2, '0')
+        const em = String(e.getMinutes()).padStart(2, '0')
+
+        const startStr = `${year}-${month}-${day} ${sh}:${sm}:00`
+        const endStr = `${year}-${month}-${day} ${eh}:${em}:00`
+
+        console.log(`Creating event ${i + 1}/${occurrences.length}:`, startStr, '-', endStr)
+
+        const fd = new FormData()
+        fd.append('title', title)
+        fd.append('category', category)
+        fd.append('color', color)
+        fd.append('lab_code', labCode)
+        fd.append('start', startStr)
+        fd.append('end', endStr)
+        fd.append('description', description)
+        fd.append('registered_for', registeredFor)
+
+        // CHỈ gửi file ở occurrence đầu
+        if (i === 0 && files && files.length > 0) {
+          for (let j = 0; j < files.length; j++) fd.append('files[]', files[j])
+        }
+
+        const res = await sendBookingRequest(baseUrl, fd)
+        if (res.ok) {
+          successCount++
+        } else {
+          failCount++
+        }
+      }
+
+      console.log(`✅ Created ${successCount} events successfully, ${failCount} failed`)
+
+      if (successCount > 0) {
+        if (window.toastr) toastr.success(`Đã tạo ${successCount} lịch thành công${failCount > 0 ? ` (${failCount} lịch thất bại)` : ''}.`)
+      } else {
+        if (window.toastr) toastr.error('Không tạo được lịch nào.')
+        return
+      }
     }
-  })
-    .then(async (response) => {
-      const text = await response.text()
-      let data = null
-      try {
-        data = JSON.parse(text)
-      } catch (e) {
-        console.error('saveEvent not JSON:', response.status, text)
-        toastr.error('Có lỗi xảy ra khi lưu sự kiện (response không phải JSON).')
-        return null
-      }
 
-      if (!response.ok) {
-        toastr.error((data && data.message) || 'Có lỗi xảy ra khi lưu sự kiện.')
-        return null
-      }
-
-      return data
-    })
-    .then(async (data) => {
-      if (!data) return
-      if (data.message) toastr.success(data.message)
-      closeModal()
-      await loadEvent()
-    })
-    .catch((error) => {
-      console.error('Error:', error)
-      toastr.error('Có lỗi xảy ra khi lưu sự kiện.')
-    })
+    closeModal()
+    await loadEvent()
+  } catch (error) {
+    console.error('Error:', error)
+    if (window.toastr) toastr.error('Có lỗi xảy ra khi lưu sự kiện.')
+  }
 }
+
+/* ======================= DETAIL MODAL ======================= */
 
 function showEventDetails(eventData) {
   currentEventId = eventData.id
@@ -632,10 +902,12 @@ function showEventDetails(eventData) {
   const pendingIcon = document.getElementById('statusPendingIcon')
   const approvedIcon = document.getElementById('statusApprovedIcon')
   const completedIcon = document.getElementById('statusCompletedIcon')
+  const cancelledIcon = document.getElementById('statusCancelledIcon')
 
   if (pendingIcon) pendingIcon.style.display = status === 'pending' ? 'inline' : 'none'
   if (approvedIcon) approvedIcon.style.display = status === 'approved' ? 'inline' : 'none'
   if (completedIcon) completedIcon.style.display = status === 'completed' ? 'inline' : 'none'
+  if (cancelledIcon) cancelledIcon.style.display = status === 'cancelled' ? 'inline' : 'none'
 
   const canEdit = checkPermission(eventData)
   const editBtn = document.getElementById('editEventBtn')
@@ -653,12 +925,57 @@ function closeDetailModal() {
   if (modal) modal.classList.remove('active')
 }
 
+function editEvent() {
+  const eventData = calendar.getEventById(currentEventId)
+  if (!eventData) return
+
+  if (!checkPermission(eventData)) {
+    if (window.toastr) toastr.error('Bạn không có quyền chỉnh sửa sự kiện này.')
+    return
+  }
+
+  closeDetailModal()
+
+  document.getElementById('modalTitle').textContent = 'Chỉnh sửa sự kiện'
+  document.getElementById('eventId').value = currentEventId
+  document.getElementById('eventTitle').value = eventData.title
+  document.getElementById('eventCategory').value = eventData.extendedProps.category || 'work'
+  document.getElementById('eventRoom').value = eventData.extendedProps.roomCode || 'Lab Phát triển phần mềm và hệ thống thông minh'
+  document.getElementById('eventRegisteredFor').value = eventData.extendedProps.registered_for || ''
+  document.getElementById('eventDescription').value = eventData.extendedProps.description || ''
+
+  const startDate = new Date(eventData.start)
+  const endDate = eventData.end ? new Date(eventData.end) : new Date(startDate.getTime() + 3600000)
+  
+  document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]
+  document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5)
+  document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
+
+  // Reset repeat
+  document.getElementById('eventRepeatType').value = ''
+  document.getElementById('eventRepeatUntil').value = ''
+  const weekdaySection = document.getElementById('weekdaySection')
+  if (weekdaySection) {
+    weekdaySection.style.display = 'none'
+    document.querySelectorAll('.weekday-checkbox').forEach((cb) => {
+      cb.checked = false
+    })
+  }
+
+  const modal = document.getElementById('eventModal')
+  if (modal) modal.classList.add('active')
+
+  buildOccurrencesFromForm({ preview: true })
+}
+
+/* ======================= DELETE EVENT ======================= */
+
 function deleteEvent() {
   const eventData = calendar.getEventById(currentEventId)
   if (!eventData) return
 
   if (!checkPermission(eventData)) {
-    toastr.error('Bạn không có quyền xóa sự kiện này.')
+    if (window.toastr) toastr.error('Bạn không có quyền xóa sự kiện này.')
     return
   }
 
@@ -717,6 +1034,8 @@ async function confirmDelete() {
     if (window.toastr) toastr.error('Lỗi kết nối máy chủ.')
   }
 }
+
+/* ======================= UPDATE TIME BY DRAG/RESIZE ======================= */
 
 async function updateEventTime(calendarEvent, infoCtx = null) {
   const id = calendarEvent.id
@@ -795,31 +1114,7 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
   }
 }
 
-// khởi tạo
-document.addEventListener('DOMContentLoaded', function () {
-  initCalendar()
-})
-
-const eventModalEl = document.getElementById('eventModal')
-if (eventModalEl) {
-  eventModalEl.addEventListener('click', function (e) {
-    if (e.target === this) closeModal()
-  })
-}
-
-const detailModalEl = document.getElementById('detailModal')
-if (detailModalEl) {
-  detailModalEl.addEventListener('click', function (e) {
-    if (e.target === this) closeDetailModal()
-  })
-}
-
-const confirmDeleteEl = document.getElementById('confirmDeleteModal')
-if (confirmDeleteEl) {
-  confirmDeleteEl.addEventListener('click', function (e) {
-    if (e.target === this) closeConfirmDelete()
-  })
-}
+/* ======================= MINI CALENDAR ======================= */
 
 function initMiniCalendar() {
   const miniEl = document.getElementById('miniCalendar')
@@ -854,6 +1149,8 @@ function initMiniCalendar() {
   mini.render()
 }
 
+/* ======================= PERMISSION ======================= */
+
 function checkPermission(eventData) {
   if (!window.LAB_USER || !window.LAB_USER.logged_in) return false
 
@@ -878,4 +1175,31 @@ function checkPermission(eventData) {
   }
 
   return true
+}
+
+/* ======================= BOOTSTRAP ======================= */
+
+document.addEventListener('DOMContentLoaded', function () {
+  initCalendar()
+})
+
+const eventModalEl = document.getElementById('eventModal')
+if (eventModalEl) {
+  eventModalEl.addEventListener('click', function (e) {
+    if (e.target === this) closeModal()
+  })
+}
+
+const detailModalEl = document.getElementById('detailModal')
+if (detailModalEl) {
+  detailModalEl.addEventListener('click', function (e) {
+    if (e.target === this) closeDetailModal()
+  })
+}
+
+const confirmDeleteEl = document.getElementById('confirmDeleteModal')
+if (confirmDeleteEl) {
+  confirmDeleteEl.addEventListener('click', function (e) {
+    if (e.target === this) closeConfirmDelete()
+  })
 }

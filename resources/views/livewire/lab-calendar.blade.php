@@ -26,17 +26,17 @@
                         <div class="lab-checklist">
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="pending">
-                                <span class="lab-check-color status-pending"></span>
+                                {{-- <span class="lab-check-color status-pending"></span> --}}
                                 <span class="lab-check-label">Chờ duyệt</span>
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="approved">
-                                <span class="lab-check-color status-approved"></span>
+                                {{-- <span class="lab-check-color status-approved"></span> --}}
                                 <span class="lab-check-label">Đã duyệt</span>
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="completed">
-                                <span class="lab-check-color status-completed"></span>
+                                {{-- <span class="lab-check-color status-completed"></span> --}}
                                 <span class="lab-check-label">Đã hoàn thành</span>
                             </label>
                         </div>
@@ -47,17 +47,17 @@
                         <div class="lab-checklist">
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-category="work">
-                                <span class="lab-check-color cat-work"></span>
+                                {{-- <span class="lab-check-color cat-work"></span> --}}
                                 <span class="lab-check-label">Làm việc / nghiên cứu</span>
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-category="seminar">
-                                <span class="lab-check-color cat-seminar"></span>
+                                {{-- <span class="lab-check-color cat-seminar"></span> --}}
                                 <span class="lab-check-label">Hội thảo / seminar</span>
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-category="other">
-                                <span class="lab-check-color cat-other"></span>
+                                    {{-- <span class="lab-check-color cat-other"></span> --}}
                                 <span class="lab-check-label">Khác</span>
                             </label>
                         </div>
