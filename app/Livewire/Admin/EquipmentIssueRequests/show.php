@@ -134,7 +134,7 @@ class Show extends Component
 
                 $issue = EquipmentIssue::create([
                     'equipment_id'     => $item->equipment_id,
-                    // 'broken_quantity'  => $qtyBroken, // bật nếu bạn đã add cột vào equipment_issues
+                    'broken_quantity'  => $qtyBroken,
                     'reported_by'      => $this->request->user_id,
                     'title'            => null,
                     'description'      => $item->description,
@@ -200,6 +200,11 @@ class Show extends Component
         $this->request->load('items');
 
         $items = $this->request->items;
+        if ($items->isEmpty()) {
+            $this->request->status = EquipmentIssueRequest::STATUS_COMPLETED;
+            $this->request->save();
+            return;
+        }
 
         $hasPending  = $items->contains(fn($i) => $i->status === EquipmentIssueRequestItem::STATUS_PENDING);
         $hasApproved = $items->contains(fn($i) => $i->status === EquipmentIssueRequestItem::STATUS_APPROVED);
