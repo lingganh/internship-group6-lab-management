@@ -4,7 +4,7 @@
             <div class="page-header-content d-lg-flex">
                 <div class="d-flex">
                     <h4 class="page-title mb-0">
-                        Danh sách phiếu báo hỏng thiết bị
+                        Phiếu ý kiến sử dụng phòng
                     </h4>
 
                 </div>
@@ -20,7 +20,7 @@
                             Ý kiến sử dụng phòng
                         </a>
                         <span class="breadcrumb-item active">
-                            Danh sách báo hỏng thiết bị của phiếu #{{ $issueRequest->id }}
+                            Phiếu #{{ $issueRequest->id }}
                         </span>
                     </div>
                 </div>

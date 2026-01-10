@@ -308,17 +308,22 @@ class CreateFromEvent extends Component
 
         $user = Auth::user();
         $createdRequest = null;
+        $hasItems = count($this->items) > 0;
+
 
         $this->event->update([
             'feedback' => trim($this->feedback),
         ]);
 
-        DB::transaction(function () use ($user, &$createdRequest) {
+        DB::transaction(function () use ($user, &$createdRequest, $hasItems) {
+
             $createdRequest = EquipmentIssueRequest::create([
                 'user_id'      => $user->id,
                 'lab_event_id' => $this->labEventId,
                 'description'  => trim($this->feedback),
-                'status'       => 'pending',
+                'status' => $hasItems
+                    ? EquipmentIssueRequest::STATUS_PENDING
+                    : EquipmentIssueRequest::STATUS_COMPLETED,
                 'items_count'  => count($this->items),
             ]);
 
@@ -361,7 +366,10 @@ class CreateFromEvent extends Component
 
         $this->dispatch('issue-request-created', [
             'requestId' => $createdRequest->id,
-            'message'   => 'Đã gửi phiếu báo hỏng. Vui lòng chờ admin xử lý.',
+            'message' => $hasItems
+                ? 'Đã gửi phiếu báo hỏng. Vui lòng chờ admin xử lý.'
+                : 'Đã gửi phản hồi. Cảm ơn bạn.',
+
         ]);
 
         $this->dispatch('issueRequestCreated', requestId: $createdRequest->id);
@@ -370,32 +378,44 @@ class CreateFromEvent extends Component
 
     private function notifyAdminsNewRequest(EquipmentIssueRequest $request): void
     {
-        $user = Auth::user();
+        $user = Auth::user(); // SENDER: người thực hiện hành động (người tạo phiếu)
 
+        // RECEIVERS: danh sách admin sẽ nhận thông báo
         $admins = User::whereHas('role', function ($q) {
             $q->where('name', RoleEnum::Admin->value);
         })->get();
 
         if ($admins->isEmpty()) return;
 
-        $desc = trim($request->description ?? '');
+        // Nội dung hiển thị ngắn trong list thông báo (nên fallback nếu rỗng)
+        $desc = trim((string) ($request->description ?? ''));
 
         foreach ($admins as $admin) {
             Notification::create([
-                'user_id' => $admin->id,
-                'type'    => 'equipment_issue_request',
+                'user_id' => $admin->id, // RECEIVER: user_id của người nhận thông báo
+
+                // UI dùng để hiển thị: title + message (mô tả)
                 'title'   => 'Đã tạo phiếu phản hồi sử dụng phòng mới!',
-                'message' => $desc !== '' ? $desc : ('Có ' . $request->items_count . ' thiết bị được báo hỏng.'),
-                'data'    => [
+                'message' => $desc !== '' ? $desc : 'Có phiếu mới cần xử lý.',
+
+                // data: payload để UI biết ai gửi + click đi đâu + liên kết tới đối tượng nghiệp vụ
+                'data' => [
                     'request_id'  => $request->id,
-                    'sender_id'   => $user->id,
-                    'sender_name' => $user->full_name ?? $user->name ?? 'Người dùng',
-                    'priority'    => null,
-                    'url'         => route('admin.equipment-issue-requests.show', $request->id),
+                    // OBJECT REF: ID của đối tượng nghiệp vụ liên quan đến thông báo (ở đây là EquipmentIssueRequest).
+                    // Khi tái sử dụng cho chức năng khác, hãy đổi key + giá trị theo đối tượng tương ứng:
+                    //   - event_id  => $event->id (tạo/duyệt sự kiện)
+                    //   - booking_id => $booking->id (đặt lịch)
+                    //   - issue_id  => $issue->id (báo hỏng 1 thiết bị)
+                    // Có thể bỏ hẳn nếu bạn không cần truy vết theo object và đã có 'url' để điều hướng.
+
+                    'sender_id'   => $user->id,    // SENDER id
+                    'sender_name' => $user->full_name ?? $user->name ?? 'Người dùng', // SENDER display
+                    'url'         => route('admin.equipment-issue-requests.show', $request->id), // Click chuyển trang
                 ],
             ]);
         }
     }
+
 
     public function getSelectableEquipmentOptionsProperty(): array
     {
