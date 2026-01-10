@@ -18,6 +18,9 @@ use App\Livewire\LabRegister;
 use App\Livewire\Admin\Lab\Index as LabIndex;
 use App\Livewire\Admin\Lab\Create as LabCreate;
 use App\Livewire\Admin\Lab\Edit as LabEdit;
+use App\Exports\LabDiaryExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 
 
 //login sso

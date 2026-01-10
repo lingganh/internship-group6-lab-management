@@ -3,8 +3,10 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Equipment;
+use App\Models\Lab;
 use App\Models\LabEvent;
 use Livewire\Component;
+
 
 
 class Dashboard extends Component
@@ -21,13 +23,35 @@ class Dashboard extends Component
     public $WeekPCData;
     public $MonthBCData;
     public $MonthPCData;
+    public $AllPCData;
+    public $EquipCData;
+    public $WeekLCData;
+    public $MonthLCData;
+    public $TopEvent;
 
     public function mount()
     {
         //aboveData
         $this->AllEvent = LabEvent::query()->where('end', '<=', now()->addDays(7))->where('start', '>=', now())->count();
         $this->ALLPendingEvt = LabEvent::query()->where('end', '<=', now()->addDays(7))->where('start', '>=', now())->where('status', '=', 'pending')->count();
+        $this->AllEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'approved')->count();
+        $this->ALLPendingEvt = LabEvent::query()->where('status', '=', 'pending')->count();
         $this->FirstEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'pending')->orderBy('start', 'asc')->first();
+        $this->TopEvent = $this->TopEvent = LabEvent::where('status', 'approved')
+            ->orderBy('start', 'asc')
+            ->limit(5)
+            ->get();
+
+
+        $Equip = Equipment::query()->get();
+        $this->EquipCData = $Equip
+            ->groupBy('status')
+            ->map(fn($items, $category) => [
+                'status' => ucfirst($category),
+                'count'    => $items->count(),
+            ])
+            ->values();
+
         $this->FaultyEquip = Equipment::query()->where('status', '=', 'broken')->count();
         $this->EuqipNum = Equipment::query()->count();
         $this->MaintaceEquip = Equipment::query()->where('status', '=', 'maintenance')->count();
@@ -36,7 +60,7 @@ class Dashboard extends Component
         $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek())->where('end', '<=', now('UTC')->endOfWeek())->get();
         $Month = LabEvent::query()->where('start', '>=', now()->startOfMonth())->where('end', '<=', now('UTC')->endOfMonth())->get();
         $Year = LabEvent::query()->where('start', '>=', now()->startOfYear())->where('end', '<=', now('UTC')->endOfYear())->get();
-
+        $All = LabEvent::query()->get();
 
         //chartData
         $BarData = [12, 19, 3, 5, 2, 3, 12];
@@ -112,9 +136,22 @@ class Dashboard extends Component
                 'count'    => $items->count(),
             ])
             ->values();
+
+
+        $this->AllPCData = $All
+            ->groupBy('category')
+            ->map(fn($items, $category) => [
+                'category' => ucfirst($category),
+                'count'    => $items->count(),
+            ])
+            ->values();
+
+
+
         $this->dispatch('create_chart');
         $this->dispatch('push_data_weekbc', data: $this->WeekBCData);
         $this->dispatch('push_data_weekpc', data: $this->WeekPCData);
+        $this->dispatch('push_data_equip', data: $this->EquipCData);
     }
 
     public function loadBarWeek()
@@ -133,6 +170,11 @@ class Dashboard extends Component
     {
         $this->dispatch('push_data_monthpc', data: $this->MonthPCData);
     }
+    public function loadPieAll()
+    {
+        $this->dispatch('push_data_allpc', data: $this->AllPCData);
+    }
+
 
     public function render()
     {

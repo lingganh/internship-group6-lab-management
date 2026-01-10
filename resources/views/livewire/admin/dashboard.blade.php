@@ -6,6 +6,7 @@
                 <h5 class="mb-1 fw-bold">Chào buổi sáng</h5>
                 <small class="text-muted">Chúc bạn có một ngày làm việc hiệu quả</small>
             </div>
+
         </div>
     </div>
 </div>
@@ -19,11 +20,16 @@
         <p class="text-muted fs-6 mb-0">
             Event chưa duyệt gần nhất :
 
+            @if(!is_null($FirstEvent))
             <span class="fw-bold">{{ $FirstEvent->title }}</span>
             diễn ra vào
             <span class="fw-semibold">{{ $FirstEvent->start }} – {{ $FirstEvent->end }}</span>
             <
                 </p>
+            @else
+            <span class="fw-bold">Không có event nào</span>
+            @endif
+        </p>
 
     </div>
 
@@ -113,6 +119,13 @@
     <h4 class="text-center fw-bold mb-3">
         Thống kê việc làm sinh viên theo đợt tốt nghiệp
     </h4>
+    <div class="d-flex align-items-center mb-1 ">
+        <h4 class="text-center fw-bold mb-3">
+            Thống kê
+        </h4>
+
+
+    </div>
 
     <!-- <div class="text-center my-5">
         <div class="spinner-border text-primary"></div>
@@ -120,6 +133,7 @@
     </div> -->
 
     <div class="row g-4">
+
         <div class="col-12 col-lg-4">
             <div class="card shadow-sm h-100">
                 <div wire:ignore class="card-body p3">
@@ -127,6 +141,7 @@
                         <div class="btn-group" role="group">
                             <button id="PiebtnWeek" type="button" class="btn btn-primary active px-4 py-2">Tuần</button>
                             <button id="PiebtnMonth" type="button" class="btn btn-outline-primary px-4 py-2">Tháng</button>
+                            <button id="PiebtnAll" type="button" class="btn btn-outline-primary px-4 py-2">Tất cả</button>
                         </div>
                     </div>
                     <canvas id="pieChart" class="chart-canvas"></canvas>
@@ -149,6 +164,104 @@
             </div>
         </div>
     </div>
+
+
+</div>
+
+<div class="container my-4">
+
+    <!-- <div class="text-center my-5">
+        <div class="spinner-border text-primary"></div>
+        <p class="text-muted mt-2">Đang tải dữ liệu biểu đồ...</p>
+    </div> -->
+
+    <div class="row g-4">
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div wire:ignore class="card-body p3">
+
+                    <canvas id="equipChart" class="chart-canvas"></canvas>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm h-100 overflow-hidden">
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <th colspan="5" class="text-center table-dark">
+                                Event sắp tới
+                            </th>
+
+                            <tbody>
+                                @forelse($TopEvent as $event)
+                                <tr>
+                                    {{-- Nội dung --}}
+                                    <td>
+                                        <div class="fw-semibold">{{ $event->title }}</div>
+                                        <div class="text-muted small">
+                                            #{{ $event->id }} • {{ ucfirst($event->category) }}
+                                        </div>
+                                    </td>
+
+                                    {{-- Phòng --}}
+                                    <td>
+                                        <span class="fw-semibold">{{ $event->lab_code }}</span>
+                                    </td>
+
+                                    {{-- Người đăng ký --}}
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ $event->user?->name ?? 'System' }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ $event->user?->email ?? '' }}
+                                        </div>
+                                    </td>
+
+                                    {{-- Thời gian --}}
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ $event->start->format('d/m/Y') }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ $event->start->format('H:i') }}
+                                            – {{ $event->end->format('H:i') }}
+                                        </div>
+                                    </td>
+
+
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        Không có event
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="5" class="text-end py-3">
+                                        <a href="{{route('admin.lab-diary')}}" class="fw-semibold text-decoration-none">
+                                            Xem thêm →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 
@@ -286,16 +399,34 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Biểu đồ số lượng sự kiện', // <-- Your title here
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
             }
         });
 
         const pieCtx = document.getElementById('pieChart');
-        pieChart = pieChart = new Chart(pieCtx, {
+        pieChart = new Chart(pieCtx, {
             type: 'pie',
             data: {
                 labels: [],
@@ -308,9 +439,36 @@
                     ],
                     borderWidth: 1
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Tỉ lệ sự kiện theo loại', // <-- Your title here
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
             }
         });
+
+
+
+
     });
+
 
 
     /* ======================
@@ -344,12 +502,64 @@
         updatePieChart(data);
         // console.log(data)    
     });
+    $wire.on('push_data_allpc', ({
+        data
+    }) => {
+        // updatePieChart(data);
+        console.log(data)
+    });
+
+    $wire.on('push_data_equip', ({
+        data
+    }) => {
+        console.log(data)
+        dat = data.map(d => d.count)
+        label = data.map(d => d.status)
+        const equipCtx = document.getElementById('equipChart');
+        new Chart(equipCtx, {
+            type: 'pie',
+            data: {
+                labels: label,
+                datasets: [{
+                    data: dat,
+                    backgroundColor: [ // Array of colors for each slice
+                        'rgb(255, 99, 132)', // Red
+                        'rgb(54, 162, 235)', // Blue
+                        'rgb(255, 205, 86)' // Yellow
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Tỉ lệ dụng cụ theo trạng thái',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
 
     function updateBarChart(Newdata) {
         barChart.data.labels = Newdata.map(d => d.date);
         barChart.data.datasets[0].data = Newdata.map(d => d.count);
         barChart.update();
-       
+
     }
 
 
@@ -357,7 +567,7 @@
         pieChart.data.labels = Newdata.map(d => d.category);
         pieChart.data.datasets[0].data = Newdata.map(d => d.count);
         pieChart.update();
-        
+
     }
 
 
@@ -367,33 +577,52 @@
 
     // Pie buttons
     document.getElementById('PiebtnWeek').addEventListener('click', () => {
-        $wire.loadPieWeek();
-        toggleButtons('PiebtnWeek', 'PiebtnMonth');
+        $wire.loadPieWeek(); // Livewire method for weekly pie data
+        toggleButtons('PiebtnWeek', ['PiebtnMonth', 'PiebtnAll']);
     });
 
     document.getElementById('PiebtnMonth').addEventListener('click', () => {
-        $wire.loadPieMonth();
-        toggleButtons('PiebtnMonth', 'PiebtnWeek');
+        $wire.loadPieMonth(); // Livewire method for monthly pie data
+        toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
+    });
+
+    document.getElementById('PiebtnAll').addEventListener('click', () => {
+        $wire.loadPieAll(); // Livewire method for all-time pie data
+        toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
     });
 
     // Bar buttons
     document.getElementById('BarbtnWeek').addEventListener('click', () => {
         $wire.loadBarWeek();
-        toggleButtons('BarbtnWeek', 'BarbtnMonth');
+        toggleButton('BarbtnWeek', 'BarbtnMonth');
     });
 
     document.getElementById('BarbtnMonth').addEventListener('click', () => {
         $wire.loadBarMonth();
-        toggleButtons('BarbtnMonth', 'BarbtnWeek');
+        toggleButton('BarbtnMonth', 'BarbtnWeek');
     });
 
     // Active button helper
-    function toggleButtons(activeId, inactiveId) {
+    function toggleButton(activeId, inactiveId) {
         document.getElementById(activeId).classList.add('btn-primary', 'active');
         document.getElementById(activeId).classList.remove('btn-outline-primary');
 
         document.getElementById(inactiveId).classList.add('btn-outline-primary');
         document.getElementById(inactiveId).classList.remove('btn-primary', 'active');
+    }
+
+    function toggleButtons(activeId, inactiveIds) {
+        // Active button
+        const activeBtn = document.getElementById(activeId);
+        activeBtn.classList.add('btn-primary', 'active');
+        activeBtn.classList.remove('btn-outline-primary');
+
+        // Inactive buttons
+        inactiveIds.forEach(id => {
+            const btn = document.getElementById(id);
+            btn.classList.add('btn-outline-primary');
+            btn.classList.remove('btn-primary', 'active');
+        });
     }
 </script>
 @endscript
