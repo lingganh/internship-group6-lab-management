@@ -12,10 +12,11 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 
-class LabDiary extends Component    
+class LabDiary extends Component
 {
     use WithPagination;
     use WithFileUploads;
@@ -25,8 +26,12 @@ class LabDiary extends Component
     public $filterFrom = '';
     public $filterTo = '';
     public $keyword = '';
+    public $ExportData=null;
 
     public $selectedEvent = null;
+    public $selectedIssueRequestId = null;
+    public int $selectedIssueEquipmentsCount = 0; // số dòng thiết bị trong phiếu
+    public int $selectedIssueBrokenTotal = 0;
 
     public $edit = [
         'title' => '',
@@ -73,6 +78,7 @@ class LabDiary extends Component
         }
     }
 
+
     public function updatingFilterLabCode()
     {
         $this->resetPage();
@@ -112,11 +118,21 @@ class LabDiary extends Component
             'user',
             'files',
             'lab',
-            'issueRequests' => function ($q) {
+            'issueRequest' => function ($q) {
                 $q->with('user:id,full_name')
-                    ->orderByDesc('created_at');
+                    ->withCount(['items as equipments_count'])
+                    ->withSum('items as broken_total', 'broken_quantity');
             },
         ])->findOrFail($id);
+
+        $req = $this->selectedEvent->issueRequest;
+
+        $this->selectedIssueRequestId = $req?->id;
+        $this->selectedIssueEquipmentsCount = (int) ($req?->equipments_count ?? 0);
+        $this->selectedIssueBrokenTotal = (int) ($req?->broken_total ?? 0);
+
+
+        $this->selectedIssueRequestId = $this->selectedEvent->issueRequest?->id;
 
         $this->edit = [
             'title' => (string) ($this->selectedEvent->title ?? ''),
@@ -221,6 +237,9 @@ class LabDiary extends Component
 
         $this->newFiles = [];
         $this->selectedEvent = null;
+        $this->selectedIssueRequestId = null;
+        $this->selectedIssueEquipmentsCount = 0;
+        $this->selectedIssueBrokenTotal = 0;
 
         $this->dispatch('close-details-modal');
         $this->flashToast('success', 'Đã lưu thông tin lịch.');
@@ -259,6 +278,7 @@ class LabDiary extends Component
         $ev->delete();
 
         $this->selectedEvent = null;
+        $this->selectedIssueRequestId = null;
 
         $this->dispatch('close-confirm-modal');
         $this->dispatch('close-details-modal');
@@ -303,8 +323,8 @@ class LabDiary extends Component
     {
         $now = Carbon::now();
         LabEvent::where('status', 'approved')
-                ->where('end', '<', $now)
-                ->update(['status' => 'completed']);
+            ->where('end', '<', $now)
+            ->update(['status' => 'completed']);
         $labs = Lab::select('code', 'name')->orderBy('name')->get();
 
         $users = User::select('id', 'full_name', 'email')
@@ -349,9 +369,27 @@ class LabDiary extends Component
             });
         }
 
+        
         $events = $q->paginate(15);
-
+        $this->ExportData=$q->get();
+       
         return view('livewire.lab-diary', compact('labs', 'events', 'users', 'groups'))
             ->layout('components.layouts.admin-layout');
     }
+
+   
+
+public function export()
+{
+    $events = $this->ExportData;
+
+    
+    Cache::put(
+        'lab-diary-export-' . auth()->id(),
+        $events,
+        now()->addMinutes(5)
+    );
+
+    return redirect()->route('lab-diary.export');
+}
 }

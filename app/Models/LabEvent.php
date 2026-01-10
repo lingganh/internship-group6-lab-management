@@ -38,10 +38,11 @@ class LabEvent extends Model
         return $this->belongsTo(Lab::class, 'lab_code', 'code');
     }
 
-    public function issueRequests()
+    public function issueRequest()
     {
-        return $this->belongsTo(\App\Models\EquipmentIssueRequest::class, 'lab_event_id');
+        return $this->hasOne(\App\Models\EquipmentIssueRequest::class, 'lab_event_id', 'id');
     }
+
 
     public function group()
     {
