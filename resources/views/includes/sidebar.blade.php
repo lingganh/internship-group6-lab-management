@@ -31,7 +31,6 @@
         <div class="sidebar-section">
             <ul class="nav nav-sidebar" data-nav-type="accordion">
                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
                     <a href="{{route('admin.dashboard')}}"
                        class="nav-link">
                         <i class="ph-house"></i>
@@ -89,7 +88,6 @@
                     <i class="ph-dots-three sidebar-resize-show"></i>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('admin.coming-soon')}}"
                     <a href="{{route('admin.report')}}"
                        class="nav-link">
                         <i class="ph-chart-bar"></i>

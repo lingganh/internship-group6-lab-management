@@ -32,8 +32,6 @@ class Dashboard extends Component
     public function mount()
     {
         //aboveData
-        $this->AllEvent = LabEvent::query()->where('end', '<=', now()->addDays(7))->where('start', '>=', now())->count();
-        $this->ALLPendingEvt = LabEvent::query()->where('end', '<=', now()->addDays(7))->where('start', '>=', now())->where('status', '=', 'pending')->count();
         $this->AllEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'approved')->count();
         $this->ALLPendingEvt = LabEvent::query()->where('status', '=', 'pending')->count();
         $this->FirstEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'pending')->orderBy('start', 'asc')->first();

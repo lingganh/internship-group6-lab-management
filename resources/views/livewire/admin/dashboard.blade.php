@@ -24,8 +24,6 @@
             <span class="fw-bold">{{ $FirstEvent->title }}</span>
             diễn ra vào
             <span class="fw-semibold">{{ $FirstEvent->start }} – {{ $FirstEvent->end }}</span>
-            <
-                </p>
             @else
             <span class="fw-bold">Không có event nào</span>
             @endif
@@ -116,9 +114,6 @@
 
 <!--Chart -->
 <div class="container my-4">
-    <h4 class="text-center fw-bold mb-3">
-        Thống kê việc làm sinh viên theo đợt tốt nghiệp
-    </h4>
     <div class="d-flex align-items-center mb-1 ">
         <h4 class="text-center fw-bold mb-3">
             Thống kê

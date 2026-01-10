@@ -24,8 +24,6 @@ use Illuminate\Support\Facades\Cache;
 
 
 //login sso
-Route::get('auth/redirect',[AuthenticateController::class,'redirectToSSO'])->name('sso.redirect');
-Route::get('auth/callback', [AuthenticateController::class,'handleSSOCallback'])->name('sso.callback');
 Route::get('auth/redirect', [AuthenticateController::class, 'redirectToSSO'])->name('sso.redirect');
 Route::get('auth/callback', [AuthenticateController::class, 'handleSSOCallback'])->name('sso.callback');
 Route::post('/logout', [AuthenticateController::class, 'logout'])->name('handleLogout');
@@ -35,7 +33,6 @@ Route::get('register', [AuthenticateController::class, 'showRegisterForm'])->nam
 Route::get('forgot-password', [AuthenticateController::class, 'forgotPassword'])->name('forgotPassword');
 Route::get('set-password/{token}', [AuthenticateController::class, 'setPassword'])->name('setPassword');
 
-Route::get('/', LabCalendar::class )->name('home');;
 Route::get('/', LabCalendar::class)->name('home');;
 
 Route::get('bookings', [LabCalendar::class, 'getAllBookings']);

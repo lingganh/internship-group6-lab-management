@@ -13,7 +13,6 @@
         "laravel/tinker": "^2.10.1",
         "laravolt/avatar": "^6.3",
         "livewire/livewire": "^3.6",
-        "livewire/volt": "^1.10"
         "livewire/volt": "^1.10",
         "maatwebsite/excel": "^3.1"
     },
