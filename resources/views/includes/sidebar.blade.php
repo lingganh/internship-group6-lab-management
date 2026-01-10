@@ -90,6 +90,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{route('admin.coming-soon')}}"
+                    <a href="{{route('admin.report')}}"
                        class="nav-link">
                         <i class="ph-chart-bar"></i>
                         <span>Báo cáo - Thống kê</span>

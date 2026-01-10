@@ -68,6 +68,9 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/', function () {
             return view('pages.admin.dashboard');
         })->name('admin.dashboard');
+        Route::get('/report', function () {
+            return view('pages.admin.report');
+        })->name('admin.report');
 
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
@@ -89,6 +92,17 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/lab', LabIndex::class)->name('admin.lab.index');
         Route::get('/lab/create', LabCreate::class)->name('admin.lab.create');
         Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
+
+        Route::get('/export-lab-diary', function () {
+            $events = Cache::get('lab-diary-export-' . auth()->id());
+
+            abort_if(!$events, 419);
+
+            return Excel::download(
+                new LabDiaryExport($events),
+                'lab-diary.xlsx'
+            );
+        })->name('lab-diary.export');
     });
 });
 

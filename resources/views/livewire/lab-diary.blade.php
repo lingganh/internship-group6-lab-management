@@ -6,6 +6,8 @@
                 <a href="#page_header"
                    class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
                    data-bs-toggle="collapse">
+                    class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                    data-bs-toggle="collapse">
                     <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                 </a>
             </div>

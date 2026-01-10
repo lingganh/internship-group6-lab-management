@@ -340,7 +340,6 @@ class LabDiary extends Component
 
         
         $events = $q->paginate(15);
-
         $this->ExportData=$q->get();
        
         return view('livewire.lab-diary', compact('labs', 'events', 'users', 'groups'))
