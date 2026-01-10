@@ -738,13 +738,13 @@ async function saveEvent() {
   const hasConflict = hasLocalConflict(occurrences, labCode, eventId || null)
   console.log('⚠️ Has conflict:', hasConflict)
   
-  if (hasConflict) {
-    const ok = window.confirm(
-      'Khung giờ bạn chọn bị trùng với một số lịch ĐÃ DUYỆT trong cùng phòng.\n' +
-        'Bạn vẫn muốn tiếp tục tạo các lịch này?'
-    )
-    if (!ok) return
-  }
+  // if (hasConflict) {
+  //   const ok = window.confirm(
+  //     'Khung giờ bạn chọn bị trùng với một số lịch ĐÃ DUYỆT trong cùng phòng.\n' +
+  //       'Bạn vẫn muốn tiếp tục tạo các lịch này?'
+  //   )
+  //   if (!ok) return
+  // }
 
   const isEditing = !!eventId
   const baseUrl = isEditing ? `/bookings/${eventId}` : '/bookings'
@@ -831,7 +831,7 @@ async function saveEvent() {
         }
       }
 
-      console.log(`✅ Created ${successCount} events successfully, ${failCount} failed`)
+      console.log(` Created ${successCount} events successfully, ${failCount} failed`)
 
       if (successCount > 0) {
         if (window.toastr) toastr.success(`Đã tạo ${successCount} lịch thành công${failCount > 0 ? ` (${failCount} lịch thất bại)` : ''}.`)

@@ -29,6 +29,7 @@
 
         <!-- Main navigation -->
         <div class="sidebar-section">
+            
             <ul class="nav nav-sidebar" data-nav-type="accordion">
                 <li class="nav-item">
                     <a href="{{ route('admin.coming-soon') }}" class="nav-link">
@@ -126,8 +127,8 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{route('admin.lab.index')}}"
-                       class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
-                        <i class="ph-user"></i>
+                       class="nav-link {{ request()->routeIs('admin.lab.index') ? 'active' : '' }}">
+                        <i class="ph-test-tube"></i>
                         <span>Phòng Lab</span>
                     </a>
                 </li>
