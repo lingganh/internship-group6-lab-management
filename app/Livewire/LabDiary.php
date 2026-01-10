@@ -12,6 +12,7 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 
@@ -25,6 +26,7 @@ class LabDiary extends Component
     public $filterFrom = '';
     public $filterTo = '';
     public $keyword = '';
+    public $ExportData=null;
 
     public $selectedEvent = null;
     public $selectedIssueRequestId = null;
@@ -75,6 +77,7 @@ class LabDiary extends Component
             $this->newFiles = array_values($this->newFiles); // reset lại key 0,1,2,...
         }
     }
+
 
     public function updatingFilterLabCode()
     {
@@ -366,9 +369,27 @@ class LabDiary extends Component
             });
         }
 
+        
         $events = $q->paginate(15);
-
+        $this->ExportData=$q->get();
+       
         return view('livewire.lab-diary', compact('labs', 'events', 'users', 'groups'))
             ->layout('components.layouts.admin-layout');
     }
+
+   
+
+public function export()
+{
+    $events = $this->ExportData;
+
+    
+    Cache::put(
+        'lab-diary-export-' . auth()->id(),
+        $events,
+        now()->addMinutes(5)
+    );
+
+    return redirect()->route('lab-diary.export');
+}
 }
