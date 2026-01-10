@@ -78,16 +78,7 @@
 
     {{-- Thông tin sử dụng phòng + mô tả chung --}}
     <div class="card mb-3">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h6 class="mb-0">Thông tin sử dụng phòng</h6>
 
-            @php $ev = $request->labEvent; @endphp
-            @if ($ev)
-                <span class="text-muted fs-sm">
-                    {{ $ev->start?->format('d/m/Y H:i') }} → {{ $ev->end?->format('d/m/Y H:i') }}
-                </span>
-            @endif
-        </div>
 
         <div class="card-body">
             @php
@@ -95,55 +86,65 @@
                 $lab = $ev?->lab;
             @endphp
 
-            <div class="row g-3">
+            <div class="row g-3 align-items-stretch">
                 {{-- Cột trái: thông tin event/lab --}}
-                <div class="col-lg-6">
-                    @if ($ev)
-                        <div class="mb-2">
-                            <div class="text-muted fs-sm">Sự kiện</div>
-                            <div class="fw-semibold">{{ $ev->title }}</div>
+                <div class="col-lg-6 d-flex">
+                    <div class="border rounded-3 p-3 w-100 d-flex flex-column bg-body-tertiary">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="fw-semibold">Thông tin</div>
+                            @if ($ev)
+                                <span class="badge bg-light text-dark border">
+                                    {{ $ev->start?->format('d/m/Y H:i') }} → {{ $ev->end?->format('d/m/Y H:i') }}
+                                </span>
+                            @endif
                         </div>
 
-                        <div class="mb-2">
-                            <div class="text-muted fs-sm">Phòng/Lab</div>
+                        @if ($ev)
+                            <div class="small text-muted">Sự kiện</div>
+                            <div class="fw-semibold mb-2">{{ $ev->title }}</div>
+
+                            <div class="small text-muted">Phòng/Lab</div>
                             <div class="fw-semibold">
                                 {{ $lab?->name ?? $ev->lab_code }}
                                 <span class="text-muted">({{ $ev->lab_code }})</span>
                             </div>
 
                             @if (!blank($lab?->location))
-                                <div class="text-muted fs-sm">Vị trí: {{ $lab->location }}</div>
+                                <div class="small text-muted mt-1">Vị trí: {{ $lab->location }}</div>
                             @endif
-                        </div>
 
-                        @if (!blank($ev->description))
-                            <div class="mt-2">
-                                <div class="text-muted fs-sm">Nội dung sử dụng</div>
-                                <div class="border rounded p-3 bg-light">
-                                    {{ $ev->description }}
+                            <div class="mt-3 flex-grow-1 d-flex flex-column">
+                                <div class="small text-muted mb-1">Nội dung sử dụng</div>
+
+                                <div class="bg-white border rounded-3 p-3 flex-grow-1" style="">
+                                    {{ !blank($ev->description) ? $ev->description : '—' }}
                                 </div>
                             </div>
+                        @else
+                            <div class="text-muted">
+                                Phiếu này do người dùng tạo ở trang chi tiết thiết bị.
+                            </div>
                         @endif
-                    @else
-                        <div class="text-muted">
-                            Phiếu này do người dùng tạo ở trang chi tiết thiết bị.
-                        </div>
-                    @endif
+                    </div>
                 </div>
 
-                {{-- Cột phải: mô tả chung (feedback) --}}
-                <div class="col-lg-6">
-                    <div class="text-muted fs-sm mb-1">Phản hồi</div>
+                {{-- Cột phải: feedback --}}
+                <div class="col-lg-6 d-flex">
+                    <div class="border rounded-3 p-3 w-100 d-flex flex-column bg-body-tertiary">
+                        <div class="fw-semibold mb-2">Phản hồi</div>
 
-                    @if (!blank($request->description))
-                        <div class="border rounded p-3 bg-light">
-                            {{ $request->description }}
+                        <div class="bg-white border rounded-3 p-3 flex-grow-1 d-flex"
+                            style="white-space: pre-wrap; min-height: 120px;">
+                            @if (!blank($request->description))
+                                <div class="w-100">{{ $request->description }}</div>
+                            @else
+                                <div class="text-muted w-100 d-flex align-items-center">—</div>
+                            @endif
                         </div>
-                    @else
-                        <div class="text-muted">—</div>
-                    @endif
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 

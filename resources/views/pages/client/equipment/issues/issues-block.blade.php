@@ -118,9 +118,15 @@
                                 </p>
 
                                 {{-- Số lượng hỏng --}}
+                                @php
+                                    $brokenQty =
+                                        $issue->requestItem?->broken_quantity ?? ($issue->broken_quantity ?? 1);
+                                @endphp
+
                                 <div class="small text-muted mt-1">
-                                    Số lượng hỏng: <span class="fw-semibold">{{ $issue->broken_quantity ?? 1 }}</span>
+                                    Số lượng hỏng: <span class="fw-semibold">{{ $brokenQty }}</span>
                                 </div>
+
 
                                 {{-- Ảnh đính kèm --}}
                                 @if (is_array($issue->images) && count($issue->images))
