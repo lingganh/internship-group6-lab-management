@@ -13,6 +13,8 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
+
 
 class LabDiary extends Component
 {
@@ -27,6 +29,9 @@ class LabDiary extends Component
     public $ExportData=null;
 
     public $selectedEvent = null;
+    public $selectedIssueRequestId = null;
+    public int $selectedIssueEquipmentsCount = 0; // số dòng thiết bị trong phiếu
+    public int $selectedIssueBrokenTotal = 0;
 
     public $edit = [
         'title' => '',
@@ -109,7 +114,25 @@ class LabDiary extends Component
 
     public function viewEvent($id)
     {
-        $this->selectedEvent = LabEvent::with(['user', 'files', 'lab', 'group'])->findOrFail($id);
+        $this->selectedEvent = LabEvent::with([
+            'user',
+            'files',
+            'lab',
+            'issueRequest' => function ($q) {
+                $q->with('user:id,full_name')
+                    ->withCount(['items as equipments_count'])
+                    ->withSum('items as broken_total', 'broken_quantity');
+            },
+        ])->findOrFail($id);
+
+        $req = $this->selectedEvent->issueRequest;
+
+        $this->selectedIssueRequestId = $req?->id;
+        $this->selectedIssueEquipmentsCount = (int) ($req?->equipments_count ?? 0);
+        $this->selectedIssueBrokenTotal = (int) ($req?->broken_total ?? 0);
+
+
+        $this->selectedIssueRequestId = $this->selectedEvent->issueRequest?->id;
 
         $this->edit = [
             'title' => (string) ($this->selectedEvent->title ?? ''),
@@ -141,7 +164,7 @@ class LabDiary extends Component
     private function flashToast(string $type, string $message)
     {
         session()->flash($type, $message);
-        $this->dispatch('toast', type: $type, message: $message);
+        $this->dispatch('alert', type: $type, message: $message);
     }
 
     public function updateEvent()
@@ -214,6 +237,9 @@ class LabDiary extends Component
 
         $this->newFiles = [];
         $this->selectedEvent = null;
+        $this->selectedIssueRequestId = null;
+        $this->selectedIssueEquipmentsCount = 0;
+        $this->selectedIssueBrokenTotal = 0;
 
         $this->dispatch('close-details-modal');
         $this->flashToast('success', 'Đã lưu thông tin lịch.');
@@ -252,11 +278,12 @@ class LabDiary extends Component
         $ev->delete();
 
         $this->selectedEvent = null;
+        $this->selectedIssueRequestId = null;
 
         $this->dispatch('close-confirm-modal');
         $this->dispatch('close-details-modal');
 
-        $this->flashToast('success', "Đã xóa lịch #{$id}.");
+        $this->flashToast('success', "Đã xóa lịch .");
     }
 
     /**
@@ -294,6 +321,10 @@ class LabDiary extends Component
 
     public function render()
     {
+        $now = Carbon::now();
+        LabEvent::where('status', 'approved')
+            ->where('end', '<', $now)
+            ->update(['status' => 'completed']);
         $labs = Lab::select('code', 'name')->orderBy('name')->get();
 
         $users = User::select('id', 'full_name', 'email')

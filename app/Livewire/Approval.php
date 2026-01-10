@@ -8,12 +8,13 @@ use App\Models\Lab;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class Approval extends Component
 {
     use WithPagination;
 
-    public $filterStatus = 'pending';
+    public $filterStatus = '';
     public $filterUserId = '';
     public $filterDate = '';
     public $filterLabCode = '';
@@ -27,9 +28,11 @@ class Approval extends Component
     public $confirmNote = '';
 
     public $passwordModalId = null;
-    public $roomPassword = '';
-
+    public $roomCode = '';
     public $rejectionNote = '';
+
+    public $conflictId = null;
+    public $conflictSchedule = null;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -83,14 +86,40 @@ class Approval extends Component
         $this->dispatch('open-confirm-modal');
     }
 
-    public function performConfirm()
+    public function confirmDelete($id = null)
     {
-        if (!$this->confirmId || !$this->confirmType) {
-            $this->dispatch('toast', type: 'error', message: 'Không hợp lệ', sub: 'Thiếu dữ liệu xác nhận.');
+        $id = $id ?? $this->selectedSchedule?->id;
+        if (!$id) {
             return;
         }
 
-       
+        $this->confirmType = 'delete';
+        $this->confirmTitle = 'Xác nhận xóa lịch';
+        $this->confirmMessage = 'Hành động này sẽ xóa lịch đăng ký khỏi hệ thống. Bạn chắc chắn?';
+        $this->confirmId = $id;
+        $this->confirmNote = '';
+        $this->rejectionNote = '';
+
+        $this->dispatch('open-confirm-modal');
+    }
+
+    public function performConfirm()
+    {
+        if (!$this->confirmId || !$this->confirmType) {
+            $this->dispatch('alert', type: 'error', message: 'Không hợp lệ', sub: 'Thiếu dữ liệu xác nhận.');
+            return;
+        }
+
+        if ($this->confirmType === 'reject') {
+            if (trim($this->rejectionNote) === '') {
+                $this->dispatch('alert', type: 'warning', message: 'Thiếu lý do', sub: 'Vui lòng nhập lý do từ chối.');
+                return;
+            }
+
+            $this->rejectSchedule($this->confirmId);
+        } elseif ($this->confirmType === 'delete') {
+            $this->deleteSchedule($this->confirmId);
+        }
 
         $this->dispatch('close-confirm-modal');
 
@@ -107,41 +136,67 @@ class Approval extends Component
             return;
         }
 
-        $schedule = LabEvent::findOrFail($id);
+        $schedule = LabEvent::with(['lab', 'user'])->findOrFail($id);
 
         if ($schedule->status !== 'pending') {
-            $this->dispatch('toast', type: 'warning', message: 'Không thể xử lý', sub: 'Lịch không còn ở trạng thái chờ.');
+            $this->dispatch('alert', type: 'warning', message: 'Không thể xử lý', sub: 'Lịch không còn ở trạng thái chờ.');
             return;
         }
 
-        $hasConflict = LabEvent::where('status', 'approved')
+        $conflict = LabEvent::with(['lab', 'user'])
+            ->where('status', 'approved')
             ->where('id', '!=', $schedule->id)
             ->where('lab_code', $schedule->lab_code)
             ->where(function ($query) use ($schedule) {
                 $query->where('start', '<', $schedule->end)
                     ->where('end', '>', $schedule->start);
             })
-            ->exists();
+            ->orderBy('start')
+            ->first();
 
-        if ($hasConflict) {
-            $this->dispatch('toast', type: 'error', message: 'Trùng lịch', sub: 'Trùng khung giờ với một lịch khác đã duyệt (cùng phòng).');
+        if ($conflict) {
+            $this->conflictId = $schedule->id;
+            $this->conflictSchedule = $conflict;
+            $this->dispatch('open-conflict-modal');
             return;
         }
 
         $this->passwordModalId = $id;
-        $this->roomPassword = '';
+        $this->roomCode = '';
+        $this->dispatch('open-password-modal');
+    }
+
+    public function forceApprove()
+    {
+        if (!$this->conflictId) {
+            return;
+        }
+
+        $schedule = LabEvent::with(['lab', 'user'])->findOrFail($this->conflictId);
+
+        if ($schedule->status !== 'pending') {
+            $this->dispatch('alert', type: 'warning', message: 'Không thể xử lý', sub: 'Lịch không còn ở trạng thái chờ.');
+            $this->conflictId = null;
+            $this->conflictSchedule = null;
+            $this->dispatch('close-conflict-modal');
+            return;
+        }
+
+        $this->passwordModalId = $schedule->id;
+        $this->roomCode = '';
+        $this->dispatch('close-conflict-modal');
         $this->dispatch('open-password-modal');
     }
 
     public function approveSchedule()
     {
         if (!$this->passwordModalId) {
-            $this->dispatch('toast', type: 'error', message: 'Lỗi', sub: 'Không tìm thấy lịch cần phê duyệt.');
+            $this->dispatch('alert', type: 'error', message: 'Lỗi', sub: 'Không tìm thấy lịch cần phê duyệt.');
             return;
         }
 
-        if (empty($this->roomPassword)) {
-            $this->dispatch('toast', type: 'warning', message: 'Thiếu mật khẩu', sub: 'Vui lòng nhập mật khẩu phòng.');
+        if (empty($this->roomCode)) {
+            $this->dispatch('alert', type: 'warning', message: 'Thiếu mã phòng', sub: 'Vui lòng nhập mã phòng lab.');
             return;
         }
 
@@ -149,17 +204,27 @@ class Approval extends Component
 
         $schedule->update(['status' => 'approved']);
 
-        Mail::to($schedule->user->email)->queue(new \App\Mail\ApprovalNotification($schedule, $this->roomPassword));
+        if ($schedule->user && $schedule->user->email) {
+            Mail::to($schedule->user->email)->queue(
+                new \App\Mail\ApprovalNotification($schedule, $this->roomCode)
+            );
+        }
 
         $this->dispatch('close-password-modal');
         $this->passwordModalId = null;
-        $this->roomPassword = '';
+        $this->roomCode = '';
 
         if ($this->selectedSchedule && $this->selectedSchedule->id == $schedule->id) {
             $this->selectedSchedule->refresh();
         }
 
-        $this->dispatch('toast', type: 'success', message: 'Đã phê duyệt', sub: 'Email đã được gửi đến người dùng.');
+        if ($this->conflictId === $schedule->id) {
+            $this->conflictId = null;
+            $this->conflictSchedule = null;
+            $this->dispatch('close-conflict-modal');
+        }
+
+        $this->dispatch('alert', type: 'success', message: 'Đã phê duyệt', sub: 'Email đã được gửi đến người dùng.');
         $this->dispatch('close-details-modal');
     }
 
@@ -173,28 +238,64 @@ class Approval extends Component
         $schedule = LabEvent::with('user')->findOrFail($id);
 
         if ($schedule->status !== 'pending') {
-            $this->dispatch('toast', type: 'warning', message: 'Không thể xử lý', sub: 'Lịch không còn ở trạng thái chờ.');
+            $this->dispatch('alert', type: 'warning', message: 'Không thể xử lý', sub: 'Lịch không còn ở trạng thái chờ.');
             return;
         }
 
+        $reason = trim($this->rejectionNote) ?: null;
+
         $schedule->update([
             'status' => 'cancelled',
+            'reason' => $reason,
         ]);
 
         if ($schedule->user && $schedule->user->email) {
-            Mail::to($schedule->user->email)->queue(new \App\Mail\RejectionNotification($schedule, $this->rejectionNote));
+            Mail::to($schedule->user->email)->queue(
+                new \App\Mail\RejectionNotification($schedule, $this->rejectionNote)
+            );
         }
 
         if ($this->selectedSchedule && $this->selectedSchedule->id == $schedule->id) {
             $this->selectedSchedule->refresh();
         }
 
-        $this->dispatch('toast', type: 'success', message: 'Đã từ chối', sub: 'Yêu cầu đã được cập nhật.');
+        $this->dispatch('alert', type: 'success', message: 'Đã từ chối', sub: 'Yêu cầu đã được cập nhật.');
+        $this->dispatch('close-details-modal');
+    }
+
+    public function deleteSchedule($id = null)
+    {
+        $id = $id ?? $this->selectedSchedule?->id;
+        if (!$id) {
+            return;
+        }
+
+        $schedule = LabEvent::find($id);
+
+        if (!$schedule) {
+            $this->dispatch('alert', type: 'warning', message: 'Không tìm thấy lịch', sub: 'Lịch đã bị xóa trước đó.');
+            return;
+        }
+
+        $schedule->delete();
+
+        if ($this->selectedSchedule && $this->selectedSchedule->id == $id) {
+            $this->selectedSchedule = null;
+        }
+
+        $this->dispatch('alert', type: 'success', message: 'Đã xóa lịch', sub: "Lịch #{$id} đã được xóa.");
         $this->dispatch('close-details-modal');
     }
 
     public function render()
     {
+        $now = Carbon::now();
+        LabEvent::where('status', 'approved')
+            ->where('end', '<', $now)
+            ->update(['status' => 'completed']);
+
+        $labs = Lab::select('code', 'name')->orderBy('name')->get();
+
         $schedules = LabEvent::with(['user', 'lab'])
             ->when($this->filterStatus !== '', fn($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterUserId !== '', fn($q) => $q->where('user_id', $this->filterUserId))
@@ -204,10 +305,10 @@ class Approval extends Component
             ->paginate(15);
 
         return view('livewire.approval', [
-            'schedules' => $schedules,
+            'schedules'    => $schedules,
             'pendingCount' => LabEvent::where('status', 'pending')->count(),
-            'users' => User::select('id', 'full_name')->orderBy('full_name')->get(),
-            'labs' => Lab::select('code', 'name')->orderBy('name')->get(),
+            'users'        => User::select('id', 'full_name')->orderBy('full_name')->get(),
+            'labs'         => $labs,
         ])->layout('components.layouts.admin-layout');
     }
 }

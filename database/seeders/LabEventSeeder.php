@@ -3,85 +3,42 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\Lab;
 use App\Models\LabEvent;
+use App\Models\User;
 
 class LabEventSeeder extends Seeder
 {
     public function run(): void
     {
-        $mk = fn() => 'EV-' . now()->format('ymd') . '-' . Str::upper(Str::random(4));
+        $lab = Lab::query()->inRandomOrder()->first();
+        $user = User::query()->inRandomOrder()->first();
 
-        LabEvent::insert([
-            [
-                'title' => 'Nghiên cứu AI (Lab 1)',
-                'category' => 'work',
-                'start' => '2025-12-27 09:00:00',
-                'end' => '2025-12-27 11:30:00',
-                'description' => 'Nghiên cứu về thuật toán machine learning mới. Cần chuẩn bị slide.',
-                'lab_code' => 'LAB-001',
-                'user_id' => 1,
-                'updated_by' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'color' => '#3498db'
+        if (! $lab || ! $user) return;
 
-            ],
-            [
-                'title' => 'Hội thảo Blockchain',
-                'category' => 'seminar',
-                'start' => '2025-12-27 14:00:00',
-                'end' => '2025-12-27 17:00:00',
-                'description' => 'Hội thảo về ứng dụng công nghệ blockchain trong tài chính.',
-                'lab_code' => 'LAB-002',
-                'user_id' => 1,
-                'updated_by' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'color' => '#3498db'
+        $baseDate = now()->startOfWeek(); // tạo trong tuần hiện tại
 
-            ],
-            [
-                'title' => 'Họp nhóm dự án',
-                'category' => 'other',
-                'start' => '2025-12-28 17:30:00',
-                'end' => '2025-12-28 18:30:00',
-                'description' => 'Họp nhanh 1 tiếng chốt deadline tuần.',
-                'lab_code' => 'LAB-003',
-                'user_id' => 1,
-                'updated_by' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'color' => '#3498db'
+        $slots = [
+            ['07:30:00', '09:00:00'],
+            ['09:00:00', '10:30:00'],
+            ['13:30:00', '15:00:00'],
+            ['15:00:00', '16:30:00'],
+        ];
 
-            ],
-            [
-                'title' => 'Bảo trì thiết bị Lab 2',
-                'category' => 'work',
-                'start' => '2025-12-26 10:00:00',
-                'end' => '2025-12-26 12:00:00',
-                'description' => 'Bảo trì định kỳ máy chủ GPU.',
-                'lab_code' => 'LAB-002',
-                'user_id' => 1,
-                'updated_by' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'color' => '#3498db'
+        for ($i = 0; $i < 6; $i++) {
+            $day = $baseDate->copy()->addDays($i);
+            [$startT, $endT] = $slots[array_rand($slots)];
 
-            ],
-            [
-                'title' => 'Seminar: An toàn thông tin',
-                'category' => 'seminar',
-                'start' => '2026-01-03 09:30:00',
-                'end' => '2026-01-03 11:00:00',
-                'description' => 'Chuyên gia từ Viettel trình bày.',
-                'lab_code' => 'LAB-004',
-                'user_id' => 1,
-                'updated_by' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'color' => '#3498db'
-            ],
-        ]);
+            LabEvent::create([
+                'title'       => 'Event test #' . ($i + 1),
+                'category'    => 'work',
+                'lab_code'    => $lab->code,
+                'user_id'     => $user->id,
+                'start'       => $day->copy()->setTimeFromTimeString($startT),
+                'end'         => $day->copy()->setTimeFromTimeString($endT),
+                'status'      => 'approved',
+                'description' => 'Seed để test gửi ý kiến (07:00–18:00)',
+            ]);
+        }
     }
 }

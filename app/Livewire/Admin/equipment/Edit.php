@@ -6,6 +6,9 @@ use Livewire\Component;
 use App\Models\Equipment;
 use App\Models\Lab;
 use Illuminate\Support\Facades\DB;
+use App\Models\EquipmentIssue;
+use Livewire\WithPagination;
+use App\Models\LabEquipmentItem;
 
 class Edit extends Component
 {
@@ -21,6 +24,9 @@ class Edit extends Component
     public $quantity = 0;
     public $broken_quantity = 0;
     public $actual_quantity = 0;
+    use WithPagination;
+
+    protected $paginationTheme = 'bootstrap';
 
 
     public function mount($id)
@@ -35,17 +41,24 @@ class Edit extends Component
         $this->purchased_date = optional($eq->purchased_date)->format('Y-m-d');
         $this->notes = $eq->notes;
 
-
         $this->specifications = json_decode($eq->specifications, true) ?? [];
 
+        $count = $eq->labItems->count();
 
-        $item = $eq->labItems->first();
-
-        $this->lab_id = $item->lab_id ?? null;
-        $this->quantity = $item->quantity ?? 0;
-        $this->broken_quantity = $item->broken_quantity ?? 0;
-        $this->actual_quantity = max(0, $this->quantity - $this->broken_quantity);
+        if ($count === 1) {
+            $item = $eq->labItems->first();
+            $this->lab_id = $item->lab_id;
+            $this->quantity = (int) $item->quantity;
+            $this->broken_quantity = (int) $item->broken_quantity;
+            $this->actual_quantity = (int) $item->actual_quantity; // nếu cột có sẵn
+        } else {
+            $this->lab_id = null;
+            $this->quantity = 0;
+            $this->broken_quantity = 0;
+            $this->actual_quantity = 0;
+        }
     }
+
 
     protected function rules()
     {
@@ -110,8 +123,19 @@ class Edit extends Component
 
     public function render()
     {
-        return view('livewire.admin.equipment.edit',[
-            'labs' => Lab::orderBy('name')->get(),
+        $issues = EquipmentIssue::with(['reporter', 'logs.changer'])
+            ->where('equipment_id', $this->equipmentId)
+            ->orderByDesc('created_at')
+            ->paginate(5, ['*'], 'issuesPage');
+
+        $labItems = LabEquipmentItem::with('lab:id,name,code')
+            ->where('equipment_id', $this->equipmentId)
+            ->get();
+
+        return view('livewire.admin.equipment.edit', [
+            'labs'     => Lab::orderBy('name')->get(),
+            'issues'   => $issues,
+            'labItems' => $labItems,
         ])->layout('components.layouts.admin-layout');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+
 class LabEvent extends Model
 {
     use HasFactory;
@@ -36,10 +37,16 @@ class LabEvent extends Model
     {
         return $this->belongsTo(Lab::class, 'lab_code', 'code');
     }
+
+    public function issueRequest()
+    {
+        return $this->hasOne(\App\Models\EquipmentIssueRequest::class, 'lab_event_id', 'id');
+    }
+
+
     public function group()
     {
         return $this->belongsTo(Group::class, 'registered_for', 'id');
-
     }
 
     public function getDisplayStatusAttribute()

@@ -15,6 +15,12 @@ use App\Livewire\Admin\equipment\Edit;
 use App\Livewire\Approval;
 use App\Livewire\UserSchedules;
 use App\Livewire\LabRegister;
+use App\Http\Controllers\client\EquipmentIssueController;
+use App\Http\Controllers\admin\EquipmentIssueController as AdminEquipmentIssueController;
+use App\Http\Controllers\admin\AdminNotificationController;
+use App\Livewire\Client\EquipmentIssues\BulkCreate;
+use App\Http\Controllers\admin\EquipmentIssueRequestController as AdminEquipmentIssueRequestController;
+
 use App\Livewire\Admin\Lab\Index as LabIndex;
 use App\Livewire\Admin\Lab\Create as LabCreate;
 use App\Livewire\Admin\Lab\Edit as LabEdit;
@@ -58,6 +64,14 @@ Route::middleware('checkAuth')->group(function () {
             [],
         ),
     )->name('client.two-factor');
+
+    // Trang "Báo hỏng & lịch sử xử lý" theo thiết bị
+    Route::get('/equipment/{equipment}/issues', [EquipmentIssueController::class, 'index'])
+        ->name('client.equipment.issues.index');
+
+    // Xử lý form gửi báo hỏng cho thiết bị
+    Route::post('/equipment/{equipment}/issues', [EquipmentIssueController::class, 'store'])
+        ->name('client.equipment.issues.store');
 });
 
 Route::middleware('role:admin')->group(function () {
@@ -86,6 +100,28 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/equipment/create', EquipmentCreate::class)->name('admin.equipment.create');
         Route::get('/equipment/edit/{id}', Edit::class)->name('admin.equipment.edit');
         Route::get('/lab-register', LabRegister::class)->name('lab.register');
+
+        Route::prefix('equipment-issue-requests')->group(function () {
+            // Danh sách phiếu báo hỏng
+            Route::get('/', [AdminEquipmentIssueRequestController::class, 'index'])
+                ->name('admin.equipment-issue-requests.index');
+
+            // Chi tiết phiếu báo hỏng (
+            Route::get('/{equipmentIssueRequest}', [AdminEquipmentIssueRequestController::class, 'show'])
+                ->name('admin.equipment-issue-requests.show');
+        });
+
+        // Cập nhật trạng thái báo hỏng
+        Route::patch('/equipment-issues/{issue}/status', [AdminEquipmentIssueController::class, 'updateStatus'])
+            ->name('admin.equipment-issues.update-status');
+
+        // Admin xóa báo hỏng
+        Route::delete('/equipment-issues/{issue}', [EquipmentIssueController::class, 'destroy'])
+            ->name('client.equipment.issues.destroy');
+
+        // Thông báo có báo hỏng đến admin
+        Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])
+            ->name('admin.notifications.mark-all-read');
         Route::get('/lab', LabIndex::class)->name('admin.lab.index');
         Route::get('/lab/create', LabCreate::class)->name('admin.lab.create');
         Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
@@ -103,6 +139,9 @@ Route::middleware('role:admin')->group(function () {
     });
 });
 
-
+Route::get('/equipment/issues/bulk-create', function () {
+    return view('pages.client.equipment.issues.bulk-create');
+})->middleware('auth')
+    ->name('client.equipment.issues.bulk-create');
 
 Route::get('coming-soon', fn() => view('coming-soon'))->name('admin.coming-soon');

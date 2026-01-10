@@ -18,10 +18,6 @@ class LabCalendar extends Component
     {
         $this->autoUpdateStatuses();
 
-        // $groups = Group::select('id', 'name') 
-            
-        //     ->orderBy('name')
-        //     ->get();
         $user = Auth::user();
         $groups = Group::select('id', 'name')
             ->when(!( !$user || (int) $user->role_id === 1), function ($q) use ($user) {
@@ -33,12 +29,13 @@ class LabCalendar extends Component
             })
             ->orderBy('name')
             ->get();
+
         $rooms = Lab::select('code', 'name')
             ->orderBy('name')
             ->get();
 
         return view('livewire.lab-calendar', [
-            'rooms' => $rooms,
+            'rooms'  => $rooms,
             'groups' => $groups
         ])->layout('components.layouts.client-layout');
     }
@@ -57,7 +54,7 @@ class LabCalendar extends Component
                 ->whereNotNull('start')
                 ->where('start', '<=', $now)
                 ->update([
-                    'status' => 'cancelled',
+                    'status'     => 'cancelled',
                     'updated_at' => $now,
                 ]);
         } catch (\Throwable $e) {
@@ -92,6 +89,24 @@ class LabCalendar extends Component
         return response()->json($events);
     }
 
+    /**
+     * CHECK TRÙNG LỊCH
+     */
+    private function hasConflict(string $labCode, $start, $end, $ignoreId = null): bool
+    {
+        return LabEvent::query()
+            ->where('lab_code', $labCode)
+            ->where('status', '!=', 'cancelled') // bỏ qua lịch đã hủy
+            ->when($ignoreId, function ($q) use ($ignoreId) {
+                $q->where('id', '!=', $ignoreId);
+            })
+            // khoảng thời gian bị chồng lấn:
+            // start_existing < end_new  &&  end_existing > start_new
+            ->where('start', '<', $end)
+            ->where('end', '>', $start)
+            ->exists();
+    }
+
     public function store(Request $request)
     {
         $this->autoUpdateStatuses();
@@ -121,10 +136,24 @@ class LabCalendar extends Component
             'end.after'         => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
+        // ====== CHECK TRÙNG TRƯỚC KHI TẠO ======
+        if ($this->hasConflict(
+            $validated['lab_code'],
+            $validated['start'],
+            $validated['end']
+        )) {
+            return response()->json([
+                'type'    => 'error',
+                'message' => 'Thời gian bạn chọn đang bị trùng với một lịch khác trong cùng phòng lab.'
+            ], 409);
+        }
+
         $user = Auth::user();
         $isAdmin = $user->role_id == 1;
-        $validated['status'] = $isAdmin ? 'approved' : 'pending';
-        $validated['user_id'] = $user->id;
+
+        // nếu admin thì auto duyệt
+        $validated['status']     = $isAdmin ? 'approved' : 'pending';
+        $validated['user_id']    = $user->id;
         $validated['updated_by'] = $user->id;
 
         $event = LabEvent::create($validated);
@@ -160,8 +189,8 @@ class LabCalendar extends Component
         $this->autoUpdateStatuses();
 
         $event = LabEvent::findOrFail($id);
-        $user = auth()->user();
-        $isAdmin = $user && $user->role_id ==1 ;
+        $user  = auth()->user();
+        $isAdmin = $user && $user->role_id == 1;
 
         // Kiểm tra quyền: Admin được sửa tất cả, user chỉ sửa event của mình
         if (!$isAdmin && $event->user_id !== $user->id) {
@@ -171,7 +200,7 @@ class LabCalendar extends Component
             ], 403);
         }
 
-        // Kiểm tra: Sự kiện đã duyệt và đã đến giờ thì không được sửa
+        // Sự kiện đã duyệt và đã đến giờ thì không được sửa
         if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
             return response()->json([
                 'type'    => 'error',
@@ -195,6 +224,19 @@ class LabCalendar extends Component
 
         $validated['updated_by'] = $user ? $user->id : null;
 
+        // dữ liệu dùng để check trùng (nếu không gửi lab_code mới thì dùng lab cũ)
+        $labCode = $validated['lab_code'] ?? $event->lab_code;
+        $start   = $validated['start'] ?? $event->start;
+        $end     = $validated['end'] ?? $event->end;
+
+        // ====== CHECK TRÙNG TRƯỚC KHI UPDATE ======
+        if ($this->hasConflict($labCode, $start, $end, $event->id)) {
+            return response()->json([
+                'type'    => 'error',
+                'message' => 'Thời gian bạn chọn đang bị trùng với một lịch khác trong cùng phòng lab.'
+            ], 409);
+        }
+
         // Nếu không phải admin và sự kiện đang ở trạng thái approved, chuyển về pending
         if (!$isAdmin && $event->status === 'approved') {
             $validated['status'] = 'pending';
@@ -209,7 +251,7 @@ class LabCalendar extends Component
         $event->refresh();
 
         return response()->json([
-            'message' => !$isAdmin && $event->status === 'pending'
+            'message' => (!$isAdmin && $event->status === 'pending')
                 ? 'Cập nhật thành công. Sự kiện đã chuyển về trạng thái chờ duyệt.'
                 : 'Cập nhật sự kiện thành công.',
             'data' => [
@@ -242,7 +284,7 @@ class LabCalendar extends Component
             ], 403);
         }
 
-        // Kiểm tra: Sự kiện đã duyệt và đã đến giờ thì không được xóa
+        // Sự kiện đã duyệt và đã đến giờ thì không được xóa
         if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
             return response()->json([
                 'type'    => 'error',

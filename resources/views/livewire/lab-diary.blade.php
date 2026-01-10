@@ -4,8 +4,8 @@
             <div class="d-flex">
                 <h4 class="page-title mb-0">Nhật ký sử dụng</h4>
                 <a href="#page_header"
-                    class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                    data-bs-toggle="collapse">
+                   class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                   data-bs-toggle="collapse">
                     <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                 </a>
             </div>
@@ -17,33 +17,24 @@
                         <i class="ph-house"></i>
                     </a>
                     <span class="breadcrumb-item active">Nhật ký sử dụng</span>
-
-
-
                 </div>
             </div>
         </div>
     </div>
 
     <div id="toastPayload"
-        data-success="{{ session('success') }}"
-        data-error="{{ session('error') }}"
-        data-warning="{{ session('warning') }}"
-        data-info="{{ session('info') }}"
-        style="display:none"></div>
+         data-success="{{ session('success') }}"
+         data-error="{{ session('error') }}"
+         data-warning="{{ session('warning') }}"
+         data-info="{{ session('info') }}"
+         style="display:none"></div>
 
     <div class="container-fluid py-4 diary-page">
         <div class="row justify-content-center">
             <div class="col-12 col-xxl-11">
                 <div class="card border-0 diary-card">
-                    <div class="card-header bg-white border-0 pb-0 d-flex align-items-center justify-content-between">
+                    <div class="card-header bg-white border-0 pb-0">
                         <h4 class="mb-0 fw-bold text-dark">Nhật ký sử dụng</h4>
-                        <button wire:click="export" class="btn btn-success">
-                            Export Excel 
-                           
-                           <i class="bi bi-file-earmark-excel me-1"></i> 
-                        </button>
-                        
                     </div>
 
                     <div class="card-body pt-3">
@@ -54,9 +45,9 @@
                                     <select wire:model.live="filterLabCode" class="form-select diary-control">
                                         <option value="">Tất cả</option>
                                         @foreach($labs as $lab)
-                                        <option wire:key="lab-{{ $lab->code }}" value="{{ $lab->code }}">
-                                            {{ $lab->name }} ({{ $lab->code }})
-                                        </option>
+                                            <option wire:key="lab-{{ $lab->code }}" value="{{ $lab->code }}">
+                                                {{ $lab->name }} ({{ $lab->code }})
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -64,23 +55,23 @@
                                 <div class="col-6 col-md-2">
                                     <label class="form-label small fw-semibold text-dark mb-1">Từ ngày</label>
                                     <input type="date"
-                                        wire:model.live="filterFrom"
-                                        class="form-control diary-control">
+                                           wire:model.live="filterFrom"
+                                           class="form-control diary-control">
                                 </div>
 
                                 <div class="col-6 col-md-2">
                                     <label class="form-label small fw-semibold text-dark mb-1">Đến ngày</label>
                                     <input type="date"
-                                        wire:model.live="filterTo"
-                                        class="form-control diary-control">
+                                           wire:model.live="filterTo"
+                                           class="form-control diary-control">
                                 </div>
 
                                 <div class="col-12 col-md-5">
                                     <label class="form-label small fw-semibold text-dark mb-1">Từ khóa</label>
                                     <input type="text"
-                                        wire:model.live="keyword"
-                                        class="form-control diary-control"
-                                        placeholder="Tiêu đề / mô tả / feedback...">
+                                           wire:model.live="keyword"
+                                           class="form-control diary-control"
+                                           placeholder="Tiêu đề / mô tả / feedback...">
                                 </div>
                             </div>
                         </div>
@@ -99,92 +90,92 @@
                                 </thead>
                                 <tbody>
                                     @forelse($events as $item)
-                                    <tr wire:key="event-{{ $item->id }}">
-                                        <td data-label="Nội dung">
-                                            <div class="fw-bold text-dark text-wrap-mobile">
-                                                {{ $item->title }}
-                                            </div>
-                                            <div class="small text-muted">
-                                                #{{ $item->id }} • {{ $this->categoryLabel($item->category) }}
-                                            </div>
-                                        </td>
+                                        <tr wire:key="event-{{ $item->id }}">
+                                            <td data-label="Nội dung">
+                                                <div class="fw-bold text-dark text-wrap-mobile">
+                                                    {{ $item->title }}
+                                                </div>
+                                                <div class="small text-muted">
+                                                    #{{ $item->id }} • {{ $this->categoryLabel($item->category) }}
+                                                </div>
+                                            </td>
 
-                                        <td data-label="Phòng">
-                                            <div class="fw-semibold text-dark">
-                                                {{ $item->lab?->name ?? ($item->lab_code ?? 'N/A') }}
-                                            </div>
-                                            <div class="small text-muted">
-                                                {{ $item->lab_code ?? '-' }}
-                                            </div>
-                                        </td>
+                                            <td data-label="Phòng">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $item->lab?->name ?? ($item->lab_code ?? 'N/A') }}
+                                                </div>
+                                                <div class="small text-muted">
+                                                    {{ $item->lab_code ?? '-' }}
+                                                </div>
+                                            </td>
 
-                                        <td data-label="Người đăng ký">
-                                            <div class="fw-semibold text-dark">
-                                                {{ $item->user?->full_name ?? 'N/A' }}
-                                            </div>
-                                            <div class="small text-muted text-break">
-                                                {{ $item->user?->email ?? '' }}
-                                            </div>
-                                        </td>
+                                            <td data-label="Người đăng ký">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $item->user?->full_name ?? 'N/A' }}
+                                                </div>
+                                                <div class="small text-muted text-break">
+                                                    {{ $item->user?->email ?? '' }}
+                                                </div>
+                                            </td>
 
-                                        <td data-label="Thời gian">
-                                            <div class="fw-semibold text-dark">
-                                                {{ $item->start->format('d/m/Y') }}
-                                            </div>
-                                            <div class="small text-muted">
-                                                {{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}
-                                            </div>
-                                        </td>
+                                            <td data-label="Thời gian">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $item->start->format('d/m/Y') }}
+                                                </div>
+                                                <div class="small text-muted">
+                                                    {{ $item->start->format('H:i') }} – {{ $item->end->format('H:i') }}
+                                                </div>
+                                            </td>
 
-                                        <td data-label="Trạng thái" class="text-center-desktop">
-                                            @if($item->status === 'pending')
-                                            <span class="badge diary-pill diary-pill-pending">
-                                                Chờ duyệt
-                                            </span>
-                                            @elseif($item->status === 'approved')
-                                            <span class="badge diary-pill diary-pill-approved">
-                                                Đã duyệt
-                                            </span>
-                                            @elseif($item->status === 'completed')
-                                            <span class="badge diary-pill diary-pill-approved">
-                                                Đã hoàn thành
-                                            </span>
-                                            @else
-                                            <span class="badge diary-pill diary-pill-cancelled">
-                                                Từ chối
-                                            </span>
-                                            @endif
-                                        </td>
+                                            <td data-label="Trạng thái" class="text-center-desktop">
+                                                @if($item->status === 'pending')
+                                                    <span class="badge diary-pill diary-pill-pending">
+                                                        Chờ duyệt
+                                                    </span>
+                                                @elseif($item->status === 'approved')
+                                                    <span class="badge diary-pill diary-pill-approved">
+                                                        Đã duyệt
+                                                    </span>
+                                                @elseif($item->status === 'completed')
+                                                    <span class="badge diary-pill diary-pill-approved">
+                                                        Đã hoàn thành
+                                                    </span>
+                                                @else
+                                                    <span class="badge diary-pill diary-pill-cancelled">
+                                                        Từ chối
+                                                    </span>
+                                                @endif
+                                            </td>
 
-                                        <td class="text-end-desktop action-cell">
-                                            <button
-                                                wire:click="viewEvent({{ $item->id }})"
-                                                class="btn btn-sm diary-btn diary-btn-primary w-100-mobile"
-                                                type="button">
-                                                Chi tiết
-                                            </button>
-                                        </td>
-                                    </tr>
+                                            <td class="text-end-desktop action-cell">
+                                                <button
+                                                    wire:click="viewEvent({{ $item->id }})"
+                                                    class="btn btn-sm diary-btn diary-btn-primary w-100-mobile"
+                                                    type="button">
+                                                    Chi tiết
+                                                </button>
+                                            </td>
+                                        </tr>
                                     @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center py-5">
-                                            <div class="text-muted">
-                                                Không có dữ liệu phù hợp.
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5">
+                                                <div class="text-muted">
+                                                    Không có dữ liệu phù hợp.
+                                                </div>
+                                            </td>
+                                        </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
 
-                        <div class="mt-3 d-flex justify-content-center">
-                            {{ $events->links() }}
+                            <div class="mt-3 d-flex justify-content-center">
+                                {{ $events->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
         {{-- Toast --}}
         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
@@ -196,260 +187,263 @@
                         <div id="apToastSub" class="small text-muted mt-1"></div>
                     </div>
                     <button type="button"
-                        class="btn-close ms-2 mt-1"
-                        data-bs-dismiss="toast"
-                        aria-label="Close"></button>
+                            class="btn-close ms-2 mt-1"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"></button>
                 </div>
             </div>
         </div>
 
-        {{-- Modal Details --}}
-        <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 diary-modal">
-                    <div class="modal-header border-0 pb-0">
-                        <div>
-                            <h5 class="modal-title fw-bold text-dark mb-1">Chi tiết nhật ký</h5>
-                            <div class="small text-muted">Xem và chỉnh sửa nhật ký sử dụng phòng lab.</div>
+            {{-- Modal Details --}}
+            <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 diary-modal">
+                        <div class="modal-header border-0 pb-0">
+                            <div>
+                                <h5 class="modal-title fw-semibold text-dark mb-1">Chi tiết nhật ký</h5>
+                                <div class="small text-muted">Xem và chỉnh sửa nhật ký sử dụng phòng lab.</div>
+                            </div>
+                            <button type="button" class="btn-close mt-1" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
-                        <button type="button" class="btn-close mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
 
                     <div class="modal-body pt-3">
                         @if($selectedEvent)
-                        <div class="row g-3">
-                            <div class="col-12 col-md-8">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
-                                    <input wire:model.defer="edit.title" type="text" class="form-control diary-control">
-                                    @error('edit.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Phân loại</label>
-                                    <select wire:model.defer="edit.category" class="form-select diary-control">
-                                        <option value="work">Làm việc / nghiên cứu</option>
-                                        <option value="seminar">Hội thảo / seminar</option>
-                                        <option value="other">Khác</option>
-                                    </select>
-                                    @error('edit.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                                    <select wire:model.defer="edit.lab_code" class="form-select diary-control">
-                                        <option value="">Chọn phòng...</option>
-                                        @foreach($labs as $lab)
-                                        <option wire:key="lab-edit-{{ $lab->code }}" value="{{ $lab->code }}">
-                                            {{ $lab->name }} ({{ $lab->code }})
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @error('edit.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
-                                    <input wire:model.defer="edit.start" type="datetime-local" class="form-control diary-control">
-                                    @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
-                                    <input wire:model.defer="edit.end" type="datetime-local" class="form-control diary-control">
-                                    @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
-                                    <select wire:model.defer="edit.status" class="form-select diary-control">
-                                        <option value="pending">Chờ duyệt</option>
-                                        <option value="approved">Đã duyệt</option>
-                                        <option value="cancelled">Từ chối</option>
-                                        <option value="completed">Đã hoàn thành</option>
-                                    </select>
-                                    @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
-                                    <select wire:model.defer="edit.user_id" class="form-select diary-control">
-                                        <option value="">Chọn người dùng...</option>
-                                        @foreach($users as $u)
-                                        <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
-                                            {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho nhóm</label>
-                                    <select wire:model.defer="edit.group_id" class="form-select diary-control">
-                                        <option value="">Chọn nhóm / lớp...</option>
-                                        @foreach($groups as $g)
-                                        <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
-                                            {{ $g->name ?? ('Group #'.$g->id) }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
-                                    <textarea wire:model.defer="edit.description"
-                                        class="form-control diary-control"
-                                        rows="3"></textarea>
-                                    @error('edit.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
-                                    <textarea wire:model.defer="edit.feedback"
-                                        class="form-control diary-control"
-                                        rows="3"></textarea>
-                                    @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-
-                            {{-- File hiện tại --}}
-                            <div class="col-12">
-                                <div class="diary-filebox">
-                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                                        <div class="fw-bold text-dark">File đính kèm</div>
-                                        <div class="small text-muted">
-                                            {{ optional($selectedEvent->files)->count() ?? 0 }} file
-                                        </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
+                                        <input wire:model.defer="edit.title" type="text" class="form-control diary-control">
+                                        @error('edit.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                     </div>
-
-                                    @if($selectedEvent->files && $selectedEvent->files->count())
-                                    <div class="diary-files">
-                                        @foreach($selectedEvent->files as $f)
-                                        @php
-                                        $p = $f->path ?? $f->file_path ?? $f->url ?? '';
-                                        $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
-                                        $n = $f->name ?? $f->file_name ?? $f->original_name ?? basename((string)$p) ?? 'file';
-                                        @endphp
-                                        <div class="diary-file">
-                                            <a class="diary-file-link" href="{{ $u }}" target="_blank" rel="noopener">
-                                                <div class="diary-file-ic">
-                                                    <i class="ph-file-text"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="small fw-semibold text-dark text-truncate">
-                                                        {{ $n }}
-                                                    </div>
-                                                    <div class="small text-muted">
-                                                        {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
-                                                    </div>
-                                                </div>
-                                            </a>
-
-                                            <button
-                                                type="button"
-                                                class="btn btn-sm btn-link text-danger diary-file-delete"
-                                                wire:click="deleteFile({{ $f->id }})">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                    @else
-                                    <div class="small text-muted">Chưa có file.</div>
-                                    @endif
                                 </div>
-                            </div>
 
-                            {{-- Thêm file mới + preview file mới --}}
-                            <div class="col-12">
-                                <div class="diary-info">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
-                                    <input type="file" wire:model="newFiles" multiple class="form-control diary-control">
-                                    <div class="small text-muted mt-1">
-                                        Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Phân loại</label>
+                                        <select wire:model.defer="edit.category" class="form-select diary-control">
+                                            <option value="work">Làm việc / nghiên cứu</option>
+                                            <option value="seminar">Hội thảo / seminar</option>
+                                            <option value="other">Khác</option>
+                                        </select>
+                                        @error('edit.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                     </div>
-                                    @error('newFiles') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                    @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                </div>
 
-                                    @if($newFiles && count($newFiles))
-                                    <div class="diary-newfiles mt-2">
-                                        @foreach($newFiles as $idx => $file)
-                                        <div class="diary-file">
-                                            <div class="diary-file-ic">
-                                                <i class="ph-paperclip"></i>
+                                <div class="col-12 col-md-6">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
+                                        <select wire:model.defer="edit.lab_code" class="form-select diary-control">
+                                            <option value="">Chọn phòng...</option>
+                                            @foreach($labs as $lab)
+                                                <option wire:key="lab-edit-{{ $lab->code }}" value="{{ $lab->code }}">
+                                                    {{ $lab->name }} ({{ $lab->code }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('edit.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
+                                        <input wire:model.defer="edit.start" type="datetime-local" class="form-control diary-control">
+                                        @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
+                                        <input wire:model.defer="edit.end" type="datetime-local" class="form-control diary-control">
+                                        @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
+                                        <select wire:model.defer="edit.status" class="form-select diary-control">
+                                            <option value="pending">Chờ duyệt</option>
+                                            <option value="approved">Đã duyệt</option>
+                                            <option value="cancelled">Từ chối</option>
+                                            <option value="completed">Đã hoàn thành</option>
+                                        </select>
+                                        @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
+                                        <select wire:model.defer="edit.user_id" class="form-select diary-control">
+                                            <option value="">Chọn người dùng...</option>
+                                            @foreach($users as $u)
+                                                <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
+                                                    {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho nhóm</label>
+                                        <select wire:model.defer="edit.group_id" class="form-select diary-control">
+                                            <option value="">Chọn nhóm / lớp...</option>
+                                            @foreach($groups as $g)
+                                                <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
+                                                    {{ $g->name ?? ('Group #'.$g->id) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
+                                        <textarea wire:model.defer="edit.description"
+                                                  class="form-control diary-control"
+                                                  rows="3"></textarea>
+                                        @error('edit.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
+                                        <textarea wire:model.defer="edit.feedback"
+                                                  class="form-control diary-control"
+                                                  rows="3"></textarea>
+                                        @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
+                                {{-- File hiện tại --}}
+                                <div class="col-12">
+                                    <div class="diary-filebox">
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                            <div class="fw-bold text-dark">File đính kèm</div>
+                                            <div class="small text-muted">
+                                                {{ optional($selectedEvent->files)->count() ?? 0 }} file
                                             </div>
-                                            <div class="flex-grow-1">
-                                                <div class="small fw-semibold text-dark text-truncate">
-                                                    {{ $file->getClientOriginalName() }}
-                                                </div>
-                                                <div class="small text-muted">
-                                                    {{ number_format($file->getSize() / 1024, 1) }} KB
-                                                </div>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                class="btn btn-sm btn-link text-danger diary-file-delete"
-                                                wire:click="removeNewFile({{ $idx }})">
-                                                Bỏ
-                                            </button>
                                         </div>
-                                        @endforeach
+
+                                        @if($selectedEvent->files && $selectedEvent->files->count())
+                                            <div class="diary-files">
+                                                @foreach($selectedEvent->files as $f)
+                                                    @php
+                                                        $p = $f->path ?? $f->file_path ?? $f->url ?? '';
+                                                        $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
+                                                        $n = $f->name ?? $f->file_name ?? $f->original_name ?? basename((string)$p) ?? 'file';
+                                                    @endphp
+                                                    <div class="diary-file">
+                                                        <a class="diary-file-link" href="{{ $u }}" target="_blank" rel="noopener">
+                                                            <div class="diary-file-ic">
+                                                                <i class="ph-file-text"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="small fw-semibold text-dark text-truncate">
+                                                                    {{ $n }}
+                                                                </div>
+                                                                <div class="small text-muted">
+                                                                    {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
+                                                                </div>
+                                                            </div>
+                                                        </a>
+
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-link text-danger diary-file-delete"
+                                                            wire:click="deleteFile({{ $f->id }})">
+                                                            Xóa
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="small text-muted">Chưa có file.</div>
+                                        @endif
                                     </div>
-                                    @endif
+                                </div>
+
+                                {{-- Thêm file mới + preview file mới --}}
+                                <div class="col-12">
+                                    <div class="diary-info">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
+                                        <input type="file" wire:model="newFiles" multiple class="form-control diary-control">
+                                        <div class="small text-muted mt-1">
+                                            Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>
+                                        </div>
+                                        @error('newFiles') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+
+                                        @if($newFiles && count($newFiles))
+                                            <div class="diary-newfiles mt-2">
+                                                @foreach($newFiles as $idx => $file)
+                                                    <div class="diary-file">
+                                                        <div class="diary-file-ic">
+                                                            <i class="ph-paperclip"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="small fw-semibold text-dark text-truncate">
+                                                                {{ $file->getClientOriginalName() }}
+                                                            </div>
+                                                            <div class="small text-muted">
+                                                                {{ number_format($file->getSize() / 1024, 1) }} KB
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-link text-danger diary-file-delete"
+                                                            wire:click="removeNewFile({{ $idx }})">
+                                                            Bỏ
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         @endif
                     </div>
 
-                    <div class="modal-footer border-0 pt-0">
-                        <div class="d-flex w-100 justify-content-between align-items-center gap-2">
-                            <button type="button" class="btn diary-btn diary-btn-ghost" data-bs-dismiss="modal">
-                                Đóng
-                            </button>
-
-                            <div class="d-flex gap-2">
-                                <button wire:click="openDeleteConfirm" type="button" class="btn diary-btn diary-btn-danger">
-                                    Xóa
+                        <div class="modal-footer border-0 pt-0">
+                            <div class="d-flex w-100 justify-content-between align-items-center gap-2">
+                                <button type="button" class="btn diary-btn diary-btn-ghost" data-bs-dismiss="modal">
+                                    Đóng
                                 </button>
 
-                                <button wire:click="updateEvent" type="button" class="btn diary-btn diary-btn-success">
-                                    Lưu
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <button wire:click="openDeleteConfirm" type="button"
+                                        class="btn diary-btn diary-btn-danger">
+                                        Xóa
+                                    </button>
+
+                                    <button wire:click="updateEvent" type="button"
+                                        class="btn diary-btn diary-btn-success">
+                                        Lưu
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
-        </div>
 
         {{-- Modal Confirm --}}
         <div wire:ignore.self
-            class="modal fade"
-            id="modalConfirm"
-            tabindex="-1"
-            aria-hidden="true">
+             class="modal fade"
+             id="modalConfirm"
+             tabindex="-1"
+             aria-hidden="true">
             <div class="modal-dialog modal-sm modal-dialog-centered">
                 <div class="modal-content border-0 diary-modal">
                     <div class="modal-header border-0 pb-0">
@@ -462,8 +456,8 @@
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button"
-                            class="btn diary-btn diary-btn-ghost"
-                            data-bs-dismiss="modal">
+                                class="btn diary-btn diary-btn-ghost"
+                                data-bs-dismiss="modal">
                             Hủy
                         </button>
                         <button
@@ -478,204 +472,195 @@
         </div>
     </div>
 
-    <style>
-        .diary-page {
-            --d-bg: #f6f8fc;
-            --d-card: #ffffff;
-            --d-text: #0f172a;
-            --d-muted: #64748b;
-            --d-border: #e6eaf2;
-            --d-shadow: 0 14px 40px rgba(15, 23, 42, .08);
-            --d-radius: 18px;
-            --d-primary: #2563eb;
-            --d-primary-soft: #eaf1ff;
-            --d-success: #16a34a;
-            --d-success-soft: #e9f9ef;
-            --d-danger: #dc2626;
-            --d-danger-soft: #ffecec;
-            --d-warn: #f59e0b;
-            --d-warn-soft: #fff3db;
-            background: var(--d-bg);
-            min-height: 100vh;
-        }
+        <style>
+            .diary-page {
+                --d-bg: #f8fafc;
+                --d-card: #ffffff;
+                --d-text: #0f172a;
+                --d-muted: #6b7280;
+                --d-border: #e5e7eb;
+                --d-radius: 14px;
+                --d-primary: #2563eb;
+                --d-success: #16a34a;
+                --d-danger: #dc2626;
+                --d-warn: #f59e0b;
+                background: var(--d-bg);
+                min-height: 100vh;
+            }
 
-        .diary-card {
-            border-radius: var(--d-radius);
-            background: var(--d-card);
-            box-shadow: var(--d-shadow);
-            border: none;
-        }
+            .diary-card {
+                border-radius: var(--d-radius);
+                background: var(--d-card);
+                border: 1px solid var(--d-border);
+                box-shadow: none;
+            }
 
-        .diary-filters {
-            background: #fff;
-            border: 1px solid var(--d-border);
-            border-radius: 16px;
-            padding: 14px;
-        }
+            .diary-filters {
+                background: #f9fafb;
+                border: 1px solid var(--d-border);
+                border-radius: 12px;
+                padding: 12px;
+            }
 
-        .diary-control {
-            border: 1px solid var(--d-border) !important;
-            border-radius: 12px !important;
-            padding: 10px 12px !important;
-        }
+            .diary-control {
+                border: 1px solid var(--d-border) !important;
+                border-radius: 8px !important;
+                padding: 8px 10px !important;
+                font-size: 0.9rem;
+            }
 
-        .diary-table-wrap {
-            border: 1px solid var(--d-border);
-            border-radius: 16px;
-            overflow: hidden;
-            background: #fff;
-        }
+            .diary-table-wrap {
+                border: 1px solid var(--d-border);
+                border-radius: 12px;
+                overflow: hidden;
+                background: #fff;
+            }
 
-        .diary-table thead th {
-            background: #fbfcff;
-            color: #334155;
-            font-weight: 700;
-            padding: 14px;
-            font-size: .92rem;
-            border-bottom: 1px solid var(--d-border);
-        }
+            .diary-table thead th {
+                background: #f9fafb;
+                color: #374151;
+                font-weight: 600;
+                padding: 12px;
+                font-size: .9rem;
+                border-bottom: 1px solid var(--d-border);
+            }
 
-        .diary-table tbody td {
-            padding: 14px;
-            border-top: 1px solid var(--d-border);
-        }
+            .diary-table tbody td {
+                padding: 12px;
+                border-top: 1px solid var(--d-border);
+                font-size: 0.9rem;
+            }
 
-        .diary-pill {
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-weight: 700;
-            font-size: .8rem;
-            display: inline-flex;
-        }
+            .diary-pill {
+                border-radius: 999px;
+                padding: 4px 10px;
+                font-weight: 600;
+                font-size: .78rem;
+                display: inline-flex;
+            }
 
-        .diary-pill-pending {
-            background: var(--d-warn-soft);
-            color: #7a4b00;
-        }
+        .diary-pill-pending { background: var(--d-warn-soft); color: #7a4b00; }
+        .diary-pill-approved { background: var(--d-success-soft); color: #0f6a2e; }
+        .diary-pill-cancelled { background: var(--d-danger-soft); color: #8a1414; }
 
-        .diary-pill-approved {
-            background: var(--d-success-soft);
-            color: #0f6a2e;
-        }
+            .diary-btn {
+                border-radius: 8px;
+                padding: 7px 14px;
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
 
-        .diary-pill-cancelled {
-            background: var(--d-danger-soft);
-            color: #8a1414;
-        }
+            .diary-btn-primary {
+                background: #eff6ff;
+                color: var(--d-primary);
+                border: 1px solid #dbeafe;
+            }
 
-        .diary-btn {
-            border-radius: 12px;
-            padding: 8px 16px;
-            font-weight: 700;
-            transition: all .2s;
-        }
+            .diary-btn-success {
+                background: var(--d-success);
+                color: #fff;
+                border: 1px solid var(--d-success);
+            }
 
-        .diary-btn-primary {
-            background: var(--d-primary-soft);
-            color: var(--d-primary);
-            border: 1px solid rgba(37, 99, 235, .1);
-        }
+            .diary-btn-danger {
+                background: #fee2e2;
+                color: var(--d-danger);
+                border: 1px solid #fecaca;
+            }
 
-        .diary-btn-success {
-            background: var(--d-success);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
-        }
+            .diary-btn-ghost {
+                background: #fff;
+                border: 1px solid var(--d-border);
+                color: var(--d-muted);
+            }
 
-        .diary-btn-danger {
-            background: var(--d-danger-soft);
-            color: var(--d-danger);
-        }
+        .text-center-desktop { text-align: center; }
+        .text-end-desktop { text-align: right; }
 
-        .diary-btn-ghost {
-            background: #fff;
-            border: 1px solid var(--d-border);
-            color: var(--d-muted);
-        }
+            .text-wrap-mobile {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 320px;
+            }
 
-        .text-center-desktop {
-            text-align: center;
-        }
+            .diary-info {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                background: transparent;
+            }
 
-        .text-end-desktop {
-            text-align: right;
-        }
+            .diary-filebox {
+                background: #f9fafb;
+                border-radius: 10px;
+                border: 1px solid var(--d-border);
+                padding: 10px 12px;
+            }
 
-        .text-wrap-mobile {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 320px;
-        }
+            .diary-files,
+            .diary-newfiles {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
 
-        .diary-info {
-            border: none;
-            border-radius: 0;
-            padding: 0;
-            background: transparent;
-        }
+            .diary-file {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 6px 8px;
+                border-radius: 8px;
+                border: 1px solid var(--d-border);
+                background: #fff;
+            }
 
-        .diary-filebox {
-            background: #f8fafc;
-            border-radius: 14px;
-            border: 1px solid var(--d-border);
-            padding: 10px 12px;
-        }
+            .diary-file-link {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                color: inherit;
+                flex: 1;
+            }
 
-        .diary-files {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
+            .diary-file-ic {
+                background: #eff6ff;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 6px;
+            }
 
-        .diary-file {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-radius: 10px;
-            border: 1px solid var(--d-border);
-            background: #fff;
-        }
+            .diary-file-delete {
+                font-size: 0.78rem;
+                white-space: nowrap;
+                padding-right: 0;
+            }
 
-        .diary-file-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: inherit;
-            flex: 1;
-        }
+            .diary-modal {
+                border-radius: 14px;
+                overflow: hidden;
+            }
 
-        .diary-file-ic {
-            background: var(--d-primary-soft);
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-        }
+            /* menu hành động đơn giản */
+            .diary-action-dropdown .dropdown-menu {
+                font-size: 0.86rem;
+            }
 
-        .diary-file-delete {
-            font-size: 0.8rem;
-            white-space: nowrap;
-            padding-right: 0;
-        }
+            .diary-action-toggle {
+                padding: 0;
+                line-height: 1;
+                color: #6b7280;
+            }
 
-        .diary-newfiles {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 6px;
-        }
-
-        .diary-modal {
-            border-radius: 20px;
-            overflow: hidden;
-        }
+            .diary-action-toggle i {
+                font-size: 18px;
+            }
 
         @media (max-width: 991.98px) {
-
             .diary-table,
             .diary-table thead,
             .diary-table tbody,
@@ -685,85 +670,73 @@
                 width: 100%;
             }
 
-            .diary-table thead {
-                display: none;
-            }
+            .diary-table thead { display: none; }
 
-            .diary-table tbody tr {
-                margin-bottom: 1rem;
-                border: 1px solid var(--d-border) !important;
-                border-radius: 16px;
-                overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-                background: #fff;
-            }
+                .diary-table tbody tr {
+                    margin-bottom: 0.75rem;
+                    border: 1px solid var(--d-border) !important;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    background: #fff;
+                }
 
-            .diary-table tbody td {
+                .diary-table tbody td {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    text-align: right;
+                    padding: 9px 14px !important;
+                    border-bottom: 1px solid var(--d-border) !important;
+                    border-top: none !important;
+                }
+
+                .diary-table tbody td:last-child {
+                    border-bottom: none !important;
+                }
+
+                .diary-table td::before {
+                    content: attr(data-label);
+                    float: left;
+                    font-weight: 600;
+                    color: var(--d-muted);
+                    font-size: 0.75rem;
+                    text-transform: uppercase;
+                }
+
+                .text-wrap-mobile {
+                    white-space: normal !important;
+                    text-align: right;
+                    max-width: 100% !important;
+                    font-size: 0.96rem;
+                }
+
+                .diary-table td[data-label="Nội dung"] {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    text-align: left;
+                }
+
+                .diary-table td[data-label="Nội dung"]::before {
+                    margin-bottom: 4px;
+                }
+
+            .w-100-mobile { width: 100%; }
+            .diary-page { padding: 10px !important; }
+        }
+
+            .ap-toast-ic {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
-                text-align: right;
-                padding: 10px 15px !important;
-                border-bottom: 1px dashed var(--d-border) !important;
-                border-top: none !important;
+                justify-content: center;
+                background: #eff6ff;
+                color: var(--d-primary);
+                font-weight: 600;
             }
+        </style>
 
-            .diary-table tbody td:last-child {
-                border-bottom: none !important;
-                background: #f8fbff;
-            }
-
-            .diary-table td::before {
-                content: attr(data-label);
-                float: left;
-                font-weight: 700;
-                color: var(--d-muted);
-                font-size: 0.75rem;
-                text-transform: uppercase;
-            }
-
-            .text-wrap-mobile {
-                white-space: normal !important;
-                text-align: right;
-                max-width: 100% !important;
-                font-size: 1rem;
-            }
-
-            .diary-table td[data-label="Nội dung"] {
-                background: var(--d-primary-soft);
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
-                padding: 15px !important;
-            }
-
-            .diary-table td[data-label="Nội dung"]::before {
-                margin-bottom: 4px;
-            }
-
-            .w-100-mobile {
-                width: 100%;
-            }
-
-            .diary-page {
-                padding: 10px !important;
-            }
-        }
-
-        .ap-toast-ic {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--d-primary-soft);
-            color: var(--d-primary);
-            font-weight: bold;
-        }
-    </style>
-
-    @script
     <script>
         function apToast(type, msg, sub) {
             const toastEl = document.getElementById('apToast');
@@ -771,34 +744,26 @@
             document.getElementById('apToastMsg').textContent = msg;
             document.getElementById('apToastSub').textContent = sub || '';
             const icon = document.getElementById('apToastIcon');
-            icon.textContent = type === 'success' ?
-                '✓' :
-                (type === 'error' ? '!' : 'i');
+            icon.textContent = type === 'success'
+                ? '✓'
+                : (type === 'error' ? '!' : 'i');
             bootstrap.Toast.getOrCreateInstance(toastEl).show();
         }
 
-        window.addEventListener('open-details-modal', () =>
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetails')).show()
-        );
+            window.addEventListener('open-details-modal', () =>
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDetails')).show()
+            );
 
-        window.addEventListener('close-details-modal', () =>
-            bootstrap.Modal.getInstance(document.getElementById('modalDetails'))?.hide()
-        );
+            window.addEventListener('close-details-modal', () =>
+                bootstrap.Modal.getInstance(document.getElementById('modalDetails'))?.hide()
+            );
 
-        window.addEventListener('open-confirm-modal', () =>
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('modalConfirm')).show()
-        );
+            window.addEventListener('open-confirm-modal', () =>
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('modalConfirm')).show()
+            );
 
         window.addEventListener('close-confirm-modal', () =>
             bootstrap.Modal.getInstance(document.getElementById('modalConfirm'))?.hide()
         );
-
-
-        $wire.on('test', ({
-            data
-        }) => {
-            console.log(data)
-        })
     </script>
-    @endscript
 </div>
