@@ -133,7 +133,7 @@ Route::middleware('role:admin')->group(function () {
 
             return Excel::download(
                 new LabDiaryExport($events),
-                'lab-diary.xlsx'
+                'Nhat_ky_su_dung_Lab.xlsx'
             );
         })->name('lab-diary.export');
     });

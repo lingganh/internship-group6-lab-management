@@ -69,7 +69,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function styles(Worksheet $sheet)
     {
         $sheet->mergeCells('A1:I1');
-        $sheet->setCellValue('A1', 'LAB USAGE REPORT');
+        $sheet->setCellValue('A1', 'NHẬT KÝ SỬ DỤNG PHÒNG LAB');
 
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [

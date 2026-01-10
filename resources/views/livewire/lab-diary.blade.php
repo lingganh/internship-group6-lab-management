@@ -33,8 +33,12 @@
         <div class="row justify-content-center">
             <div class="col-12 col-xxl-11">
                 <div class="card border-0 diary-card">
-                    <div class="card-header bg-white border-0 pb-0">
+                    <div class="card-header bg-white border-0 pb-0 d-flex justify-content-between ">
                         <h4 class="mb-0 fw-bold text-dark">Nhật ký sử dụng</h4>
+                        <button wire:click="export"class="btn btn-success">
+                            <i class="ph ph-microsoft-excel-logo"></i>
+                            Xuất file Excel
+                        </button>
                     </div>
 
                     <div class="card-body pt-3">
