@@ -53,7 +53,7 @@
 
         <div class="d-flex align-items-center gap-2">
             @if ($unreadCount > 0)
-                <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="me-2">
+                <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="me-2">
                     @csrf
                     <button type="submit" class="btn btn-link btn-sm p-0">
                         Đọc tất cả
