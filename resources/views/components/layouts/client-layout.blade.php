@@ -45,7 +45,7 @@
     <!-- /page content -->
 
 
-    @include('includes.admin_notifications')
+    @include('includes.notifications')
 </body>
 
 </html>
