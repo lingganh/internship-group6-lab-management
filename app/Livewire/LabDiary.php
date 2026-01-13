@@ -382,11 +382,12 @@ class LabDiary extends Component
 public function export()
 {
     $events = $this->ExportData;
-
+    $start=$this->filterFrom;
+    $end=$this->filterTo;
     
     Cache::put(
         'lab-diary-export-' . auth()->id(),
-        $events,
+        [$events,$start,$end],
         now()->addMinutes(5)
     );
 

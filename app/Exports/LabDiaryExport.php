@@ -16,16 +16,20 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell
 {
     protected Collection $events;
-    protected int $counter=0;
+    protected int $counter = 0;
+    protected string $start;
+    protected string $end;
 
-    public function __construct(Collection $events)
+    public function __construct(Collection $events, string $start, string $end)
     {
         $this->events = $events;
+        $this->start = $start;
+        $this->end = $end;
     }
 
     public function startCell(): string
     {
-        return 'A2';
+        return 'A4';
     }
     public function collection()
     {
@@ -68,17 +72,37 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function styles(Worksheet $sheet)
     {
+        $text = '';
+
+        if (!empty($this->start)) {
+            $text .= 'Từ ngày ' . \Carbon\Carbon::parse($this->start)->format('d/m/Y');
+        }
+
+        if (!empty($this->end)) {
+            if (!empty($text)) {
+                $text .= ' ';
+            }
+            $text .= 'đến ngày ' . \Carbon\Carbon::parse($this->end)->format('d/m/Y');
+        }
+
         $sheet->mergeCells('A1:I1');
         $sheet->setCellValue('A1', 'NHẬT KÝ SỬ DỤNG PHÒNG LAB');
+
+        $sheet->mergeCells('A2:I2');
+            
+            $sheet->setCellValue('A2', $text);
+       
+
+        $sheet->mergeCells('A3:I3');
+        $sheet->setCellValue(
+            'A3',
+            'Ngày xuất báo cáo: ' . now()->format('d/m/Y H:i')
+        );
 
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'size' => 18,
-            ],
-             'fill' => [
-                'fillType' => 'solid',
-                'startColor' => ['rgb' => '107C41'], // Excel green
             ],
             'alignment' => [
                 'horizontal' => 'center',
@@ -86,10 +110,10 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
             ],
         ]);
         // Freeze header row
-        $sheet->freezePane('A3');
+        $sheet->freezePane('A5');
 
         // Header style
-        $sheet->getStyle('A2:I2')->applyFromArray([
+        $sheet->getStyle('A4:I4')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -107,7 +131,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
 
         // Border for all data
         $lastRow = $sheet->getHighestRow();
-        $sheet->getStyle("A2:H{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A4:I{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => 'thin',
@@ -115,7 +139,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
                 ],
             ],
         ]);
-        $sheet->setAutoFilter("A2:I{$lastRow}");
+        $sheet->setAutoFilter("A4:I{$lastRow}");
 
         // Align columns
         $sheet->getStyle('B:C')->getAlignment()->setHorizontal('center');
