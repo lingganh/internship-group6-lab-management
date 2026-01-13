@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Equipment;
 use App\Models\Lab;
+use App\Models\LabEquipmentItem;
 use App\Models\LabEvent;
 use Livewire\Component;
 
@@ -28,6 +29,7 @@ class Dashboard extends Component
     public $WeekLCData;
     public $MonthLCData;
     public $TopEvent;
+    public $Temp;
 
     public function mount()
     {
@@ -40,19 +42,19 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
+        $this->EquipCData = LabEquipmentItem::selectRaw('
+        equipment.status,
+        SUM(lab_equipment_items.quantity) as count')
+            ->join('equipment', 'equipment.id', '=', 'lab_equipment_items.equipment_id')
+            ->groupBy('equipment.status')
+            ->get();
 
-        $Equip = Equipment::query()->get();
-        $this->EquipCData = $Equip
-            ->groupBy('status')
-            ->map(fn($items, $category) => [
-                'status' => ucfirst($category),
-                'count'    => $items->count(),
-            ])
-            ->values();
-
-        $this->FaultyEquip = Equipment::query()->where('status', '=', 'broken')->count();
-        $this->EuqipNum = Equipment::query()->count();
-        $this->MaintaceEquip = Equipment::query()->where('status', '=', 'maintenance')->count();
+        $this->FaultyEquip  = LabEquipmentItem::sum('broken_quantity');;
+        $this->EuqipNum = LabEquipmentItem::sum('quantity');
+        $this->MaintaceEquip = $maintenanceCount = LabEquipmentItem::whereHas('equipment', function ($q) {
+            $q->where('status', 'maintenance');
+        })
+            ->sum('quantity');
 
         //
         $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek())->where('end', '<=', now('UTC')->endOfWeek())->get();
