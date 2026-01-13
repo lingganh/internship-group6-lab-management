@@ -127,12 +127,16 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
 
         Route::get('/export-lab-diary', function () {
-            $events = Cache::get('lab-diary-export-' . auth()->id());
+            $temp= Cache::get('lab-diary-export-' . auth()->id());
+            $events =$temp[0];
+            $start=$temp[1];
+            $end=$temp[2];
 
             abort_if(!$events, 419);
+            
 
             return Excel::download(
-                new LabDiaryExport($events),
+                new LabDiaryExport($events,$start,$end),
                 'Nhat_ky_su_dung_Lab.xlsx'
             );
         })->name('lab-diary.export');
