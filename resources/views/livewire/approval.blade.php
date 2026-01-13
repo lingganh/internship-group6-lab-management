@@ -645,7 +645,7 @@
             border: 1px solid var(--ap-border);
             border-radius: 12px;
             background: #fff;
-            overflow-x: auto;
+            overflow-x: visible;
             overflow-y: visible;
             position: relative;
         }

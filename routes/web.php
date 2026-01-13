@@ -20,6 +20,7 @@ use App\Http\Controllers\admin\EquipmentIssueController as AdminEquipmentIssueCo
 use App\Http\Controllers\admin\AdminNotificationController;
 use App\Livewire\Client\EquipmentIssues\BulkCreate;
 use App\Http\Controllers\admin\EquipmentIssueRequestController as AdminEquipmentIssueRequestController;
+use App\Http\Controllers\NotificationController;
 
 use App\Livewire\Admin\Lab\Index as LabIndex;
 use App\Livewire\Admin\Lab\Create as LabCreate;
@@ -148,4 +149,6 @@ Route::get('/equipment/issues/bulk-create', function () {
 })->middleware('auth')
     ->name('client.equipment.issues.bulk-create');
 
+Route::middleware('auth')->post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])
+    ->name('notifications.mark-all-read');
 Route::get('coming-soon', fn() => view('coming-soon'))->name('admin.coming-soon');

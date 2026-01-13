@@ -8,6 +8,8 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Laravolt\Avatar\Facade as Avatar;
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class NotificationCreated implements ShouldBroadcastNow
 {
@@ -34,23 +36,34 @@ class NotificationCreated implements ShouldBroadcastNow
         $senderName = $data['sender_name'] ?? 'Hệ thống';
         $senderId   = $data['sender_id'] ?? null;
 
+        $senderAvatar = null;
 
-        $senderAvatar = $senderName
-            ? Avatar::create($senderName)->toBase64()
-            : null;
+        if ($senderId) {
+            $sender = User::select('id', 'thumbnail', 'full_name')->find($senderId);
+
+            if ($sender && filled($sender->thumbnail)) {
+                $senderAvatar = str_starts_with($sender->thumbnail, 'http')
+                    ? $sender->thumbnail
+                    : Storage::url($sender->thumbnail);
+            }
+        }
+
+        if (!$senderAvatar) {
+            $senderAvatar = $senderName
+                ? Avatar::create($senderName)->toBase64()
+                : null;
+        }
 
         return [
-            'id'           => $this->notification->id,
-            'type'         => $this->notification->type,
-            'title'        => $this->notification->title,
-            'message'      => $this->notification->message,
-            'url'          => $data['url'] ?? null,
-
-            'sender_id'    => $senderId,
-            'sender_name'  => $senderName,
+            'id'            => $this->notification->id,
+            'type'          => $this->notification->type,
+            'title'         => $this->notification->title,
+            'message'       => $this->notification->message,
+            'url'           => $data['url'] ?? null,
+            'sender_id'     => $senderId,
+            'sender_name'   => $senderName,
             'sender_avatar' => $senderAvatar,
-
-            'created_at'   => optional($this->notification->created_at)->toISOString(),
+            'created_at'    => optional($this->notification->created_at)->toISOString(),
         ];
     }
 }

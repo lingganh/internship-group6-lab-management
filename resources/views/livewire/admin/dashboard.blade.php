@@ -43,7 +43,6 @@
                 <small>Sự kiện 7 ngày</small>
                 <h3>{{ $AllEvent }}</h3>
             </div>
-        </div>
 
         <div class="kpi-card">
             <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
@@ -51,7 +50,6 @@
                 <small>Chờ duyệt</small>
                 <h3>{{ $ALLPendingEvt }}</h3>
             </div>
-        </div>
 
         <div class="kpi-card">
             <div class="kpi-icon bg-danger"><i class="fa fa-triangle-exclamation"></i></div>
@@ -59,7 +57,6 @@
                 <small>Thiết bị hỏng</small>
                 <h3>{{ $FaultyEquip }}</h3>
             </div>
-        </div>
 
         <div class="kpi-card">
             <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
@@ -67,8 +64,8 @@
                 <small>Đang sửa</small>
                 <h3>{{ $MaintaceEquip }}</h3>
             </div>
-        </div>
 
+        </div>
     </div>
 
     <!-- CHARTS -->
@@ -111,7 +108,6 @@
             <div class="chart-box" wire:ignore>
                 <canvas id="equipChart" class="chart-canvas"></canvas>
             </div>
-        </div>
 
         <div class="panel">
             <h6 class="mb-3">Sự kiện sắp tới</h6>
@@ -142,6 +138,30 @@
 </div>
 </div>
 
+        .select {
+            font-size: .95rem;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1.5px solid var(--line);
+            min-width: 280px;
+            background: #fff;
+            color: var(--ink)
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 14px;
+            box-shadow: var(--shadow)
+        }
+
+        .panel-title {
+            margin: 6px 6px 8px;
+            color: #334155;
+            font-weight: 800;
+            font-size: 1rem
+        }
 
 <!-- {{-- Styles --}} -->
 <style>
@@ -509,9 +529,9 @@
                             size: 18,
                             weight: 'bold'
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 10
+                        legend: {
+                            display: true,
+                            position: 'bottom'
                         }
                     },
                     legend: {
@@ -615,6 +635,50 @@
             // 🔥 remove focus ring
             btn.blur();
         });
-    }
-</script>
-@endscript
+
+        document.getElementById('PiebtnMonth').addEventListener('click', () => {
+            $wire.loadPieMonth(); // Livewire method for monthly pie data
+            toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
+        });
+
+        document.getElementById('PiebtnAll').addEventListener('click', () => {
+            $wire.loadPieAll(); // Livewire method for all-time pie data
+            toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
+        });
+
+        // Bar buttons
+        document.getElementById('BarbtnWeek').addEventListener('click', () => {
+            $wire.loadBarWeek();
+            toggleButton('BarbtnWeek', 'BarbtnMonth');
+        });
+
+        document.getElementById('BarbtnMonth').addEventListener('click', () => {
+            $wire.loadBarMonth();
+            toggleButton('BarbtnMonth', 'BarbtnWeek');
+        });
+
+        // Active button helper
+        function toggleButton(activeId, inactiveId) {
+            document.getElementById(activeId).classList.add('btn-primary', 'active');
+            document.getElementById(activeId).classList.remove('btn-outline-primary');
+
+            document.getElementById(inactiveId).classList.add('btn-outline-primary');
+            document.getElementById(inactiveId).classList.remove('btn-primary', 'active');
+        }
+
+        function toggleButtons(activeId, inactiveIds) {
+            // Active button
+            const activeBtn = document.getElementById(activeId);
+            activeBtn.classList.add('btn-primary', 'active');
+            activeBtn.classList.remove('btn-outline-primary');
+
+            // Inactive buttons
+            inactiveIds.forEach(id => {
+                const btn = document.getElementById(id);
+                btn.classList.add('btn-outline-primary');
+                btn.classList.remove('btn-primary', 'active');
+            });
+        }
+    </script>
+    @endscript
+</div>

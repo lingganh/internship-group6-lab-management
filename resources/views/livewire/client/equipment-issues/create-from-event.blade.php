@@ -107,6 +107,7 @@
                                 <th class="text-center" style="width: 30px;">STT</th>
                                 <th style="width: 120px;">Thiết bị</th>
                                 <th style="width: 220px;">Mô tả</th>
+                                <th class="text-center" style="width: 120px;">Số lượng hỏng</th>
                                 <th class="text-center" style="width: 160px;">Hành động</th>
                             </tr>
                         </thead>
@@ -118,6 +119,9 @@
                                     <td>{{ $item['equipment_label'] ?? '#' . ($item['equipment_id'] ?? '') }}</td>
                                     <td class="text-muted text-break" title="{{ $item['description'] ?? '' }}">
                                         {{ \Illuminate\Support\Str::limit($item['description'] ?? '', 50, '…') }}
+                                    </td>
+                                    <td class="text-center">
+                                        {{ (int) ($item['broken_quantity'] ?? 1) }}
                                     </td>
                                     <td class="text-center">
                                         <div class="d-inline-flex justify-content-center gap-2">
@@ -178,7 +182,12 @@
                                     {{ $previewItem['equipment_label'] ?? '' }}
                                 </div>
                             </div>
-
+                            <div class="row mb-2">
+                                <div class="col-sm-4 text-muted">Số lượng hỏng:</div>
+                                <div class="col-sm-8 fw-semibold">
+                                    {{ (int) ($previewItem['broken_quantity'] ?? 1) }}
+                                </div>
+                            </div>
                             <div class="row mb-3">
                                 <div class="col-sm-4 text-muted">Mô tả chi tiết:</div>
                                 <div class="col-sm-8 text-break">

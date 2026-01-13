@@ -1,5 +1,6 @@
 @php
     use App\Models\User;
+    use Illuminate\Support\Facades\Storage;
 
     $currentUser = auth()->user();
 
@@ -53,7 +54,7 @@
 
         <div class="d-flex align-items-center gap-2">
             @if ($unreadCount > 0)
-                <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="me-2">
+                <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="me-2">
                     @csrf
                     <button type="submit" class="btn btn-link btn-sm p-0">
                         Đọc tất cả
@@ -84,7 +85,14 @@
                 <div class="d-flex align-items-start mb-3">
                     {{-- Avatar người gửi --}}
                     <div class="status-indicator-container me-3">
-                        @if ($sender)
+                        @php
+                            $thumb = $sender?->thumbnail;
+                        @endphp
+
+                        @if ($sender && filled($thumb))
+                            <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill" alt="">
+                            <span class="status-indicator bg-success"></span>
+                        @elseif ($sender)
                             <img src="{{ Avatar::create($senderName)->toBase64() }}" class="w-40px h-40px rounded-pill"
                                 alt="">
                             <span class="status-indicator bg-success"></span>
@@ -92,6 +100,7 @@
                             <img src="{{ asset('assets/images/default-user-image.png') }}"
                                 class="w-40px h-40px rounded-pill" alt="">
                         @endif
+
                     </div>
 
                     <div class="flex-fill">
@@ -138,7 +147,15 @@
 
                         <div class="d-flex align-items-start mb-3">
                             <div class="status-indicator-container me-3">
-                                @if ($sender)
+                                @php
+                                    $thumb = $sender?->thumbnail;
+                                @endphp
+
+                                @if ($sender && filled($thumb))
+                                    <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill"
+                                        alt="">
+                                    <span class="status-indicator bg-success"></span>
+                                @elseif ($sender)
                                     <img src="{{ Avatar::create($senderName)->toBase64() }}"
                                         class="w-40px h-40px rounded-pill" alt="">
                                     <span class="status-indicator bg-success"></span>
@@ -146,6 +163,7 @@
                                     <img src="{{ asset('assets/images/default-user-image.png') }}"
                                         class="w-40px h-40px rounded-pill" alt="">
                                 @endif
+
                             </div>
 
                             <div class="flex-fill">
@@ -188,14 +206,22 @@
 
                 <div class="d-flex align-items-start mb-3">
                     <div class="status-indicator-container me-3">
-                        @if ($sender)
+                        @php
+                            $thumb = $sender?->thumbnail;
+                        @endphp
+
+                        @if ($sender && filled($thumb))
+                            <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill" alt="">
+                            <span class="status-indicator bg-success"></span>
+                        @elseif ($sender)
                             <img src="{{ Avatar::create($senderName)->toBase64() }}" class="w-40px h-40px rounded-pill"
                                 alt="">
-                            <span class="status-indicator bg-grey"></span>
+                            <span class="status-indicator bg-success"></span>
                         @else
                             <img src="{{ asset('assets/images/default-user-image.png') }}"
                                 class="w-40px h-40px rounded-pill" alt="">
                         @endif
+
                     </div>
 
                     <div class="flex-fill opacity-75">
@@ -242,38 +268,46 @@
 
                         <div class="d-flex align-items-start mb-3">
                             <div class="status-indicator-container me-3">
-                                @if ($sender)
+                                @php
+                                    $thumb = $sender?->thumbnail;
+                                @endphp
+
+                                @if ($sender && filled($thumb))
+                                    <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill"
+                                        alt="">
+                                    <span class="status-indicator bg-success"></span>
+                                @elseif ($sender)
                                     <img src="{{ Avatar::create($senderName)->toBase64() }}"
                                         class="w-40px h-40px rounded-pill" alt="">
-                                    <span class="status-indicator bg-grey"></span>
+                                    <span class="status-indicator bg-success"></span>
                                 @else
                                     <img src="{{ asset('assets/images/default-user-image.png') }}"
                                         class="w-40px h-40px rounded-pill" alt="">
                                 @endif
-                            </div>
 
-                            <div class="flex-fill opacity-75">
-                                <span class="fw-semibold text-body">{{ $senderName }}</span>
-                                <a href="{{ $notif->data['url'] ?? '#' }}"
-                                    class="ms-1 text-body text-decoration-none">
-                                    {{ $notif->title }}
-                                    @if ($priority)
-                                        (Ưu tiên: {{ $priority }})
+
+                                <div class="flex-fill opacity-75">
+                                    <span class="fw-semibold text-body">{{ $senderName }}</span>
+                                    <a href="{{ $notif->data['url'] ?? '#' }}"
+                                        class="ms-1 text-body text-decoration-none">
+                                        {{ $notif->title }}
+                                        @if ($priority)
+                                            (Ưu tiên: {{ $priority }})
+                                        @endif
+                                    </a>
+
+                                    @if ($notif->message)
+                                        <div class="mt-1">
+                                            <span class="text-muted">Tiêu đề:</span>
+                                            <span class="fw-semibold">{{ $notif->message }}</span>
+                                        </div>
                                     @endif
-                                </a>
 
-                                @if ($notif->message)
-                                    <div class="mt-1">
-                                        <span class="text-muted">Tiêu đề:</span>
-                                        <span class="fw-semibold">{{ $notif->message }}</span>
+                                    <div class="fs-sm text-muted mt-1">
+                                        {{ $notif->created_at?->diffForHumans() }}
                                     </div>
-                                @endif
-
-                                <div class="fs-sm text-muted mt-1">
-                                    {{ $notif->created_at?->diffForHumans() }}
                                 </div>
                             </div>
-                        </div>
                     @endforeach
                 </div>
             @endif
