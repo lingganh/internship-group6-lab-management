@@ -7,7 +7,7 @@
 
 <body>
 
-    {{-- ================= HEADER (CHỈ 1 LẦN) ================= --}}
+    {{-- ================= HEADER  ================= --}}
     <div style="position: relative; margin-bottom: 20px;">
 
         <!-- LOGO (RIGHT) -->
@@ -43,7 +43,7 @@
 
     </div>
 
-    {{-- ================= 1️⃣ SUMMARY PAGE ================= --}}
+    {{-- ================= SUMMARY PAGE ================= --}}
     <div class="summary">
         <div class="summary-title">I. TỔNG QUAN</div>
 
@@ -65,7 +65,7 @@
 
     <hr>
 
-    {{-- ================= 2️⃣ EVENTS GROUP BY LAB ================= --}}
+    {{-- ================= EVENTS GROUP BY LAB ================= --}}
     <h3 style="font-size:16px; margin-bottom:10px;">
         II. DANH SÁCH SỰ KIỆN THEO PHÒNG LAB
     </h3>

@@ -42,12 +42,16 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
-        $this->EquipCData = LabEquipmentItem::selectRaw('
-        equipment.status,
-        SUM(lab_equipment_items.quantity) as count')
-            ->join('equipment', 'equipment.id', '=', 'lab_equipment_items.equipment_id')
+        $this->EquipCData = LabEquipmentItem::join('equipment', 'equipment.id', '=', 'lab_equipment_items.equipment_id')
+            ->select('equipment.status')
+            ->selectRaw('SUM(lab_equipment_items.quantity) as count')
             ->groupBy('equipment.status')
-            ->get();
+            ->get()
+            ->map(fn($row) => [
+                'status' => ucfirst($row->status),
+                'count'  => (int) $row->count,
+            ])
+            ->values();
 
         $this->FaultyEquip  = LabEquipmentItem::sum('broken_quantity');;
         $this->EuqipNum = LabEquipmentItem::sum('quantity');
@@ -148,10 +152,7 @@ class Dashboard extends Component
 
 
 
-        $this->dispatch('create_chart');
-        $this->dispatch('push_data_weekbc', data: $this->WeekBCData);
-        $this->dispatch('push_data_weekpc', data: $this->WeekPCData);
-        $this->dispatch('push_data_equip', data: $this->EquipCData);
+        
     }
 
     public function loadBarWeek()
@@ -179,5 +180,13 @@ class Dashboard extends Component
     public function render()
     {
         return view('livewire.admin.dashboard');
+    }
+
+    public function rendered()
+    {
+        $this->dispatch('create_chart');
+        $this->dispatch('push_data_weekbc', data: $this->WeekBCData);
+        $this->dispatch('push_data_weekpc', data: $this->WeekPCData);
+        $this->dispatch('push_data_equip', data: $this->EquipCData);
     }
 }

@@ -43,6 +43,7 @@
                 <small>Sự kiện 7 ngày</small>
                 <h3>{{ $AllEvent }}</h3>
             </div>
+        </div>
 
         <div class="kpi-card">
             <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
@@ -50,6 +51,7 @@
                 <small>Chờ duyệt</small>
                 <h3>{{ $ALLPendingEvt }}</h3>
             </div>
+        </div>
 
         <div class="kpi-card">
             <div class="kpi-icon bg-danger"><i class="fa fa-triangle-exclamation"></i></div>
@@ -57,6 +59,7 @@
                 <small>Thiết bị hỏng</small>
                 <h3>{{ $FaultyEquip }}</h3>
             </div>
+        </div>
 
         <div class="kpi-card">
             <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
@@ -108,7 +111,7 @@
             <div class="chart-box" wire:ignore>
                 <canvas id="equipChart" class="chart-canvas"></canvas>
             </div>
-
+        </div>
         <div class="panel">
             <h6 class="mb-3">Sự kiện sắp tới</h6>
 
@@ -132,39 +135,41 @@
                 @endforelse
             </div>
         </div>
-
     </div>
-
-</div>
 </div>
 
-        .select {
-            font-size: .95rem;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1.5px solid var(--line);
-            min-width: 280px;
-            background: #fff;
-            color: var(--ink)
-        }
 
-        .panel {
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 14px;
-            box-shadow: var(--shadow)
-        }
+</div>
 
-        .panel-title {
-            margin: 6px 6px 8px;
-            color: #334155;
-            font-weight: 800;
-            font-size: 1rem
-        }
+
 
 <!-- {{-- Styles --}} -->
 <style>
+    .select {
+        font-size: .95rem;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1.5px solid var(--line);
+        min-width: 280px;
+        background: #fff;
+        color: var(--ink)
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+        box-shadow: var(--shadow)
+    }
+
+    .panel-title {
+        margin: 6px 6px 8px;
+        color: #334155;
+        font-weight: 800;
+        font-size: 1rem
+    }
+
     .dashboard-shell {
         padding: 28px 36px;
         background: #f4f7fb;
@@ -269,59 +274,58 @@
     }
 
     .event-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-.event-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 18px;
-    background: #f9fbff;
-    border-radius: 14px;
-    transition: all 0.2s ease;
-}
+    .event-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        background: #f9fbff;
+        border-radius: 14px;
+        transition: all 0.2s ease;
+    }
 
-.event-item:hover {
-    background: #eef4ff;
-    transform: translateY(-2px);
-}
+    .event-item:hover {
+        background: #eef4ff;
+        transform: translateY(-2px);
+    }
 
-.event-left {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
+    .event-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
 
-.event-title {
-    font-weight: 600;
-    color: #1f2937;
-}
+    .event-title {
+        font-weight: 600;
+        color: #1f2937;
+    }
 
-.event-lab {
-    font-size: 13px;
-    color: #6b7280;
-}
+    .event-lab {
+        font-size: 13px;
+        color: #6b7280;
+    }
 
-.event-time {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
+    .event-time {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
 
-.event-date {
-    font-weight: 600;
-    color: #2563eb;
-}
+    .event-date {
+        font-weight: 600;
+        color: #2563eb;
+    }
 
-.event-hour {
-    font-size: 13px;
-    color: #6b7280;
-}
-
+    .event-hour {
+        font-size: 13px;
+        color: #6b7280;
+    }
 </style>
 
 
@@ -635,50 +639,39 @@
             // 🔥 remove focus ring
             btn.blur();
         });
+    }
+    document.getElementById('PiebtnMonth').addEventListener('click', () => {
+        $wire.loadPieMonth(); // Livewire method for monthly pie data
+        toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
+    });
 
-        document.getElementById('PiebtnMonth').addEventListener('click', () => {
-            $wire.loadPieMonth(); // Livewire method for monthly pie data
-            toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
-        });
+    document.getElementById('PiebtnAll').addEventListener('click', () => {
+        $wire.loadPieAll(); // Livewire method for all-time pie data
+        toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
+    });
 
-        document.getElementById('PiebtnAll').addEventListener('click', () => {
-            $wire.loadPieAll(); // Livewire method for all-time pie data
-            toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
-        });
+    // Bar buttons
+    document.getElementById('BarbtnWeek').addEventListener('click', () => {
+        $wire.loadBarWeek();
+        toggleButton('BarbtnWeek', 'BarbtnMonth');
+    });
 
-        // Bar buttons
-        document.getElementById('BarbtnWeek').addEventListener('click', () => {
-            $wire.loadBarWeek();
-            toggleButton('BarbtnWeek', 'BarbtnMonth');
-        });
+    document.getElementById('BarbtnMonth').addEventListener('click', () => {
+        $wire.loadBarMonth();
+        toggleButton('BarbtnMonth', 'BarbtnWeek');
+    });
 
-        document.getElementById('BarbtnMonth').addEventListener('click', () => {
-            $wire.loadBarMonth();
-            toggleButton('BarbtnMonth', 'BarbtnWeek');
-        });
+    const dashboard = document.querySelector('.dashboard-content');
 
-        // Active button helper
-        function toggleButton(activeId, inactiveId) {
-            document.getElementById(activeId).classList.add('btn-primary', 'active');
-            document.getElementById(activeId).classList.remove('btn-outline-primary');
+    const observer = new ResizeObserver(() => {
+        if (barChart) barChart.resize();
+        if (pieChart) pieChart.resize();
+        if (equipChart) equipChart.resize();
+    });
 
-            document.getElementById(inactiveId).classList.add('btn-outline-primary');
-            document.getElementById(inactiveId).classList.remove('btn-primary', 'active');
-        }
+    observer.observe(dashboard);
 
-        function toggleButtons(activeId, inactiveIds) {
-            // Active button
-            const activeBtn = document.getElementById(activeId);
-            activeBtn.classList.add('btn-primary', 'active');
-            activeBtn.classList.remove('btn-outline-primary');
-
-            // Inactive buttons
-            inactiveIds.forEach(id => {
-                const btn = document.getElementById(id);
-                btn.classList.add('btn-outline-primary');
-                btn.classList.remove('btn-primary', 'active');
-            });
-        }
-    </script>
-    @endscript
+    
+</script>
+@endscript
 </div>
