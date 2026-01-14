@@ -87,6 +87,10 @@
                             <i class="ph-calendar me-2"></i>
                             Lịch đã đăng ký
                         </a>
+                        <a href="{{ route('client.group-index') }}" class="dropdown-item">
+                            <i class="ph-users me-2"></i>
+                            Danh sách nhóm NCKH
+                        </a>
                         <a href="{{ route('client.info-user') }}" class="dropdown-item">
                             <i class="ph-user me-2"></i>
                             Tài khoản
