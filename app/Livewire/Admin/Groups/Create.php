@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Groups;
 
 use App\Enums\UserStatus;
 use App\Models\Group;
+use App\Models\Notification;
 use App\Models\Role as ModelsRole;
 use App\Models\Student;
 use App\Models\User;
@@ -158,6 +159,22 @@ class Create extends Component
             }
 
             DB::commit();
+
+            Notification::create([
+                'user_id' => $this->leaderId, // RECEIVER: user_id của người nhận thông báo
+
+                // UI dùng để hiển thị: title + message (mô tả)
+                'title'   => 'Đã tạo  một nhóm Nghiên cứu khoa học mới!',
+                'message' => 'Bạn đã được thêm vào nhóm NCKH: ' . $this->name . ',Với vai trò là giảng viên hướng dẫn.',
+
+                // data: payload để UI biết ai gửi + click đi đâu + liên kết tới đối tượng nghiệp vụ
+                'data' => [
+                    'request_id'  => Auth()->user()->id,
+                    'sender_id'   => Auth()->user()->id,    // SENDER id
+                    'sender_name' => Auth()->user()->full_name ?? $user->name ?? 'Người dùng', // SENDER display
+                    'url'         => route('client.group-index'), // Click chuyển trang
+                ],
+            ]);
 
             session()->flash('success', 'Tạo nhóm NCKH mới thành công!');
             return redirect()->route('admin.groups.index', ['groupId' => $group->id]);

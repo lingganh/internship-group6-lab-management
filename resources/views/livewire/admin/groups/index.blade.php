@@ -46,12 +46,12 @@
                 <tbody>
                 @forelse($groups as $group)
                     <tr>
-                        <th>{{$loop->index+1 + $groups->perPage()* ($groups->currentPage()-1)}}</th>
-                        <th>{{$group->name}}</th>
-                        <th>{{$group->leader->full_name}}</th>
-                        <th>{{$group->students()->count()}}</th>
-                        <th>{{$group->created_at ? $group->created_at->format('d-m-Y') : ''}}</th>
-                        <th>{!! $group->group_status !!}</th>
+                        <td>{{$loop->index+1 + $groups->perPage()* ($groups->currentPage()-1)}}</td>
+                        <td>{{$group->name}}</td>
+                        <td>{{$group->leader->full_name}}</td>
+                        <td>{{$group->students()->count()}}</td>
+                        <td>{{$group->created_at ? $group->created_at->format('d-m-Y') : ''}}</td>
+                        <td>{!! $group->group_status !!}</td>
                         <td class="text-center">
                             <div class="dropdown ">
                                 <a href="#" class="text-body" data-bs-toggle="dropdown">
