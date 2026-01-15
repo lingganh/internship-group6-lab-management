@@ -83,7 +83,7 @@
                     <button id="PiebtnAll" class="btn btn-sm btn-outline-primary">Tất cả</button>
                 </div>
             </div>
-            <div class="chart-box" wire:ignore>
+            <div class="chart-wrapper" wire:ignore>
                 <canvas id="pieChart" class="chart-canvas"></canvas>
             </div>
         </div>
@@ -96,7 +96,7 @@
                     <button id="BarbtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
                 </div>
             </div>
-            <div class="chart-box" wire:ignore>
+            <div class="chart-wrapper" wire:ignore>
                 <canvas id="barChart" class="chart-canvas"></canvas>
             </div>
         </div>
@@ -108,7 +108,7 @@
 
         <div class="panel">
             <h6 class="mb-3">Trạng thái thiết bị</h6>
-            <div class="chart-box" wire:ignore>
+            <div class="chart-warpper" wire:ignore>
                 <canvas id="equipChart" class="chart-canvas"></canvas>
             </div>
         </div>
@@ -259,12 +259,16 @@
     }
 
 
-    .chart-box {
+    .chart-wrapper {
+        position: relative;
         width: 100%;
-        height: 320px;
-        min-height: 320px;
-        overflow: hidden;
-        display: block;
+        min-width: 0;
+        /* 🔥 VERY IMPORTANT */
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
     }
 
     .btn:focus,
@@ -373,7 +377,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // 🔥 IMPORTANT
+                animation: true, // 🔥 IMPORTANT
                 resizeDelay: 300,
                 scales: {
                     y: {
@@ -415,10 +419,13 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // 🔥 IMPORTANT
+                animation: true, // 🔥 IMPORTANT
                 resizeDelay: 300,
             }
         });
+
+        bindChartResize(barChart);
+        bindChartResize(pieChart);
     });
 
 
@@ -495,7 +502,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // 🔥 IMPORTANT
+                animation: true, // 🔥 IMPORTANT
                 resizeDelay: 300,
 
                 plugins: {
@@ -519,13 +526,7 @@
                             padding: 20
                         }
                     }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 700,
-                    easing: 'easeOutQuart'
-                },
+                }
 
 
             }
@@ -613,31 +614,45 @@
         });
     }
 
-    (function() {
+    function hardResetChart(chart) {
+        if (!chart) return;
 
-        function resizeAllCharts() {
-            if (!window.Chart) return;
+        const canvas = chart.canvas;
+        const parent = canvas.parentElement;
+        if (!parent) return;
 
-            Chart.helpers.each(Chart.instances, function(chart) {
-                chart.resize();
-                console.log("ah")
-            });
-        }
+        const rect = parent.getBoundingClientRect();
+        const width = Math.floor(rect.width);
+        const height = Math.floor(rect.height);
 
-        // When Limitless sidebar changes
-        document.addEventListener('sidebar:collapsed', resizeAllCharts);
-        document.addEventListener('sidebar:expanded', resizeAllCharts);
-        document.addEventListener('sidebar:mobile', resizeAllCharts);
+        console.log('[FORCE]', width, height);
 
-        // Also after Livewire updates
-        document.addEventListener('livewire:load', () => {
-            Livewire.hook('message.processed', resizeAllCharts);
-            console.log("bruh")
+        // 🔥 force canvas size
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+
+        canvas.width = width;
+        canvas.height = height;
+
+        chart.resize();
+    }
+
+
+    function bindChartResize(chart) {
+        const parent = chart.canvas.parentElement;
+
+        const ro = new ResizeObserver(entries => {
+            const {
+                width,
+                height
+            } = entries[0].contentRect;
+            console.log('[RO]', Math.round(width), Math.round(height));
+
+            chart.resize();
         });
 
-    })();
-
-    
+        ro.observe(parent);
+    }
 </script>
 @endscript
 </div>
