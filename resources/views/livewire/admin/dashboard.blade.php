@@ -260,11 +260,11 @@
 
 
     .chart-box {
-        position: relative;
         width: 100%;
         height: 320px;
         min-height: 320px;
-        /* 🔥 IMPORTANT */
+        overflow: hidden;
+        display: block;
     }
 
     .btn:focus,
@@ -347,9 +347,16 @@
 
     $wire.on('create_chart', () => {
 
-        const barCtx = document.getElementById('barChart').getContext('2d');
+        // 🔥 BAR CHART
+        const barCanvas = document.getElementById('barChart');
+        if (!barCanvas) return;
 
-        const barGradient = makeGradient(barCtx, '#60a5fa', '#2563eb');
+        const barCtx = barCanvas.getContext('2d');
+
+        if (barChart) {
+            barChart.destroy();
+            barChart = null;
+        }
 
         barChart = new Chart(barCtx, {
             type: 'bar',
@@ -358,7 +365,7 @@
                 datasets: [{
                     label: 'Sự kiện',
                     data: [],
-                    backgroundColor: barGradient,
+                    backgroundColor: makeGradient(barCtx, '#60a5fa', '#2563eb'),
                     borderRadius: 8,
                     borderSkipped: false
                 }]
@@ -366,28 +373,8 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                resizeDelay: 200,
-
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Biểu đồ số lượng sự kiện',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
-                        padding: {
-                            top: 10,
-                            bottom: 10
-                        }
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-
-                // ⬅️ THIS MUST NOT BE INSIDE plugins
+                animation: false, // 🔥 IMPORTANT
+                resizeDelay: 300,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -399,8 +386,16 @@
             }
         });
 
+        // 🔥 PIE CHART
         const pieCanvas = document.getElementById('pieChart');
+        if (!pieCanvas) return;
+
         const pieCtx = pieCanvas.getContext('2d');
+
+        if (pieChart) {
+            pieChart.destroy();
+            pieChart = null;
+        }
 
         pieChart = new Chart(pieCtx, {
             type: 'pie',
@@ -420,34 +415,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                resizeDelay: 200,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Số sự kiện theo loại',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        }
-                    },
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20
-                        }
-                    }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 700,
-                    easing: 'easeOutQuart'
-                }
-            },
-
+                animation: false, // 🔥 IMPORTANT
+                resizeDelay: 300,
+            }
         });
-
     });
 
 
@@ -487,7 +458,7 @@
         data
     }) => {
         updatePieChart(data);
-        console.log(data)
+
     });
 
     let equipChart = null;
@@ -503,7 +474,7 @@
         const equipCtx = equipCanvas.getContext('2d');
 
         if (equipChart) {
-            equipChart.destroy(); // 🔥 prevent canvas stacking bug
+            equipChart.destroy();
         }
 
         equipChart = new Chart(equipCtx, {
@@ -524,6 +495,8 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false, // 🔥 IMPORTANT
+                resizeDelay: 300,
 
                 plugins: {
                     title: {
@@ -571,7 +544,8 @@
             easing: 'easeOutCubic'
         });
 
-        setTimeout(() => barChart.resize(), 0);
+
+        console.log(Newdata)
     }
 
 
@@ -586,11 +560,9 @@
             easing: 'easeOutCubic'
         });
 
-        setTimeout(() => pieChart.resize(), 0);
+
+        console.log(Newdata)
     }
-
-
-
 
     /* ======================
        Buttons
@@ -636,40 +608,34 @@
                 btn.classList.add('btn-outline-primary');
             }
 
-            // 🔥 remove focus ring
+
             btn.blur();
         });
     }
-    document.getElementById('PiebtnMonth').addEventListener('click', () => {
-        $wire.loadPieMonth(); // Livewire method for monthly pie data
-        toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
-    });
 
-    document.getElementById('PiebtnAll').addEventListener('click', () => {
-        $wire.loadPieAll(); // Livewire method for all-time pie data
-        toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
-    });
+    (function() {
 
-    // Bar buttons
-    document.getElementById('BarbtnWeek').addEventListener('click', () => {
-        $wire.loadBarWeek();
-        toggleButton('BarbtnWeek', 'BarbtnMonth');
-    });
+        function resizeAllCharts() {
+            if (!window.Chart) return;
 
-    document.getElementById('BarbtnMonth').addEventListener('click', () => {
-        $wire.loadBarMonth();
-        toggleButton('BarbtnMonth', 'BarbtnWeek');
-    });
+            Chart.helpers.each(Chart.instances, function(chart) {
+                chart.resize();
+                console.log("ah")
+            });
+        }
 
-    const dashboard = document.querySelector('.dashboard-content');
+        // When Limitless sidebar changes
+        document.addEventListener('sidebar:collapsed', resizeAllCharts);
+        document.addEventListener('sidebar:expanded', resizeAllCharts);
+        document.addEventListener('sidebar:mobile', resizeAllCharts);
 
-    const observer = new ResizeObserver(() => {
-        if (barChart) barChart.resize();
-        if (pieChart) pieChart.resize();
-        if (equipChart) equipChart.resize();
-    });
+        // Also after Livewire updates
+        document.addEventListener('livewire:load', () => {
+            Livewire.hook('message.processed', resizeAllCharts);
+            console.log("bruh")
+        });
 
-    observer.observe(dashboard);
+    })();
 
     
 </script>
