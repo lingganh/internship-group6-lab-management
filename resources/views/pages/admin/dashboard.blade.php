@@ -1,5 +1,5 @@
 <x-admin-layout>
 <div class="content">
-    {{-- <livewire:admin.dashboard/> --}}
+     <livewire:admin.dashboard/>
 </div>
 </x-admin-layout>
