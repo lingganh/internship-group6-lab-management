@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-
+use App\Enums\Role;
 class SetPassword extends Component
 {
     public $email;
@@ -45,6 +46,30 @@ class SetPassword extends Component
         //xoa token sau khi dat lai mk
         DB::table('password_reset_tokens')->where('token', $this->token)->delete();
         Auth::logout();
+
+        $admins = User::whereHas('role', function ($q) {
+            $q->where('name', Role::Admin->value);
+        })->get();
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id, // RECEIVER: user_id của người nhận thông báo
+
+                // UI dùng để hiển thị: title + message (mô tả)
+                'title'   => 'Đã tạo yêu cầu phê duyệt tài khoản mới!',
+                'message' => 'Có một tài khoản mới đang chờ phê duyệt.',
+
+                // data: payload để UI biết ai gửi + click đi đâu + liên kết tới đối tượng nghiệp vụ
+                'data' => [
+                    'request_id'  => $user->id,
+                    'sender_id'   => $user->id,    // SENDER id
+                    'sender_name' => $user->full_name ?? $user->name ?? 'Người dùng', // SENDER display
+                    'url'         => route('admin.users.edit', $user->id), // Click chuyển trang
+                ],
+            ]);
+        }
+
+
         session()->flash('success', 'Thiết lập mật khẩu thành công! Vui lòng đăng nhập.');
         return redirect()->route('login');
     }

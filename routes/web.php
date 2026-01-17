@@ -57,6 +57,7 @@ Route::get('/event-calendar', [HomeControler::class, 'eventsCalendar'])->name('e
 Route::middleware('checkAuth')->group(function () {
     Route::get('/thong-tin-tai-khoan', [ClientController::class, 'infoUser'])->name('client.info-user');
     Route::get('/doi-mat-khau', [ClientController::class, 'changePassword'])->name('client.change-password');
+    Route::get('/danh-sach-nhom-nckh', [ClientController::class, 'GroupIndex'])->name('client.group-index');
     Route::get('/xac-thuc-2-lop', [ClientController::class, 'twoFactor'])->middleware(
         when(
             Features::canManageTwoFactorAuthentication()
@@ -134,7 +135,7 @@ Route::middleware('role:admin')->group(function () {
             $end=$temp[2];
 
             abort_if(!$events, 419);
-            
+
 
             return Excel::download(
                 new LabDiaryExport($events,$start,$end),
