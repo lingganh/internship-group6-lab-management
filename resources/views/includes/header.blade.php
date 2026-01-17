@@ -74,6 +74,20 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-end">
+                        @if (auth()->user()->hasRole('admin'))
+                            <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
+                                <i class="ph-wrench me-2"></i>
+                                Quản trị hệ thống
+                            </a>
+                        @endif
+                        <a href="{{ route('user.schedules') }}" class="dropdown-item">
+                            <i class="ph-calendar me-2"></i>
+                            Lịch đã đăng ký
+                        </a>
+                        <a href="{{ route('client.group-index') }}" class="dropdown-item">
+                            <i class="ph-users me-2"></i>
+                            Danh sách nhóm NCKH
+                        </a>
                         <a href="{{ route('client.info-user') }}" class="dropdown-item">
                             <i class="ph-gear me-2"></i>
                             Tài khoản

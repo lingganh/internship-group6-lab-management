@@ -9,6 +9,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use App\Livewire\Storage;
+use App\Models\LabEventFile;
 
 class Approval extends Component
 {
@@ -203,7 +205,7 @@ class Approval extends Component
         $schedule = LabEvent::with(['user', 'lab'])->findOrFail($this->passwordModalId);
 
         $schedule->update(['status' => 'approved']);
-
+        $this->notifyUserEventResult($schedule, 'approved');
         if ($schedule->user && $schedule->user->email) {
             Mail::to($schedule->user->email)->queue(
                 new \App\Mail\ApprovalNotification($schedule, $this->roomCode)
@@ -248,7 +250,7 @@ class Approval extends Component
             'status' => 'cancelled',
             'reason' => $reason,
         ]);
-
+        $this->notifyUserEventResult($schedule, 'rejected');
         if ($schedule->user && $schedule->user->email) {
             Mail::to($schedule->user->email)->queue(
                 new \App\Mail\RejectionNotification($schedule, $this->rejectionNote)
@@ -286,6 +288,19 @@ class Approval extends Component
         $this->dispatch('alert', type: 'success', message: 'Đã xóa lịch', sub: "Lịch #{$id} đã được xóa.");
         $this->dispatch('close-details-modal');
     }
+    public function downloadFile($fileId)
+    {
+    $file = LabEventFile::findOrFail($fileId);
+    
+    // Kiểm tra file có tồn tại thật không
+    if (!\Storage::exists($file->file_path)) {
+        session()->flash('error', 'File không tồn tại trên hệ thống.');
+        return;
+    }
+
+    // Trả về response download với tên file gốc trong DB
+    return \Storage::download($file->file_path, $file->file_name);
+    }
 
     public function render()
     {
@@ -311,4 +326,26 @@ class Approval extends Component
             'labs'         => $labs,
         ])->layout('components.layouts.admin-layout');
     }
+
+    private function notifyUserEventResult(LabEvent $event, string $status): void
+{
+    $userId = $event->user_id;
+    if (!$userId) return;
+
+    $admin = auth()->user();
+     $statusText = $status === 'approved' ? 'đã được phê duyệt' : 'đã bị từ chối';
+
+    \App\Models\Notification::create([
+        'user_id' => $userId,
+        'title'   => "Kết quả duyệt lịch: " . $event->title,
+        'message' => "Yêu cầu mượn phòng " . $event->lab_code . " của bạn " . $statusText . ".",
+        'data' => [
+            'event_id'    => $event->id,
+            'type'        => 'event_result',
+            'status'      => $status,
+            'admin_name'  => $admin->full_name ?? $admin->name ?? 'Quản trị viên',
+            'url'         => route('home'), 
+        ],
+    ]);
+}
 }

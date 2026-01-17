@@ -1,625 +1,678 @@
 <div>
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="alert alert-info d-flex align-items-center gap-3 mb-0" role="alert">
-                <i class="fa-solid fa-sun fs-3 text-warning"></i>
-                <div>
-                    <h5 class="mb-1 fw-bold">Chào buổi sáng</h5>
-                    <small class="text-muted">Chúc bạn có một ngày làm việc hiệu quả</small>
-                </div>
+<div class="dashboard-shell">
+    <div class="dashboard-content">
 
-            </div>
+        <!-- GREETING -->
+        <div class="greeting">
+            @php
+            $hour = now()->hour;
+
+            if ($hour >= 5 && $hour < 12) {
+                $greeting='Chào buổi sáng' ;
+                $icon='☀️' ;
+                $message='Chúc bạn có một ngày làm việc hiệu quả' ;
+                } elseif ($hour>= 12 && $hour < 18) {
+                    $greeting='Chào buổi chiều' ;
+                    $icon='🌤️' ;
+                    $message='Chúc bạn làm việc năng suất' ;
+                    } else {
+                    $greeting='Chào buổi tối' ;
+                    $icon='🌙' ;
+                    $message='Chúc bạn một buổi tối thư giãn' ;
+                    }
+                    @endphp
+
+                    <div class="greeting-left">
+                    <div class="greeting-icon">{{ $icon }}</div>
+                    <div>
+                        <h4>{{ $greeting }}</h4>
+                        <p>{{ $message }}</p>
+                    </div>
+        </div>
+
+        <div class="greeting-date">
+            {{ now()->format('d/m/Y') }}
         </div>
     </div>
 
+    <!-- KPI -->
+    <div class="kpi-grid">
 
-    <!-- General statsitic -->
-
-    <div class="card-body">
-        <div class="border-bottom pb-3 mb-4">
-            <h4 class="fw-bold mb-1">Tổng quan</h4>
-            <p class="text-muted fs-6 mb-0">
-                Event chưa duyệt gần nhất :
-
-                @if(!is_null($FirstEvent))
-                <span class="fw-bold">{{ $FirstEvent->title }}</span>
-                diễn ra vào
-                <span class="fw-semibold">{{ $FirstEvent->start }} – {{ $FirstEvent->end }}</span>
-                @else
-                <span class="fw-bold">Không có event nào</span>
-                @endif
-            </p>
-
+        <div class="kpi-card">
+            <div class="kpi-icon bg-primary"><i class="fa fa-calendar"></i></div>
+            <div>
+                <small>Sự kiện 7 ngày</small>
+                <h3>{{ $AllEvent }}</h3>
+            </div>
         </div>
 
-        <div class="row g-3">
-            <!-- KPI ITEM -->
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body d-flex justify-content-between">
-                        <div>
-                            <small class="text-uppercase text-muted fw-semibold">
-                                Tổng số event trong 7 ngày kế tiếp
-                            </small>
-                            <h4 class="fw-bold mb-0">{{$AllEvent}}</h4>
-                            <small class="text-muted">Event</small>
-                        </div>
-                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
-                            style="width:44px;height:44px;">
-                            <i class="fa-solid fa-file-circle-check text-primary"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="kpi-card">
+            <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
+            <div>
+                <small>Chờ duyệt</small>
+                <h3>{{ $ALLPendingEvt }}</h3>
             </div>
+        </div>
 
-            <!-- repeat for others -->
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body d-flex justify-content-between">
-                        <div>
-                            <small class="text-uppercase text-muted fw-semibold">
-                                TỔNG SỐ EVENT ĐANG CHỜ DUYÊT
-                            </small>
-                            <h4 class="fw-bold mb-0">{{$ALLPendingEvt}}</h4>
-                            <small class="text-muted">Event</small>
-                        </div>
-                        <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
-                            style="width:44px;height:44px;">
-                            <i class="fa-solid fa-briefcase text-success"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="kpi-card">
+            <div class="kpi-icon bg-danger"><i class="fa fa-triangle-exclamation"></i></div>
+            <div>
+                <small>Thiết bị hỏng</small>
+                <h3>{{ $FaultyEquip }}</h3>
             </div>
+        </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body d-flex justify-content-between">
-                        <div>
-                            <small class="text-uppercase text-muted fw-semibold">
-                                SỐ THIẾT BỊ HỎNG HÓC
-                            </small>
-                            <h4 class="fw-bold mb-0">{{$FaultyEquip}}</h4>
-                            <small class="text-muted">trong {{$EuqipNum}} thiết bị</small>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
-                            style="width:44px;height:44px;">
-                            <i class="fa-solid fa-graduation-cap text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body d-flex justify-content-between">
-                        <div>
-                            <small class="text-uppercase text-muted fw-semibold">
-                                SỐ THIẾT BỊ ĐANG SỬA CHỮA
-                            </small>
-                            <h4 class="fw-bold mb-0">{{$MaintaceEquip}}</h4>
-                            <small class="text-muted">trong {{$EuqipNum}} thiết bị</small>
-                        </div>
-                        <div class="bg-purple bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
-                            style="width:44px;height:44px;">
-                            <i class="fa-solid fa-star text-primary"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="kpi-card">
+            <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
+            <div>
+                <small>Đang sửa</small>
+                <h3>{{ $MaintaceEquip }}</h3>
             </div>
 
         </div>
     </div>
 
+    <!-- CHARTS -->
+    <div class="dashboard-grid">
 
-
-
-    <!--Chart -->
-    <div class="container my-4">
-        <div class="d-flex align-items-center mb-1 ">
-            <h4 class="text-center fw-bold mb-3">
-                Thống kê
-            </h4>
-
-
-        </div>
-
-        <!-- <div class="text-center my-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="text-muted mt-2">Đang tải dữ liệu biểu đồ...</p>
-        </div> -->
-
-        <div class="row g-4">
-
-            <div class="col-12 col-lg-4">
-                <div class="card shadow-sm h-100">
-                    <div wire:ignore class="card-body p3">
-                        <div class="d-flex justify-content-end mb-2">
-                            <div class="btn-group" role="group">
-                                <button id="PiebtnWeek" type="button" class="btn btn-primary active px-4 py-2">Tuần</button>
-                                <button id="PiebtnMonth" type="button" class="btn btn-outline-primary px-4 py-2">Tháng</button>
-                                <button id="PiebtnAll" type="button" class="btn btn-outline-primary px-4 py-2">Tất cả</button>
-                            </div>
-                        </div>
-                        <canvas id="pieChart" class="chart-canvas"></canvas>
-
-                    </div>
+        <div class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center mb-2">
+                <h6>Sự kiện theo loại</h6>
+                <div wire:ignore class="btn-group">
+                    <button id="PiebtnWeek" class="btn btn-sm btn-primary">Tuần</button>
+                    <button id="PiebtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
+                    <button id="PiebtnAll" class="btn btn-sm btn-outline-primary">Tất cả</button>
                 </div>
             </div>
-
-            <div class="col-12 col-lg-8">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-end mb-2">
-                            <div class="btn-group" role="group">
-                                <button id="BarbtnWeek" type="button" class="btn btn-primary active px-4 py-2">Tuần</button>
-                                <button id="BarbtnMonth" type="button" class="btn btn-outline-primary px-4 py-2">Tháng</button>
-                            </div>
-                        </div>
-                        <canvas id="barChart" class="chart-canvas"></canvas>
-                    </div>
-                </div>
+            <div class="chart-box" wire:ignore>
+                <canvas id="pieChart" class="chart-canvas"></canvas>
             </div>
         </div>
 
+        <div class="panel">
+            <div class="panel-header d-flex justify-content-between align-items-center mb-2">
+                <h6>Số lượng sự kiện</h6>
+                <div wire:ignore class="btn-group ">
+                    <button id="BarbtnWeek" class="btn btn-sm btn-primary">Tuần</button>
+                    <button id="BarbtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
+                </div>
+            </div>
+            <div class="chart-box" wire:ignore>
+                <canvas id="barChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
 
     </div>
 
-    <div class="container my-4">
+    <!-- EQUIPMENT + EVENTS -->
+    <div class="dashboard-grid">
 
-        <!-- <div class="text-center my-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="text-muted mt-2">Đang tải dữ liệu biểu đồ...</p>
-        </div> -->
-
-        <div class="row g-4">
-
-            <div class="col-12 col-lg-4">
-                <div class="card shadow-sm h-100">
-                    <div wire:ignore class="card-body p3">
-
-                        <canvas id="equipChart" class="chart-canvas"></canvas>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-lg-8">
-                <div class="card shadow-sm h-100 overflow-hidden">
-                    <div class="card-body p-0">
-
-                        <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                                <th colspan="5" class="text-center table-dark">
-                                    Event sắp tới
-                                </th>
-
-                                <tbody>
-                                    @forelse($TopEvent as $event)
-                                    <tr>
-                                        {{-- Nội dung --}}
-                                        <td>
-                                            <div class="fw-semibold">{{ $event->title }}</div>
-                                            <div class="text-muted small">
-                                                #{{ $event->id }} • {{ ucfirst($event->category) }}
-                                            </div>
-                                        </td>
-
-                                        {{-- Phòng --}}
-                                        <td>
-                                            <span class="fw-semibold">{{ $event->lab_code }}</span>
-                                        </td>
-
-                                        {{-- Người đăng ký --}}
-                                        <td>
-                                            <div class="fw-semibold">
-                                                {{ $event->user?->name ?? 'System' }}
-                                            </div>
-                                            <div class="text-muted small">
-                                                {{ $event->user?->email ?? '' }}
-                                            </div>
-                                        </td>
-
-                                        {{-- Thời gian --}}
-                                        <td>
-                                            <div class="fw-semibold">
-                                                {{ $event->start->format('d/m/Y') }}
-                                            </div>
-                                            <div class="text-muted small">
-                                                {{ $event->start->format('H:i') }}
-                                                – {{ $event->end->format('H:i') }}
-                                            </div>
-                                        </td>
-
-
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">
-                                            Không có event
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                                <tfoot>
-                                    <tr class="table-light">
-                                        <td colspan="5" class="text-end py-3">
-                                            <a href="{{route('admin.lab-diary')}}" class="fw-semibold text-decoration-none">
-                                                Xem thêm →
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
+        <div class="panel">
+            <h6 class="mb-3">Trạng thái thiết bị</h6>
+            <div class="chart-box" wire:ignore>
+                <canvas id="equipChart" class="chart-canvas"></canvas>
             </div>
         </div>
+        <div class="panel">
+            <h6 class="mb-3">Sự kiện sắp tới</h6>
 
+            <div class="event-list">
+                @forelse($TopEvent as $event)
+                <div class="event-item">
+                    <div class="event-left">
+                        <div class="event-title">{{ $event->title }}</div>
+                        <div class="event-lab">{{ $event->lab_code }}</div>
+                    </div>
 
+                    <div class="event-time">
+                        <span class="event-date">{{ $event->start->format('d/m') }}</span>
+                        <span class="event-hour">{{ $event->start->format('H:i') }}</span>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center text-muted py-4">
+                    Không có sự kiện
+                </div>
+                @endforelse
+            </div>
+        </div>
     </div>
+</div>
 
 
-    <!-- {{-- Styles --}} -->
-    <style>
-        :root {
-            --ink: #0f172a;
-            --muted: #667085;
-            --line: #e7eaee;
-            --bg: #ffffff;
-            --brand: #2563eb;
-            --brand-2: #06b6d4;
-            --blue: #3b82f6;
-            --green: #10b981;
-            --purple: #8b5cf6;
-            --amber: #f59e0b;
-            --red: #ef4444;
-            --radius: 14px;
-            --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+</div>
+
+
+
+<!-- {{-- Styles --}} -->
+<style>
+    .select {
+        font-size: .95rem;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1.5px solid var(--line);
+        min-width: 280px;
+        background: #fff;
+        color: var(--ink)
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px;
+        box-shadow: var(--shadow)
+    }
+
+    .panel-title {
+        margin: 6px 6px 8px;
+        color: #334155;
+        font-weight: 800;
+        font-size: 1rem
+    }
+
+    .dashboard-shell {
+        padding: 28px 36px;
+        background: #f4f7fb;
+        min-height: 100vh;
+    }
+
+    .dashboard-content {
+        max-width: 1450px;
+        margin: 0 auto;
+    }
+
+    .greeting {
+        background: linear-gradient(135deg, #eef4ff, #e6fbff);
+        border-radius: 20px;
+        padding: 26px 30px;
+        display: flex;
+        justify-content: space-between;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+    }
+
+    .greeting-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: #fde68a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin: 28px 0;
+    }
+
+    @media(max-width:1200px) {
+        .kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
+    }
 
-        .custom-greeting {
-            background: linear-gradient(135deg, #eef2ff 0%, #ecfeff 100%);
-            border: 1px solid #dbeafe;
+    .kpi-card {
+        background: white;
+        padding: 20px;
+        border-radius: 18px;
+        display: flex;
+        gap: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+    }
+
+    .kpi-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
         }
+    }
 
-        .text-gradient {
-            background: linear-gradient(90deg, var(--brand), var(--brand-2));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+    .panel {
+        background: white;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, .06);
+    }
 
-        #greetIcon {
-            color: #f59e0b
-        }
+    .panel.wide {
+        grid-column: span 1;
+    }
 
-        .kpi-card {
-            border: 1px solid var(--line)
-        }
 
-        .kpi-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            color: #fff;
-            font-size: 1.1rem
-        }
+    .chart-box {
+        position: relative;
+        width: 100%;
+        height: 320px;
+        min-height: 320px;
+        /* 🔥 IMPORTANT */
+    }
 
-        .kpi-blue {
-            background: var(--blue)
-        }
+    .btn:focus,
+    .btn:active,
+    .btn:focus-visible {
+        box-shadow: none !important;
+    }
 
-        .kpi-green {
-            background: var(--green)
-        }
+    .event-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-        .kpi-purple {
-            background: var(--purple)
-        }
+    .event-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        background: #f9fbff;
+        border-radius: 14px;
+        transition: all 0.2s ease;
+    }
 
-        .kpi-amber {
-            background: var(--amber)
-        }
+    .event-item:hover {
+        background: #eef4ff;
+        transform: translateY(-2px);
+    }
 
-        .charts-title {
-            text-align: center;
-            margin-bottom: 12px;
-            color: var(--ink);
-            font-weight: 800
-        }
+    .event-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
 
-        .select {
-            font-size: .95rem;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1.5px solid var(--line);
-            min-width: 280px;
-            background: #fff;
-            color: var(--ink)
-        }
+    .event-title {
+        font-weight: 600;
+        color: #1f2937;
+    }
 
-        .panel {
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 14px;
-            box-shadow: var(--shadow)
-        }
+    .event-lab {
+        font-size: 13px;
+        color: #6b7280;
+    }
 
-        .panel-title {
-            margin: 6px 6px 8px;
-            color: #334155;
-            font-weight: 800;
-            font-size: 1rem
-        }
+    .event-time {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
 
-        .chart-box {
-            width: 100%;
-            height: 440px;
-            border-radius: 12px
-        }
+    .event-date {
+        font-weight: 600;
+        color: #2563eb;
+    }
 
-        @media (max-width:768px) {
-            .chart-box {
-                height: 360px
+    .event-hour {
+        font-size: 13px;
+        color: #6b7280;
+    }
+</style>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+@script
+<script>
+    let barChart = null,
+        pieChart = null;
+
+    function makeGradient(ctx, color1, color2) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        return gradient;
+    }
+
+    $wire.on('create_chart', () => {
+
+        const barCtx = document.getElementById('barChart').getContext('2d');
+
+        const barGradient = makeGradient(barCtx, '#60a5fa', '#2563eb');
+
+        barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Sự kiện',
+                    data: [],
+                    backgroundColor: barGradient,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                resizeDelay: 200,
+
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Biểu đồ số lượng sự kiện',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 10
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+
+                // ⬅️ THIS MUST NOT BE INSIDE plugins
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
             }
-        }
+        });
 
-        #pieChart .am5-Legend {
-            margin-top: 8px !important;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        const pieCanvas = document.getElementById('pieChart');
+        const pieCtx = pieCanvas.getContext('2d');
 
-    @script
-    <script>
-        let barChart = null,
-            pieChart = null;
-
-        $wire.on('create_chart', () => {
-            const barCtx = document.getElementById('barChart');
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: '# of events',
-                        data: [],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Biểu đồ số lượng sự kiện', // <-- Your title here
-                            font: {
-                                size: 18,
-                                weight: 'bold'
-                            },
-                            padding: {
-                                top: 10,
-                                bottom: 10
-                            }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+        pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        makeGradient(pieCtx, '#60a5fa', '#2563eb'),
+                        makeGradient(pieCtx, '#34d399', '#059669'),
+                        makeGradient(pieCtx, '#fbbf24', '#d97706'),
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                resizeDelay: 200,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Số sự kiện theo loại',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
                         }
                     }
-                }
-            });
-
-            const pieCtx = document.getElementById('pieChart');
-            pieChart = new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: [ // Array of colors for each slice
-                            'rgb(255, 99, 132)', // Red
-                            'rgb(54, 162, 235)', // Blue
-                            'rgb(255, 205, 86)' // Yellow
-                        ],
-                        borderWidth: 1
-                    }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Tỉ lệ sự kiện theo loại', // <-- Your title here
-                            font: {
-                                size: 18,
-                                weight: 'bold'
-                            },
-                            padding: {
-                                top: 10,
-                                bottom: 10
-                            }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'bottom'
-                        }
-                    }
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 700,
+                    easing: 'easeOutQuart'
                 }
-            });
-
-
-
+            },
 
         });
 
+    });
 
 
-        /* ======================
-           Livewire events
-        ====================== */
 
-        // Bar chart data
-        $wire.on('push_data_weekbc', ({
-            data
-        }) => {
-            updateBarChart(data);
-            // console.log(data)
-        });
-        $wire.on('push_data_monthbc', ({
-            data
-        }) => {
-            updateBarChart(data);
-            console.log(data)
-        });
+    /* ======================
+       Livewire events
+    ====================== */
 
-        // Pie chart data
-        $wire.on('push_data_weekpc', ({
-            data
-        }) => {
-            updatePieChart(data);
-            // console.log(data)
-        });
-        $wire.on('push_data_monthpc', ({
-            data
-        }) => {
-            updatePieChart(data);
-            // console.log(data)
-        });
-        $wire.on('push_data_allpc', ({
-            data
-        }) => {
-            // updatePieChart(data);
-            console.log(data)
-        });
+    // Bar chart data
+    $wire.on('push_data_weekbc', ({
+        data
+    }) => {
+        updateBarChart(data);
+        // console.log(data)
+    });
+    $wire.on('push_data_monthbc', ({
+        data
+    }) => {
+        updateBarChart(data);
+        console.log(data)
+    });
 
-        $wire.on('push_data_equip', ({
-            data
-        }) => {
-            console.log(data)
-            dat = data.map(d => d.count)
-            label = data.map(d => d.status)
-            const equipCtx = document.getElementById('equipChart');
-            new Chart(equipCtx, {
-                type: 'pie',
-                data: {
-                    labels: label,
-                    datasets: [{
-                        data: dat,
-                        backgroundColor: [ // Array of colors for each slice
-                            'rgb(255, 99, 132)', // Red
-                            'rgb(54, 162, 235)', // Blue
-                            'rgb(255, 205, 86)' // Yellow
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Tỉ lệ dụng cụ theo trạng thái',
-                            font: {
-                                size: 18,
-                                weight: 'bold'
-                            },
-                            padding: {
-                                top: 10,
-                                bottom: 10
-                            }
+    // Pie chart data
+    $wire.on('push_data_weekpc', ({
+        data
+    }) => {
+        updatePieChart(data);
+        // console.log(data)
+    });
+    $wire.on('push_data_monthpc', ({
+        data
+    }) => {
+        updatePieChart(data);
+        // console.log(data)
+    });
+    $wire.on('push_data_allpc', ({
+        data
+    }) => {
+        updatePieChart(data);
+        console.log(data)
+    });
+
+    let equipChart = null;
+
+    $wire.on('push_data_equip', ({
+        data
+    }) => {
+
+        const dat = data.map(d => d.count);
+        const label = data.map(d => d.status);
+
+        const equipCanvas = document.getElementById('equipChart');
+        const equipCtx = equipCanvas.getContext('2d');
+
+        if (equipChart) {
+            equipChart.destroy(); // 🔥 prevent canvas stacking bug
+        }
+
+        equipChart = new Chart(equipCtx, {
+            type: 'pie',
+            data: {
+                labels: label,
+                datasets: [{
+                    data: dat,
+                    backgroundColor: [
+                        makeGradient(equipCtx, '#fb7185', '#be123c'),
+                        makeGradient(equipCtx, '#60a5fa', '#2563eb'),
+                        makeGradient(equipCtx, '#facc15', '#ca8a04'),
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Trạng thái thiết bị',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
                         },
                         legend: {
                             display: true,
                             position: 'bottom'
                         }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
                     }
-                }
-            });
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 700,
+                    easing: 'easeOutQuart'
+                },
+
+
+            }
+        });
+    });
+
+    function updateBarChart(Newdata) {
+        if (!barChart) return;
+
+        barChart.data.labels = Newdata.map(d => d.date);
+        barChart.data.datasets[0].data = Newdata.map(d => d.count);
+
+
+        barChart.update({
+            duration: 600,
+            easing: 'easeOutCubic'
         });
 
-        function updateBarChart(Newdata) {
-            barChart.data.labels = Newdata.map(d => d.date);
-            barChart.data.datasets[0].data = Newdata.map(d => d.count);
-            barChart.update();
-
-        }
+        setTimeout(() => barChart.resize(), 0);
+    }
 
 
-        function updatePieChart(Newdata) {
-            pieChart.data.labels = Newdata.map(d => d.category);
-            pieChart.data.datasets[0].data = Newdata.map(d => d.count);
-            pieChart.update();
+    function updatePieChart(Newdata) {
+        if (!pieChart) return; // 🔥 guard
 
-        }
+        pieChart.data.labels = Newdata.map(d => d.category);
+        pieChart.data.datasets[0].data = Newdata.map(d => d.count);
 
-
-        /* ======================
-           Buttons
-        ====================== */
-
-        // Pie buttons
-        document.getElementById('PiebtnWeek').addEventListener('click', () => {
-            $wire.loadPieWeek(); // Livewire method for weekly pie data
-            toggleButtons('PiebtnWeek', ['PiebtnMonth', 'PiebtnAll']);
+        pieChart.update({
+            duration: 600,
+            easing: 'easeOutCubic'
         });
 
-        document.getElementById('PiebtnMonth').addEventListener('click', () => {
-            $wire.loadPieMonth(); // Livewire method for monthly pie data
-            toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
-        });
+        setTimeout(() => pieChart.resize(), 0);
+    }
 
-        document.getElementById('PiebtnAll').addEventListener('click', () => {
-            $wire.loadPieAll(); // Livewire method for all-time pie data
-            toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
-        });
 
-        // Bar buttons
-        document.getElementById('BarbtnWeek').addEventListener('click', () => {
-            $wire.loadBarWeek();
-            toggleButton('BarbtnWeek', 'BarbtnMonth');
-        });
 
-        document.getElementById('BarbtnMonth').addEventListener('click', () => {
-            $wire.loadBarMonth();
-            toggleButton('BarbtnMonth', 'BarbtnWeek');
-        });
 
-        // Active button helper
-        function toggleButton(activeId, inactiveId) {
-            document.getElementById(activeId).classList.add('btn-primary', 'active');
-            document.getElementById(activeId).classList.remove('btn-outline-primary');
+    /* ======================
+       Buttons
+    ====================== */
 
-            document.getElementById(inactiveId).classList.add('btn-outline-primary');
-            document.getElementById(inactiveId).classList.remove('btn-primary', 'active');
-        }
+    // Pie buttons
+    document.getElementById('PiebtnWeek').addEventListener('click', () => {
+        $wire.loadPieWeek();
+        setActiveButton('PiebtnWeek', ['PiebtnWeek', 'PiebtnMonth', 'PiebtnAll']);
+    });
 
-        function toggleButtons(activeId, inactiveIds) {
-            // Active button
-            const activeBtn = document.getElementById(activeId);
-            activeBtn.classList.add('btn-primary', 'active');
-            activeBtn.classList.remove('btn-outline-primary');
+    document.getElementById('PiebtnMonth').addEventListener('click', () => {
+        $wire.loadPieMonth();
+        setActiveButton('PiebtnMonth', ['PiebtnWeek', 'PiebtnMonth', 'PiebtnAll']);
+    });
 
-            // Inactive buttons
-            inactiveIds.forEach(id => {
-                const btn = document.getElementById(id);
+    document.getElementById('PiebtnAll').addEventListener('click', () => {
+        $wire.loadPieAll();
+        setActiveButton('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth', 'PiebtnAll']);
+    });
+
+    // Bar buttons
+    document.getElementById('BarbtnWeek').addEventListener('click', () => {
+        $wire.loadBarWeek();
+        setActiveButton('BarbtnWeek', ['BarbtnWeek', 'BarbtnMonth']);
+    });
+
+    document.getElementById('BarbtnMonth').addEventListener('click', () => {
+        $wire.loadBarMonth();
+        setActiveButton('BarbtnMonth', ['BarbtnWeek', 'BarbtnMonth']);
+    });
+
+    // Active button helper
+    function setActiveButton(activeId, allIds) {
+        allIds.forEach(id => {
+            const btn = document.getElementById(id);
+
+            if (id === activeId) {
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary');
+            } else {
+                btn.classList.remove('btn-primary');
                 btn.classList.add('btn-outline-primary');
-                btn.classList.remove('btn-primary', 'active');
-            });
-        }
-    </script>
-    @endscript
+            }
+
+            // 🔥 remove focus ring
+            btn.blur();
+        });
+    }
+    document.getElementById('PiebtnMonth').addEventListener('click', () => {
+        $wire.loadPieMonth(); // Livewire method for monthly pie data
+        toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
+    });
+
+    document.getElementById('PiebtnAll').addEventListener('click', () => {
+        $wire.loadPieAll(); // Livewire method for all-time pie data
+        toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
+    });
+
+    // Bar buttons
+    document.getElementById('BarbtnWeek').addEventListener('click', () => {
+        $wire.loadBarWeek();
+        toggleButton('BarbtnWeek', 'BarbtnMonth');
+    });
+
+    document.getElementById('BarbtnMonth').addEventListener('click', () => {
+        $wire.loadBarMonth();
+        toggleButton('BarbtnMonth', 'BarbtnWeek');
+    });
+
+    const dashboard = document.querySelector('.dashboard-content');
+
+    const observer = new ResizeObserver(() => {
+        if (barChart) barChart.resize();
+        if (pieChart) pieChart.resize();
+        if (equipChart) equipChart.resize();
+    });
+
+    observer.observe(dashboard);
+
+
+</script>
+@endscript
 </div>
