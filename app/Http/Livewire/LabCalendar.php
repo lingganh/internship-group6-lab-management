@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Group;
+use App\Models\Notification;
+use App\Models\User;
+use App\Enums\Role as RoleEnum;
 
 class LabCalendar extends Component
 {
@@ -20,7 +23,7 @@ class LabCalendar extends Component
 
         $user = Auth::user();
         $groups = Group::select('id', 'name')
-            ->when(!( !$user || (int) $user->role_id === 1), function ($q) use ($user) {
+            ->when(!(!$user || (int) $user->role_id === 1), function ($q) use ($user) {
                 $q->whereIn('id', function ($sub) use ($user) {
                     $sub->select('id')
                         ->from('lab_events')
@@ -35,7 +38,7 @@ class LabCalendar extends Component
             ->get();
 
         return view('livewire.lab-calendar', [
-            'rooms'  => $rooms,
+            'rooms' => $rooms,
             'groups' => $groups
         ])->layout('components.layouts.client-layout');
     }
@@ -54,7 +57,7 @@ class LabCalendar extends Component
                 ->whereNotNull('start')
                 ->where('start', '<=', $now)
                 ->update([
-                    'status'     => 'cancelled',
+                    'status' => 'cancelled',
                     'updated_at' => $now,
                 ]);
         } catch (\Throwable $e) {
@@ -72,17 +75,17 @@ class LabCalendar extends Component
             ->get()
             ->map(function ($event) {
                 return [
-                    'id'             => $event->id,
-                    'title'          => $event->title,
-                    'category'       => $event->category,
-                    'color'          => $event->color,
-                    'lab_code'       => $event->lab_code,
-                    'start'          => $event->start,
-                    'end'            => $event->end,
-                    'description'    => $event->description,
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'category' => $event->category,
+                    'color' => $event->color,
+                    'lab_code' => $event->lab_code,
+                    'start' => $event->start,
+                    'end' => $event->end,
+                    'description' => $event->description,
                     'registered_for' => $event->registered_for,
-                    'status'         => $event->status,
-                    'user_id'        => $event->user_id,
+                    'status' => $event->status,
+                    'user_id' => $event->user_id,
                 ];
             });
 
@@ -113,37 +116,39 @@ class LabCalendar extends Component
 
         if (!auth()->check()) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Bạn cần đăng nhập để đăng ký sự kiện.'
             ], 401);
         }
 
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'category'       => 'required|string|in:work,seminar,other',
-            'color'          => 'nullable|string|max:20',
-            'lab_code'       => 'required|string|exists:labs,code',
-            'start'          => 'required|date',
-            'end'            => 'required|date|after:start',
-            'description'    => 'nullable|string|max:1000',
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|in:work,seminar,other',
+            'color' => 'nullable|string|max:20',
+            'lab_code' => 'required|string|exists:labs,code',
+            'start' => 'required|date',
+            'end' => 'required|date|after:start',
+            'description' => 'nullable|string|max:1000',
             'registered_for' => 'nullable|string|max:255',
         ], [
-            'title.required'    => 'Vui lòng nhập tiêu đề sự kiện.',
+            'title.required' => 'Vui lòng nhập tiêu đề sự kiện.',
             'lab_code.required' => 'Vui lòng chọn phòng lab.',
-            'lab_code.exists'   => 'Phòng lab không tồn tại.',
-            'start.required'    => 'Vui lòng chọn thời gian bắt đầu.',
-            'end.required'      => 'Vui lòng chọn thời gian kết thúc.',
-            'end.after'         => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+            'lab_code.exists' => 'Phòng lab không tồn tại.',
+            'start.required' => 'Vui lòng chọn thời gian bắt đầu.',
+            'end.required' => 'Vui lòng chọn thời gian kết thúc.',
+            'end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
         // ====== CHECK TRÙNG TRƯỚC KHI TẠO ======
-        if ($this->hasConflict(
-            $validated['lab_code'],
-            $validated['start'],
-            $validated['end']
-        )) {
+        if (
+            $this->hasConflict(
+                $validated['lab_code'],
+                $validated['start'],
+                $validated['end']
+            )
+        ) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Thời gian bạn chọn đang bị trùng với một lịch khác trong cùng phòng lab.'
             ], 409);
         }
@@ -151,9 +156,8 @@ class LabCalendar extends Component
         $user = Auth::user();
         $isAdmin = $user->role_id == 1;
 
-        // nếu admin thì auto duyệt
-        $validated['status']     = $isAdmin ? 'approved' : 'pending';
-        $validated['user_id']    = $user->id;
+        $validated['status'] = 'pending';
+        $validated['user_id'] = $user->id;
         $validated['updated_by'] = $user->id;
 
         $event = LabEvent::create($validated);
@@ -162,6 +166,9 @@ class LabCalendar extends Component
             $this->handleFileUploads($request->file('files'), $event->id);
         }
 
+        if (!$isAdmin) {
+            $this->notifyAdminsPendingEvent($event, 'created');
+        }
         $event->refresh();
 
         return response()->json([
@@ -169,17 +176,17 @@ class LabCalendar extends Component
                 ? 'Sự kiện đã được tạo và tự động duyệt.'
                 : 'Đã gửi yêu cầu đăng ký. Vui lòng chờ quản trị viên phê duyệt.',
             'data' => [
-                'id'             => $event->id,
-                'title'          => $event->title,
-                'category'       => $event->category,
-                'color'          => $event->color,
-                'lab_code'       => $event->lab_code,
-                'start'          => $event->start,
-                'end'            => $event->end,
-                'description'    => $event->description,
+                'id' => $event->id,
+                'title' => $event->title,
+                'category' => $event->category,
+                'color' => $event->color,
+                'lab_code' => $event->lab_code,
+                'start' => $event->start,
+                'end' => $event->end,
+                'description' => $event->description,
                 'registered_for' => $event->registered_for,
-                'status'         => $event->status,
-                'user_id'        => $event->user_id,
+                'status' => $event->status,
+                'user_id' => $event->user_id,
             ],
         ], 201);
     }
@@ -189,13 +196,13 @@ class LabCalendar extends Component
         $this->autoUpdateStatuses();
 
         $event = LabEvent::findOrFail($id);
-        $user  = auth()->user();
+        $user = auth()->user();
         $isAdmin = $user && $user->role_id == 1;
 
         // Kiểm tra quyền: Admin được sửa tất cả, user chỉ sửa event của mình
         if (!$isAdmin && $event->user_id !== $user->id) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Bạn không có quyền chỉnh sửa sự kiện này.'
             ], 403);
         }
@@ -203,36 +210,36 @@ class LabCalendar extends Component
         // Sự kiện đã duyệt và đã đến giờ thì không được sửa
         if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Không thể chỉnh sửa sự kiện đã duyệt và đã bắt đầu.'
             ], 403);
         }
 
         $validated = $request->validate([
-            'title'          => 'sometimes|required|string|max:255',
-            'category'       => 'sometimes|required|string|in:work,seminar,other',
-            'color'          => 'nullable|string|max:20',
-            'lab_code'       => 'sometimes|required|string|exists:labs,code',
-            'start'          => 'required|date',
-            'end'            => 'required|date|after:start',
-            'description'    => 'nullable|string|max:1000',
+            'title' => 'sometimes|required|string|max:255',
+            'category' => 'sometimes|required|string|in:work,seminar,other',
+            'color' => 'nullable|string|max:20',
+            'lab_code' => 'sometimes|required|string|exists:labs,code',
+            'start' => 'required|date',
+            'end' => 'required|date|after:start',
+            'description' => 'nullable|string|max:1000',
             'registered_for' => 'nullable|string|max:255',
         ], [
             'lab_code.exists' => 'Phòng lab không tồn tại.',
-            'end.after'       => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+            'end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
         $validated['updated_by'] = $user ? $user->id : null;
 
         // dữ liệu dùng để check trùng (nếu không gửi lab_code mới thì dùng lab cũ)
         $labCode = $validated['lab_code'] ?? $event->lab_code;
-        $start   = $validated['start'] ?? $event->start;
-        $end     = $validated['end'] ?? $event->end;
+        $start = $validated['start'] ?? $event->start;
+        $end = $validated['end'] ?? $event->end;
 
         // ====== CHECK TRÙNG TRƯỚC KHI UPDATE ======
         if ($this->hasConflict($labCode, $start, $end, $event->id)) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Thời gian bạn chọn đang bị trùng với một lịch khác trong cùng phòng lab.'
             ], 409);
         }
@@ -247,7 +254,9 @@ class LabCalendar extends Component
         if ($request->hasFile('files')) {
             $this->handleFileUploads($request->file('files'), $event->id);
         }
-
+        if (!$isAdmin && $event->status === 'pending') {
+            $this->notifyAdminsPendingEvent($event, 'updated');
+        }
         $event->refresh();
 
         return response()->json([
@@ -255,17 +264,17 @@ class LabCalendar extends Component
                 ? 'Cập nhật thành công. Sự kiện đã chuyển về trạng thái chờ duyệt.'
                 : 'Cập nhật sự kiện thành công.',
             'data' => [
-                'id'             => $event->id,
-                'title'          => $event->title,
-                'category'       => $event->category,
-                'color'          => $event->color,
-                'lab_code'       => $event->lab_code,
-                'start'          => $event->start,
-                'end'            => $event->end,
-                'description'    => $event->description,
+                'id' => $event->id,
+                'title' => $event->title,
+                'category' => $event->category,
+                'color' => $event->color,
+                'lab_code' => $event->lab_code,
+                'start' => $event->start,
+                'end' => $event->end,
+                'description' => $event->description,
                 'registered_for' => $event->registered_for,
-                'status'         => $event->status,
-                'user_id'        => $event->user_id,
+                'status' => $event->status,
+                'user_id' => $event->user_id,
             ],
         ]);
     }
@@ -279,7 +288,7 @@ class LabCalendar extends Component
         // Kiểm tra quyền: Admin được xóa tất cả, user chỉ xóa event của mình
         if (!$isAdmin && $event->user_id !== $user->id) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Bạn không có quyền xóa sự kiện này.'
             ], 403);
         }
@@ -287,7 +296,7 @@ class LabCalendar extends Component
         // Sự kiện đã duyệt và đã đến giờ thì không được xóa
         if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
             return response()->json([
-                'type'    => 'error',
+                'type' => 'error',
                 'message' => 'Không thể xóa sự kiện đã duyệt và đã bắt đầu.'
             ], 403);
         }
@@ -316,14 +325,47 @@ class LabCalendar extends Component
 
                 LabEventFile::create([
                     'lab_event_id' => $eventId,
-                    'file_name'    => $file->getClientOriginalName(),
-                    'file_path'    => $path,
-                    'file_type'    => $file->getClientMimeType(),
-                    'file_size'    => $file->getSize(),
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'file_type' => $file->getClientMimeType(),
+                    'file_size' => $file->getSize(),
                 ]);
             } catch (\Exception $e) {
                 Log::error('File upload error: ' . $e->getMessage());
             }
+        }
+    }
+
+    private function notifyAdminsPendingEvent(LabEvent $event, string $action = 'created'): void
+    {
+        $user = Auth::user();
+
+        // Tìm tất cả User có role_id là 1 (Admin)
+        $admins = User::where('role_id', 1)->get();
+
+        if ($admins->isEmpty())
+            return;
+
+        $title = $action === 'created' ? 'Lịch đặt phòng mới chờ duyệt' : 'Lịch đặt phòng đã được cập nhật';
+        $senderName = $user->full_name ?? $user->name ?? 'Người dùng';
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'title' => $title,
+                'message' => "{$senderName} đã đăng ký: {$event->title} tại phòng {$event->lab_code}",
+                'data' => [
+                    'event_id' => $event->id,
+                    'type' => 'pending_event',
+                    'sender_name' => $senderName,
+                    'url' => route('admin.approval'),
+                ],
+            ]);
+            if ($admin->email) {
+            \Illuminate\Support\Facades\Mail::to($admin->email)->queue(
+                new \App\Mail\AdminPendingEventNotification($event, $senderName, $action)
+            );
+        }
         }
     }
 }

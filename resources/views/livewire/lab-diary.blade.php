@@ -338,82 +338,64 @@
                                             </div>
                                         </div>
 
-                                        @if($selectedEvent->files && $selectedEvent->files->count())
-                                            <div class="diary-files">
-                                                @foreach($selectedEvent->files as $f)
-                                                    @php
-                                                        $p = $f->path ?? $f->file_path ?? $f->url ?? '';
-                                                        $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
-                                                        $n = $f->name ?? $f->file_name ?? $f->original_name ?? basename((string)$p) ?? 'file';
-                                                    @endphp
-                                                    <div class="diary-file">
-                                                        <a class="diary-file-link" href="{{ $u }}" target="_blank" rel="noopener">
-                                                            <div class="diary-file-ic">
-                                                                <i class="ph-file-text"></i>
-                                                            </div>
-                                                            <div>
-                                                                <div class="small fw-semibold text-dark text-truncate">
-                                                                    {{ $n }}
+                                            @if($selectedEvent->files && $selectedEvent->files->count())
+                                                <div class="diary-files">
+                                                    @foreach($selectedEvent->files as $f)
+                                                        @php
+                                                            $p = $f->file_path; 
+                                                            $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
+                                                            $n = $f->file_name ?? 'file';
+                                                        @endphp
+                                                        
+                                                        <div class="diary-file" wire:key="file-{{ $f->id }}">
+                                                            <a class="diary-file-link" 
+                                                            href="{{ $u != '#' ? $u : 'javascript:void(0)' }}" 
+                                                            target="{{ $u != '#' ? '_blank' : '' }}" 
+                                                            rel="noopener">
+                                                                <div class="diary-file-ic">
+                                                                    <i class="ph-file-text"></i>
                                                                 </div>
-                                                                <div class="small text-muted">
-                                                                    {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
+                                                                <div class="flex-grow-1">
+                                                                    <div class="small fw-semibold text-dark text-truncate">{{ $n }}</div>
+                                                                    <div class="small text-muted">
+                                                                        {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </a>
+                                                            </a>
 
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-sm btn-link text-danger diary-file-delete"
-                                                            wire:click="deleteFile({{ $f->id }})">
-                                                            Xóa
-                                                        </button>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="small text-muted">Chưa có file.</div>
-                                        @endif
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-link text-danger"
+                                                                wire:click.prevent="deleteFile({{ $f->id }})">
+                                                                Xóa
+                                                            </button>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="small text-muted">Chưa có file.</div>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
 
                                 {{-- Thêm file mới + preview file mới --}}
-                                <div class="col-12">
-                                    <div class="diary-info">
-                                        <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
-                                        <input type="file" wire:model="newFiles" multiple class="form-control diary-control">
-                                        <div class="small text-muted mt-1">
-                                            Có thể chọn nhiều file cùng lúc. File mới sẽ được lưu khi bấm <b>Lưu</b>
+                                @foreach($newFiles as $idx => $file)
+                                    <div class="diary-file" wire:key="new-file-{{ $idx }}"> <div class="diary-file-ic">
+                                            <i class="ph-paperclip"></i>
                                         </div>
-                                        @error('newFiles') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-                                        @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
-
-                                        @if($newFiles && count($newFiles))
-                                            <div class="diary-newfiles mt-2">
-                                                @foreach($newFiles as $idx => $file)
-                                                    <div class="diary-file">
-                                                        <div class="diary-file-ic">
-                                                            <i class="ph-paperclip"></i>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <div class="small fw-semibold text-dark text-truncate">
-                                                                {{ $file->getClientOriginalName() }}
-                                                            </div>
-                                                            <div class="small text-muted">
-                                                                {{ number_format($file->getSize() / 1024, 1) }} KB
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-sm btn-link text-danger diary-file-delete"
-                                                            wire:click="removeNewFile({{ $idx }})">
-                                                            Bỏ
-                                                        </button>
-                                                    </div>
-                                                @endforeach
+                                        <div class="flex-grow-1">
+                                            <div class="small fw-semibold text-dark text-truncate">
+                                                {{ $file->getClientOriginalName() }}
                                             </div>
-                                        @endif
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-link text-danger"
+                                            wire:click.prevent="removeNewFile({{ $idx }})">
+                                            Bỏ
+                                        </button>
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
                         @endif
                     </div>

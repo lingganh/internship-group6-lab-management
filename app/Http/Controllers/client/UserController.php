@@ -20,4 +20,9 @@ class UserController extends Controller
     {
         return view('pages.auth.two-factor');
     }
+
+    public function GroupIndex()
+    {
+        return view('pages.client.user.group-index');
+    }
 }

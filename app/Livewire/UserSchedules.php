@@ -28,14 +28,13 @@ class UserSchedules extends Component
     // feedback tạo Phản hồi thành công
     public ?string $feedbackSuccessMessage = null;
 
-    protected $listeners = [
-        // không cần gì ở đây
-    ];
-
+   
+    
     public function render()
     {
         $query = LabEvent::query()
             ->with('user')
+            ->where('user_id', auth()->id())
             ->whereNot('status', 'cancelled');
 
         if ($this->filterStatus !== '') {

@@ -1,3 +1,4 @@
+<div>
 <div class="dashboard-shell">
     <div class="dashboard-content">
 
@@ -478,7 +479,7 @@
         data
     }) => {
         updatePieChart(data);
-        // console.log(data)    
+        // console.log(data)
     });
     $wire.on('push_data_allpc', ({
         data

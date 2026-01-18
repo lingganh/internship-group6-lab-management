@@ -365,33 +365,39 @@
                                             <div class="small text-muted mb-1">
                                                 Tệp đính kèm
                                             </div>
+                                                @if($selectedSchedule->files && $selectedSchedule->files->count())
+                                                    <div class="approval-files">
+                                                        @foreach($selectedSchedule->files as $file)
+                                                            @php
+                                                                 $filePath = $file->file_path; 
+                                                                $url = $filePath ? \Illuminate\Support\Facades\Storage::url($filePath) : 'javascript:void(0)';
+                                                                
+                                                                 $fileName = $file->file_name ?? 'Tệp đính kèm';
+                                                            @endphp
 
-                                            @if($selectedSchedule->files && $selectedSchedule->files->count())
-                                                <div class="approval-files">
-                                                    @foreach($selectedSchedule->files as $file)
-                                                        <a href="{{ $file->file_url ?? ($file->path ?? '#') }}"
-                                                           target="_blank"
-                                                           class="approval-file">
-                                                            <div class="approval-file-ic">
-                                                                <i class="ph-file-text"></i>
-                                                            </div>
-                                                            <div>
-                                                                <div class="small fw-semibold text-dark text-truncate">
-                                                                    {{ $file->original_name ?? basename($file->path ?? '') }}
-                                                                </div>
-                                                                <div class="small text-muted">
-                                                                    {{ $file->file_size ? number_format($file->file_size / 1024, 1) . ' KB' : 'Tệp đính kèm' }}
-                                                                </div>
-                                                            </div>
-                                                        </a>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <div class="small text-muted">
-                                                    Không có tệp đính kèm.
-                                                </div>
-                                            @endif
-                                        </div>
+                                                            <a href="javascript:void(0)" 
+                                                                wire:click="downloadFile({{ $file->id }})" 
+                                                                class="approval-file"
+                                                                wire:key="file-{{ $file->id }}">
+                                                                    <div class="approval-file-ic">
+                                                                        <i class="ph-file-text"></i>
+                                                                    </div>
+                                                                    <div class="flex-grow-1">
+                                                                        <div class="small fw-semibold text-dark text-truncate">
+                                                                            {{ $file->file_name }} </div>
+                                                                        {{-- <div class="small text-muted">
+                                                                            {{ number_format($file->file_size / 1024, 1) }} KB
+                                                                        </div> --}}
+                                                                    </div>
+                                                                </a>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div class="small text-muted">
+                                                        Không có tệp đính kèm.
+                                                    </div>
+                                                @endif  
+                                                                                        </div>
                                     </div>
                                 </div>
                             @endif
