@@ -22,16 +22,24 @@
                     @endphp
 
                     <div class="greeting-left">
-                    <div class="greeting-icon">{{ $icon }}</div>
+
                     <div>
                         <h4>{{ $greeting }}</h4>
                         <p>{{ $message }}</p>
+
                     </div>
+
+
+
+        </div>
+        <div>
+            <div class="greeting-icon">{{ $icon }}</div>
+            <div class="greeting-date">
+                {{ now()->format('d/m/Y') }}
+            </div>
         </div>
 
-        <div class="greeting-date">
-            {{ now()->format('d/m/Y') }}
-        </div>
+
     </div>
 
     <!-- KPI -->
@@ -48,7 +56,7 @@
         <div class="kpi-card">
             <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
             <div>
-                <small>Chờ duyệt</small>
+                <small>chờ duyệt</small>
                 <h3>{{ $ALLPendingEvt }}</h3>
             </div>
         </div>
@@ -64,7 +72,7 @@
         <div class="kpi-card">
             <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
             <div>
-                <small>Đang sửa</small>
+                <small>Thiết bị đang sửa</small>
                 <h3>{{ $MaintaceEquip }}</h3>
             </div>
 
@@ -191,14 +199,25 @@
     }
 
     .greeting-icon {
-        width: 56px;
-        height: 56px;
+        width: 44px;
+        height: 44px;
         border-radius: 16px;
         background: #fde68a;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
+        font-size: 20px;
+    }
+
+    .greeting h4 {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+
+    .greeting p {
+        font-size: 0.9rem;
+        margin: 0;
+        color: #475569;
     }
 
     .kpi-grid {
@@ -470,12 +489,26 @@
 
     let equipChart = null;
 
+    function translate(status) {
+        if (status == 'Broken')
+            return 'Bị Hỏng'
+        else if (status == 'Maintenance')
+            return 'Đang sửa chữa'
+        else if (status == 'Available')
+            return 'Có thể sử dụng'
+        else if (status == 'in_Use')
+            return 'Đang trong sử dụng'
+        else
+            return status
+
+    }
+
     $wire.on('push_data_equip', ({
         data
     }) => {
 
         const dat = data.map(d => d.count);
-        const label = data.map(d => d.status);
+        const label = data.map(d => translate(d.status));
 
         const equipCanvas = document.getElementById('equipChart');
         const equipCtx = equipCanvas.getContext('2d');
