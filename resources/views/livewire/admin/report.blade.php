@@ -114,7 +114,7 @@
     <div class="container-fluid px-4">
         <div class="row g-4">
             <div wire:ignore class="col-md-6">
-                <div  class="card shadow-sm border-0 rounded-4 p-4">
+                <div class="card shadow-sm border-0 rounded-4 p-4">
                     <h6 class="fw-semibold mb-3">Thiết bị theo trạng thái</h6>
                     <div class="chart-box">
                         <canvas id="chart1"></canvas>
@@ -226,14 +226,14 @@
     let piechart1 = null;
     let piechart2 = null;
 
-     function translate(status){
-        if(status=='broken')
+    function translate(status) {
+        if (status == 'broken')
             return 'Bị Hỏng'
-        else if (status=='maintenance')
+        else if (status == 'maintenance')
             return 'Đang sửa chữa'
-        else if(status=='available')
-            return'Có thể sử dụng'
-        else if (status=='in_use')
+        else if (status == 'available')
+            return 'Có thể sử dụng'
+        else if (status == 'In_use')
             return 'Đang trong sử dụng'
         else
             return status
@@ -288,11 +288,15 @@
                 labels: [],
                 datasets: [{
                     data: [],
-                    backgroundColor: [ // Array of colors for each slice
+                    backgroundColor: [
+                        'rgb(34, 197, 94)', // Green 
+                        'rgb(168, 85, 247)', // Purple
+                        'rgb(251, 146, 60)', // Orange
+                        'rgb(20, 184, 166)', // Teal
+                        'rgb(244, 114, 182)', // Pink
                         'rgb(255, 99, 132)', // Red
                         'rgb(54, 162, 235)', // Blue
-                        'rgb(255, 205, 86)', // Yellow
-                        ' rgb(15, 153, 15) '
+                        'rgb(255, 205, 86)', // Yellow 
                     ],
                     borderWidth: 1
                 }]
@@ -303,7 +307,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Số dụng cụ theo trạng thái', // <-- Your title here
+                        text: 'Số dụng cụ theo trạng thái',
                         font: {
                             size: 18,
                             weight: 'bold'

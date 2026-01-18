@@ -1,151 +1,151 @@
 <div>
-<div class="dashboard-shell">
-    <div class="dashboard-content">
+    <div class="dashboard-shell">
+        <div class="dashboard-content">
 
-        <!-- GREETING -->
-        <div class="greeting">
-            @php
-            $hour = now()->hour;
+            <!-- GREETING -->
+            <div class="greeting">
+                @php
+                $hour = now()->hour;
 
-            if ($hour >= 5 && $hour < 12) {
-                $greeting='Chào buổi sáng' ;
-                $icon='☀️' ;
-                $message='Chúc bạn có một ngày làm việc hiệu quả' ;
-                } elseif ($hour>= 12 && $hour < 18) {
-                    $greeting='Chào buổi chiều' ;
-                    $icon='🌤️' ;
-                    $message='Chúc bạn làm việc năng suất' ;
-                    } else {
-                    $greeting='Chào buổi tối' ;
-                    $icon='🌙' ;
-                    $message='Chúc bạn một buổi tối thư giãn' ;
-                    }
-                    @endphp
+                if ($hour >= 5 && $hour < 12) {
+                    $greeting='Chào buổi sáng' ;
+                    $icon='☀️' ;
+                    $message='Chúc bạn có một ngày làm việc hiệu quả' ;
+                    } elseif ($hour>= 12 && $hour < 18) {
+                        $greeting='Chào buổi chiều' ;
+                        $icon='🌤️' ;
+                        $message='Chúc bạn làm việc năng suất' ;
+                        } else {
+                        $greeting='Chào buổi tối' ;
+                        $icon='🌙' ;
+                        $message='Chúc bạn một buổi tối thư giãn' ;
+                        }
+                        @endphp
 
-                    <div class="greeting-left">
+                        <div class="greeting-left">
 
-                    <div>
-                        <h4>{{ $greeting }}</h4>
-                        <p>{{ $message }}</p>
+                        <div>
+                            <h4>{{ $greeting }}</h4>
+                            <p>{{ $message }}</p>
 
-                    </div>
+                        </div>
 
 
 
-        </div>
-        <div>
-            <div class="greeting-icon">{{ $icon }}</div>
-            <div class="greeting-date">
-                {{ now()->format('d/m/Y') }}
             </div>
-        </div>
-
-
-    </div>
-
-    <!-- KPI -->
-    <div class="kpi-grid">
-
-        <div class="kpi-card">
-            <div class="kpi-icon bg-primary"><i class="fa fa-calendar"></i></div>
             <div>
-                <small>Sự kiện 7 ngày</small>
-                <h3>{{ $AllEvent }}</h3>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
-            <div>
-                <small>chờ duyệt</small>
-                <h3>{{ $ALLPendingEvt }}</h3>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon bg-danger"><i class="fa fa-triangle-exclamation"></i></div>
-            <div>
-                <small>Thiết bị hỏng</small>
-                <h3>{{ $FaultyEquip }}</h3>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
-            <div>
-                <small>Thiết bị đang sửa</small>
-                <h3>{{ $MaintaceEquip }}</h3>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- CHARTS -->
-    <div class="dashboard-grid">
-
-        <div class="panel">
-            <div class="panel-header d-flex justify-content-between align-items-center mb-2">
-                <h6>Sự kiện theo loại</h6>
-                <div wire:ignore class="btn-group">
-                    <button id="PiebtnWeek" class="btn btn-sm btn-primary">Tuần</button>
-                    <button id="PiebtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
-                    <button id="PiebtnAll" class="btn btn-sm btn-outline-primary">Tất cả</button>
+                <div class="greeting-icon">{{ $icon }}</div>
+                <div class="greeting-date">
+                    {{ now()->format('d/m/Y') }}
                 </div>
             </div>
-            <div class="chart-wrapper" wire:ignore>
-                <canvas id="pieChart" class="chart-canvas"></canvas>
-            </div>
+
+
         </div>
 
-        <div class="panel">
-            <div class="panel-header d-flex justify-content-between align-items-center mb-2">
-                <h6>Số lượng sự kiện</h6>
-                <div wire:ignore class="btn-group ">
-                    <button id="BarbtnWeek" class="btn btn-sm btn-primary">Tuần</button>
-                    <button id="BarbtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
+        <!-- KPI -->
+        <div class="kpi-grid">
+
+            <div class="kpi-card">
+                <div class="kpi-icon bg-primary"><i class="fa fa-calendar"></i></div>
+                <div>
+                    <small>Sự kiện 7 ngày</small>
+                    <h3>{{ $AllEvent }}</h3>
                 </div>
             </div>
-            <div class="chart-wrapper" wire:ignore>
-                <canvas id="barChart" class="chart-canvas"></canvas>
+
+            <div class="kpi-card">
+                <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
+                <div>
+                    <small>chờ duyệt</small>
+                    <h3>{{ $ALLPendingEvt }}</h3>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon bg-danger"><i class="fa fa-triangle-exclamation"></i></div>
+                <div>
+                    <small>Thiết bị hỏng</small>
+                    <h3>{{ $FaultyEquip }}</h3>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
+                <div>
+                    <small>Thiết bị đang sửa</small>
+                    <h3>{{ $MaintaceEquip }}</h3>
+                </div>
+
             </div>
         </div>
 
-    </div>
+        <!-- CHARTS -->
+        <div class="dashboard-grid">
 
-    <!-- EQUIPMENT + EVENTS -->
-    <div class="dashboard-grid">
-
-        <div class="panel">
-            <h6 class="mb-3">Trạng thái thiết bị</h6>
-            <div class="chart-warpper" wire:ignore>
-                <canvas id="equipChart" class="chart-canvas"></canvas>
-            </div>
-        </div>
-        <div class="panel">
-            <h6 class="mb-3">Sự kiện sắp tới</h6>
-
-            <div class="event-list">
-                @forelse($TopEvent as $event)
-                <div class="event-item">
-                    <div class="event-left">
-                        <div class="event-title">{{ $event->title }}</div>
-                        <div class="event-lab">{{ $event->lab_code }}</div>
-                    </div>
-
-                    <div class="event-time">
-                        <span class="event-date">{{ $event->start->format('d/m') }}</span>
-                        <span class="event-hour">{{ $event->start->format('H:i') }}</span>
+            <div class="panel">
+                <div class="panel-header d-flex justify-content-between align-items-center mb-2">
+                    <h6>Sự kiện theo loại</h6>
+                    <div wire:ignore class="btn-group">
+                        <button id="PiebtnWeek" class="btn btn-sm btn-primary">Tuần</button>
+                        <button id="PiebtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
+                        <button id="PiebtnAll" class="btn btn-sm btn-outline-primary">Tất cả</button>
                     </div>
                 </div>
-                @empty
-                <div class="text-center text-muted py-4">
-                    Không có sự kiện
+                <div class="chart-wrapper" wire:ignore>
+                    <canvas id="pieChart" class="chart-canvas"></canvas>
                 </div>
-                @endforelse
+            </div>
+
+            <div class="panel">
+                <div class="panel-header d-flex justify-content-between align-items-center mb-2">
+                    <h6>Số lượng sự kiện</h6>
+                    <div wire:ignore class="btn-group ">
+                        <button id="BarbtnWeek" class="btn btn-sm btn-primary">Tuần</button>
+                        <button id="BarbtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper" wire:ignore>
+                    <canvas id="barChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- EQUIPMENT + EVENTS -->
+        <div class="dashboard-grid">
+
+            <div class="panel">
+                <h6 class="mb-3">Trạng thái thiết bị</h6>
+                <div class="chart-warpper" wire:ignore>
+                    <canvas id="equipChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h6 class="mb-3">Sự kiện sắp tới</h6>
+
+                <div class="event-list">
+                    @forelse($TopEvent as $event)
+                    <div class="event-item">
+                        <div class="event-left">
+                            <div class="event-title">{{ $event->title }}</div>
+                            <div class="event-lab">{{ $event->lab_code }}</div>
+                        </div>
+
+                        <div class="event-time">
+                            <span class="event-date">{{ $event->start->format('d/m') }}</span>
+                            <span class="event-hour">{{ $event->start->format('H:i') }}</span>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="text-center text-muted py-4">
+                        Không có sự kiện
+                    </div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
 </div>
@@ -428,9 +428,14 @@
                 datasets: [{
                     data: [],
                     backgroundColor: [
-                        makeGradient(pieCtx, '#60a5fa', '#2563eb'),
-                        makeGradient(pieCtx, '#34d399', '#059669'),
-                        makeGradient(pieCtx, '#fbbf24', '#d97706'),
+                        makeGradient(pieCtx, '#60a5fa', '#2563eb'), // blue
+                        makeGradient(pieCtx, '#34d399', '#059669'), // green
+                        makeGradient(pieCtx, '#fbbf24', '#d97706'), // amber
+                        makeGradient(pieCtx, '#f87171', '#dc2626'), // red
+                        makeGradient(pieCtx, '#c084fc', '#7c3aed'), // purple
+                        makeGradient(pieCtx, '#fb7185', '#be123c'), // pink
+                        makeGradient(pieCtx, '#22d3ee', '#0891b2'), // cyan
+                        makeGradient(pieCtx, '#a3e635', '#4d7c0f'), // lime
                     ],
                     borderWidth: 2,
                     hoverOffset: 12
@@ -497,7 +502,7 @@
             return 'Đang sửa chữa'
         else if (status == 'Available')
             return 'Có thể sử dụng'
-        else if (status == 'in_Use')
+        else if (status == 'In_use')
             return 'Đang trong sử dụng'
         else
             return status
