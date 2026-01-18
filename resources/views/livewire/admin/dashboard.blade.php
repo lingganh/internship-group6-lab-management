@@ -23,16 +23,24 @@
                     @endphp
 
                     <div class="greeting-left">
-                    <div class="greeting-icon">{{ $icon }}</div>
+
                     <div>
                         <h4>{{ $greeting }}</h4>
                         <p>{{ $message }}</p>
+
                     </div>
+
+
+
+        </div>
+        <div>
+            <div class="greeting-icon">{{ $icon }}</div>
+            <div class="greeting-date">
+                {{ now()->format('d/m/Y') }}
+            </div>
         </div>
 
-        <div class="greeting-date">
-            {{ now()->format('d/m/Y') }}
-        </div>
+
     </div>
 
     <!-- KPI -->
@@ -49,7 +57,7 @@
         <div class="kpi-card">
             <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
             <div>
-                <small>Chờ duyệt</small>
+                <small>chờ duyệt</small>
                 <h3>{{ $ALLPendingEvt }}</h3>
             </div>
         </div>
@@ -65,7 +73,7 @@
         <div class="kpi-card">
             <div class="kpi-icon bg-success"><i class="fa fa-screwdriver"></i></div>
             <div>
-                <small>Đang sửa</small>
+                <small>Thiết bị đang sửa</small>
                 <h3>{{ $MaintaceEquip }}</h3>
             </div>
 
@@ -84,7 +92,7 @@
                     <button id="PiebtnAll" class="btn btn-sm btn-outline-primary">Tất cả</button>
                 </div>
             </div>
-            <div class="chart-box" wire:ignore>
+            <div class="chart-wrapper" wire:ignore>
                 <canvas id="pieChart" class="chart-canvas"></canvas>
             </div>
         </div>
@@ -97,7 +105,7 @@
                     <button id="BarbtnMonth" class="btn btn-sm btn-outline-primary">Tháng</button>
                 </div>
             </div>
-            <div class="chart-box" wire:ignore>
+            <div class="chart-wrapper" wire:ignore>
                 <canvas id="barChart" class="chart-canvas"></canvas>
             </div>
         </div>
@@ -109,7 +117,7 @@
 
         <div class="panel">
             <h6 class="mb-3">Trạng thái thiết bị</h6>
-            <div class="chart-box" wire:ignore>
+            <div class="chart-warpper" wire:ignore>
                 <canvas id="equipChart" class="chart-canvas"></canvas>
             </div>
         </div>
@@ -192,14 +200,25 @@
     }
 
     .greeting-icon {
-        width: 56px;
-        height: 56px;
+        width: 44px;
+        height: 44px;
         border-radius: 16px;
         background: #fde68a;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
+        font-size: 20px;
+    }
+
+    .greeting h4 {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+
+    .greeting p {
+        font-size: 0.9rem;
+        margin: 0;
+        color: #475569;
     }
 
     .kpi-grid {
@@ -260,12 +279,16 @@
     }
 
 
-    .chart-box {
+    .chart-wrapper {
         position: relative;
         width: 100%;
-        height: 320px;
-        min-height: 320px;
-        /* 🔥 IMPORTANT */
+        min-width: 0;
+        /* 🔥 VERY IMPORTANT */
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
     }
 
     .btn:focus,
@@ -348,9 +371,16 @@
 
     $wire.on('create_chart', () => {
 
-        const barCtx = document.getElementById('barChart').getContext('2d');
+        // 🔥 BAR CHART
+        const barCanvas = document.getElementById('barChart');
+        if (!barCanvas) return;
 
-        const barGradient = makeGradient(barCtx, '#60a5fa', '#2563eb');
+        const barCtx = barCanvas.getContext('2d');
+
+        if (barChart) {
+            barChart.destroy();
+            barChart = null;
+        }
 
         barChart = new Chart(barCtx, {
             type: 'bar',
@@ -359,7 +389,7 @@
                 datasets: [{
                     label: 'Sự kiện',
                     data: [],
-                    backgroundColor: barGradient,
+                    backgroundColor: makeGradient(barCtx, '#60a5fa', '#2563eb'),
                     borderRadius: 8,
                     borderSkipped: false
                 }]
@@ -367,28 +397,8 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                resizeDelay: 200,
-
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Biểu đồ số lượng sự kiện',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        },
-                        padding: {
-                            top: 10,
-                            bottom: 10
-                        }
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-
-                // ⬅️ THIS MUST NOT BE INSIDE plugins
+                animation: true, // 🔥 IMPORTANT
+                resizeDelay: 300,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -400,8 +410,16 @@
             }
         });
 
+        // 🔥 PIE CHART
         const pieCanvas = document.getElementById('pieChart');
+        if (!pieCanvas) return;
+
         const pieCtx = pieCanvas.getContext('2d');
+
+        if (pieChart) {
+            pieChart.destroy();
+            pieChart = null;
+        }
 
         pieChart = new Chart(pieCtx, {
             type: 'pie',
@@ -421,34 +439,13 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                resizeDelay: 200,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Số sự kiện theo loại',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
-                        }
-                    },
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20
-                        }
-                    }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 700,
-                    easing: 'easeOutQuart'
-                }
-            },
-
+                animation: true, // 🔥 IMPORTANT
+                resizeDelay: 300,
+            }
         });
 
+        bindChartResize(barChart);
+        bindChartResize(pieChart);
     });
 
 
@@ -488,23 +485,37 @@
         data
     }) => {
         updatePieChart(data);
-        console.log(data)
+
     });
 
     let equipChart = null;
+
+    function translate(status) {
+        if (status == 'Broken')
+            return 'Bị Hỏng'
+        else if (status == 'Maintenance')
+            return 'Đang sửa chữa'
+        else if (status == 'Available')
+            return 'Có thể sử dụng'
+        else if (status == 'in_Use')
+            return 'Đang trong sử dụng'
+        else
+            return status
+
+    }
 
     $wire.on('push_data_equip', ({
         data
     }) => {
 
         const dat = data.map(d => d.count);
-        const label = data.map(d => d.status);
+        const label = data.map(d => translate(d.status));
 
         const equipCanvas = document.getElementById('equipChart');
         const equipCtx = equipCanvas.getContext('2d');
 
         if (equipChart) {
-            equipChart.destroy(); // 🔥 prevent canvas stacking bug
+            equipChart.destroy();
         }
 
         equipChart = new Chart(equipCtx, {
@@ -525,6 +536,8 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: true, // 🔥 IMPORTANT
+                resizeDelay: 300,
 
                 plugins: {
                     title: {
@@ -547,13 +560,7 @@
                             padding: 20
                         }
                     }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 700,
-                    easing: 'easeOutQuart'
-                },
+                }
 
 
             }
@@ -572,7 +579,8 @@
             easing: 'easeOutCubic'
         });
 
-        setTimeout(() => barChart.resize(), 0);
+
+        console.log(Newdata)
     }
 
 
@@ -587,11 +595,9 @@
             easing: 'easeOutCubic'
         });
 
-        setTimeout(() => pieChart.resize(), 0);
+
+        console.log(Newdata)
     }
-
-
-
 
     /* ======================
        Buttons
@@ -637,42 +643,50 @@
                 btn.classList.add('btn-outline-primary');
             }
 
-            // 🔥 remove focus ring
+
             btn.blur();
         });
     }
-    document.getElementById('PiebtnMonth').addEventListener('click', () => {
-        $wire.loadPieMonth(); // Livewire method for monthly pie data
-        toggleButtons('PiebtnMonth', ['PiebtnWeek', 'PiebtnAll']);
-    });
 
-    document.getElementById('PiebtnAll').addEventListener('click', () => {
-        $wire.loadPieAll(); // Livewire method for all-time pie data
-        toggleButtons('PiebtnAll', ['PiebtnWeek', 'PiebtnMonth']);
-    });
+    function hardResetChart(chart) {
+        if (!chart) return;
 
-    // Bar buttons
-    document.getElementById('BarbtnWeek').addEventListener('click', () => {
-        $wire.loadBarWeek();
-        toggleButton('BarbtnWeek', 'BarbtnMonth');
-    });
+        const canvas = chart.canvas;
+        const parent = canvas.parentElement;
+        if (!parent) return;
 
-    document.getElementById('BarbtnMonth').addEventListener('click', () => {
-        $wire.loadBarMonth();
-        toggleButton('BarbtnMonth', 'BarbtnWeek');
-    });
+        const rect = parent.getBoundingClientRect();
+        const width = Math.floor(rect.width);
+        const height = Math.floor(rect.height);
 
-    const dashboard = document.querySelector('.dashboard-content');
+        console.log('[FORCE]', width, height);
 
-    const observer = new ResizeObserver(() => {
-        if (barChart) barChart.resize();
-        if (pieChart) pieChart.resize();
-        if (equipChart) equipChart.resize();
-    });
+        // 🔥 force canvas size
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
 
-    observer.observe(dashboard);
+        canvas.width = width;
+        canvas.height = height;
+
+        chart.resize();
+    }
 
 
+    function bindChartResize(chart) {
+        const parent = chart.canvas.parentElement;
+
+        const ro = new ResizeObserver(entries => {
+            const {
+                width,
+                height
+            } = entries[0].contentRect;
+            console.log('[RO]', Math.round(width), Math.round(height));
+
+            chart.resize();
+        });
+
+        ro.observe(parent);
+    }
 </script>
 @endscript
 </div>

@@ -1,5 +1,3 @@
 <x-admin-layout>
-<div class="content">
-    <livewire:admin.report/>
-</div>
+    <livewire:admin.report />
 </x-admin-layout>

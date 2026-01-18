@@ -226,6 +226,19 @@
     let piechart1 = null;
     let piechart2 = null;
 
+     function translate(status){
+        if(status=='broken')
+            return 'Bị Hỏng'
+        else if (status=='maintenance')
+            return 'Đang sửa chữa'
+        else if(status=='available')
+            return'Có thể sử dụng'
+        else if (status=='in_use')
+            return 'Đang trong sử dụng'
+        else
+            return status
+
+    }
 
 
     $wire.on('create_chart', () => {
@@ -316,7 +329,7 @@
     $wire.on('push_PCData1', ({
         data
     }) => {
-        piechart1.data.labels = data.map(i => i.status);
+        piechart1.data.labels = data.map(i => translate(i.status));
         piechart1.data.datasets[0].data = data.map(i => i.count)
         piechart1.update();
     })
