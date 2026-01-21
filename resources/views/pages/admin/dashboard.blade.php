@@ -1,3 +1,5 @@
 <x-admin-layout>
-    <livewire:admin.dashboard />
+<div class="content">
+     <livewire:admin.dashboard/>
+</div>
 </x-admin-layout>
