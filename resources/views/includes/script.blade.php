@@ -111,6 +111,8 @@
     (function() {
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
+        const openBase = "{{ url('/notifications') }}";
+
         const EchoCtor = window.Echo;
         if (typeof EchoCtor !== 'function') return;
 
@@ -153,26 +155,26 @@
 
                 if (list) {
                     const fallbackAvatar = "{{ asset('assets/images/default-user-image.png') }}";
+                    const openUrl = `${openBase}/${e.id}/open`;
+
                     const html = `
-                    <div class="d-flex align-items-start mb-3">
+                    <a href="${openUrl}"
+                        class="notification-item notification-unread d-flex align-items-start mb-3 text-reset text-decoration-none">
                         <div class="status-indicator-container me-3">
-                            <img src="${e.sender_avatar || fallbackAvatar}"
-                                 class="w-40px h-40px rounded-pill" alt="">
+                            <img src="${e.sender_avatar || fallbackAvatar}" class="w-40px h-40px rounded-pill" alt="">
                             <span class="status-indicator bg-success"></span>
                         </div>
 
                         <div class="flex-fill">
                             <span class="fw-semibold text-body">${escapeHtml(e.sender_name || 'Hệ thống')}</span>
-                            <a href="${e.url || '#'}" class="ms-1 text-body text-decoration-none">
-                                ${escapeHtml(e.title || '')}
-                            </a>
-
+                            <span class="ms-1 text-body notif-title">${escapeHtml(e.title || '')}</span>
                             ${e.message ? `<div class="mt-1"><span class="fw-semibold">${escapeHtml(e.message)}</span></div>` : ''}
-
                             <div class="fs-sm text-muted mt-1">Vừa xong</div>
                         </div>
-                    </div>
-                `;
+                    </a>
+                    `;
+
+
                     list.insertAdjacentHTML('afterbegin', html);
                 }
 

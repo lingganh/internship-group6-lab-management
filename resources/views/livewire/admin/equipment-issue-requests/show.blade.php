@@ -229,15 +229,13 @@
                                     @if ($isPending)
                                         {{-- Chấp nhận --}}
                                         <button type="button" class="btn btn-sm btn-outline-success"
-                                            wire:click="approveItem({{ $item->id }})"
-                                            wire:confirm="Chấp nhận tạo báo hỏng cho thiết bị này?">
+                                            wire:click="openApproveModal({{ $item->id }})">
                                             <i class="ph-check me-1"></i>Chấp nhận
                                         </button>
 
                                         {{-- Từ chối --}}
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                            wire:click="rejectItem({{ $item->id }})"
-                                            wire:confirm="Từ chối báo hỏng cho thiết bị này?">
+                                            wire:click="openRejectModal({{ $item->id }})">
                                             <i class="ph-x me-1"></i>Từ chối
                                         </button>
                                     @else

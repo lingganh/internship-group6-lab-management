@@ -129,16 +129,16 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
 
         Route::get('/export-lab-diary', function () {
-            $temp= Cache::get('lab-diary-export-' . auth()->id());
-            $events =$temp[0];
-            $start=$temp[1];
-            $end=$temp[2];
+            $temp = Cache::get('lab-diary-export-' . auth()->id());
+            $events = $temp[0];
+            $start = $temp[1];
+            $end = $temp[2];
 
             abort_if(!$events, 419);
 
 
             return Excel::download(
-                new LabDiaryExport($events,$start,$end),
+                new LabDiaryExport($events, $start, $end),
                 'Nhat_ky_su_dung_Lab.xlsx'
             );
         })->name('lab-diary.export');
@@ -152,4 +152,7 @@ Route::get('/equipment/issues/bulk-create', function () {
 
 Route::middleware('auth')->post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])
     ->name('notifications.mark-all-read');
+Route::middleware('auth')->get('/notifications/{notification}/open', [NotificationController::class, 'open'])
+    ->name('notifications.open');
+
 Route::get('coming-soon', fn() => view('coming-soon'))->name('admin.coming-soon');

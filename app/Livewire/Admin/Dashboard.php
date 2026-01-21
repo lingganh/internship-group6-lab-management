@@ -107,6 +107,7 @@ class Dashboard extends Component
         $monthEnd   = now('UTC')->endOfMonth();
 
         //Month barchart
+        
         $this->MonthBCData = collect();
         $cursor = $monthStart->copy();
         $weekIndex = 1;
@@ -151,8 +152,10 @@ class Dashboard extends Component
             ->values();
 
 
-
-        
+        $this->dispatch('create_chart');
+        $this->dispatch('push_data_weekbc', data: $this->WeekBCData);
+        $this->dispatch('push_data_weekpc', data: $this->WeekPCData);
+        $this->dispatch('push_data_equip', data: $this->EquipCData);
     }
 
     public function loadBarWeek()
@@ -182,11 +185,7 @@ class Dashboard extends Component
         return view('livewire.admin.dashboard');
     }
 
-    public function rendered()
-    {
-        $this->dispatch('create_chart');
-        $this->dispatch('push_data_weekbc', data: $this->WeekBCData);
-        $this->dispatch('push_data_weekpc', data: $this->WeekPCData);
-        $this->dispatch('push_data_equip', data: $this->EquipCData);
-    }
+   
+
+    
 }
