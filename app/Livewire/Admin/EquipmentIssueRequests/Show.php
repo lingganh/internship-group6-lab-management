@@ -16,6 +16,13 @@ class Show extends Component
     public EquipmentIssueRequest $request;
     public ?EquipmentIssueRequestItem $selectedItem = null;
 
+    protected $listeners = [
+        'confirmApproveItem' => 'confirmApproveItem',
+        'confirmRejectItem'  => 'confirmRejectItem',
+    ];
+
+    public ?int $pendingItemId = null;
+
     public function mount(int $requestId)
     {
         $this->request = EquipmentIssueRequest::with([
@@ -192,6 +199,50 @@ class Show extends Component
         $this->request->refresh()->load(['user', 'items.equipment']);
 
         session()->flash('success', 'Đã từ chối báo hỏng cho thiết bị.');
+    }
+
+    public function openApproveModal(int $itemId): void
+    {
+        $this->pendingItemId = $itemId;
+
+        $this->dispatch(
+            'openModel',
+            type: 'warning',
+            title: 'Chấp nhận tạo báo hỏng cho thiết bị này?',
+            desc: 'Hệ thống sẽ tạo ticket báo hỏng và cập nhật số lượng hỏng trong phòng/lab.',
+            confirmEvent: 'confirmApproveItem'
+        );
+    }
+
+    public function confirmApproveItem(): void
+    {
+        if ($this->pendingItemId) {
+            $this->approveItem($this->pendingItemId);
+        }
+
+        $this->pendingItemId = null;
+    }
+
+    public function openRejectModal(int $itemId): void
+    {
+        $this->pendingItemId = $itemId;
+
+        $this->dispatch(
+            'openModel',
+            type: 'warning',
+            title: 'Từ chối báo hỏng cho thiết bị này?',
+            desc: 'Thiết bị sẽ được đánh dấu “Đã từ chối” trong phiếu.',
+            confirmEvent: 'confirmRejectItem'
+        );
+    }
+
+    public function confirmRejectItem(): void
+    {
+        if ($this->pendingItemId) {
+            $this->rejectItem($this->pendingItemId);
+        }
+
+        $this->pendingItemId = null;
     }
 
     protected function refreshRequestStatus(): void
