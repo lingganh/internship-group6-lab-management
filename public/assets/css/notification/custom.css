@@ -3,3 +3,23 @@ nav[role="navigation"] svg.w-5.h-5 {
     width: 1rem !important;
     height: 1rem !important;
 }
+
+.notification-item {
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.notification-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.notification-item:active {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+/*title nhìn giống link khi hover */
+.notification-item:hover .notif-title {
+    text-decoration: underline;
+}

@@ -47,7 +47,7 @@
 @endphp
 
 
-{{-- OFFCANVAS (bên phải màn hình) --}}
+{{-- OFFCANVAS --}}
 <div class="offcanvas offcanvas-end" tabindex="-1" id="notifications" aria-modal="true" role="dialog">
     <div class="offcanvas-header py-0">
         <h5 class="offcanvas-title py-3">Thông báo</h5>
@@ -78,16 +78,16 @@
                     $senderId = $notif->data['sender_id'] ?? null;
                     $sender = $senderId ? $senders[$senderId] ?? null : null;
                     $senderName = $sender->full_name ?? ($notif->data['sender_name'] ?? 'Hệ thống');
-
                     $priority = $notif->data['priority'] ?? null;
+
+                    $openUrl = route('notifications.open', $notif);
                 @endphp
 
-                <div class="d-flex align-items-start mb-3">
+                <a href="{{ $openUrl }}"
+                    class="notification-item notification-unread d-flex align-items-start mb-3 text-reset text-decoration-none">
                     {{-- Avatar người gửi --}}
                     <div class="status-indicator-container me-3">
-                        @php
-                            $thumb = $sender?->thumbnail;
-                        @endphp
+                        @php $thumb = $sender?->thumbnail; @endphp
 
                         @if ($sender && filled($thumb))
                             <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill" alt="">
@@ -100,18 +100,17 @@
                             <img src="{{ asset('assets/images/default-user-image.png') }}"
                                 class="w-40px h-40px rounded-pill" alt="">
                         @endif
-
                     </div>
 
                     <div class="flex-fill">
-                        {{-- Dòng 1: tên user, hành động --}}
                         <span class="fw-semibold text-body">{{ $senderName }}</span>
-                        <a href="{{ $notif->data['url'] ?? '#' }}" class="ms-1 text-body text-decoration-none">
+                        <span class="ms-1 text-body notif-title">
                             {{ $notif->title }}
+                            @if ($priority)
+                                (Ưu tiên: {{ $priority }})
+                            @endif
+                        </span>
 
-                        </a>
-
-                        {{-- Dòng 2: tiêu đề báo hỏng --}}
                         @if ($notif->message)
                             <div class="mt-1">
                                 <span class="text-muted">Tiêu đề:</span>
@@ -119,17 +118,17 @@
                             </div>
                         @endif
 
-                        {{-- Dòng 3: thời gian --}}
                         <div class="fs-sm text-muted mt-1">
                             {{ $notif->created_at?->diffForHumans() }}
                         </div>
                     </div>
-                </div>
+                </a>
             @empty
-                <div class="text-muted fs-sm">
+                <div id="notificationNewEmpty" class="text-muted fs-sm">
                     Không có thông báo mới.
                 </div>
             @endforelse
+
             @if ($newMore > 0)
                 <button class="btn btn-link btn-sm p-0" type="button" data-bs-toggle="collapse"
                     data-bs-target="#moreNewNotifications" aria-expanded="false" aria-controls="moreNewNotifications">
@@ -143,13 +142,14 @@
                             $sender = $senderId ? $senders[$senderId] ?? null : null;
                             $senderName = $sender->full_name ?? ($notif->data['sender_name'] ?? 'Hệ thống');
                             $priority = $notif->data['priority'] ?? null;
+
+                            $openUrl = route('notifications.open', $notif);
                         @endphp
 
-                        <div class="d-flex align-items-start mb-3">
+                        <a href="{{ $openUrl }}"
+                            class="notification-item notification-unread d-flex align-items-start mb-3 text-reset text-decoration-none">
                             <div class="status-indicator-container me-3">
-                                @php
-                                    $thumb = $sender?->thumbnail;
-                                @endphp
+                                @php $thumb = $sender?->thumbnail; @endphp
 
                                 @if ($sender && filled($thumb))
                                     <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill"
@@ -163,17 +163,16 @@
                                     <img src="{{ asset('assets/images/default-user-image.png') }}"
                                         class="w-40px h-40px rounded-pill" alt="">
                                 @endif
-
                             </div>
 
                             <div class="flex-fill">
                                 <span class="fw-semibold text-body">{{ $senderName }}</span>
-                                <a href="{{ $notif->data['url'] ?? '#' }}" class="ms-1 text-body text-decoration-none">
+                                <span class="ms-1 text-body notif-title">
                                     {{ $notif->title }}
                                     @if ($priority)
                                         (Ưu tiên: {{ $priority }})
                                     @endif
-                                </a>
+                                </span>
 
                                 @if ($notif->message)
                                     <div class="mt-1">
@@ -185,7 +184,7 @@
                                     {{ $notif->created_at?->diffForHumans() }}
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @endif
@@ -200,15 +199,15 @@
                     $senderId = $notif->data['sender_id'] ?? null;
                     $sender = $senderId ? $senders[$senderId] ?? null : null;
                     $senderName = $sender->full_name ?? ($notif->data['sender_name'] ?? 'Hệ thống');
-
                     $priority = $notif->data['priority'] ?? null;
+
+                    $openUrl = route('notifications.open', $notif);
                 @endphp
 
-                <div class="d-flex align-items-start mb-3">
+                <a href="{{ $openUrl }}"
+                    class="notification-item notification-read d-flex align-items-start mb-3 text-reset text-decoration-none opacity-75">
                     <div class="status-indicator-container me-3">
-                        @php
-                            $thumb = $sender?->thumbnail;
-                        @endphp
+                        @php $thumb = $sender?->thumbnail; @endphp
 
                         @if ($sender && filled($thumb))
                             <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill" alt="">
@@ -221,17 +220,16 @@
                             <img src="{{ asset('assets/images/default-user-image.png') }}"
                                 class="w-40px h-40px rounded-pill" alt="">
                         @endif
-
                     </div>
 
-                    <div class="flex-fill opacity-75">
+                    <div class="flex-fill">
                         <span class="fw-semibold text-body">{{ $senderName }}</span>
-                        <a href="{{ $notif->data['url'] ?? '#' }}" class="ms-1 text-body text-decoration-none">
+                        <span class="ms-1 text-body notif-title">
                             {{ $notif->title }}
                             @if ($priority)
                                 (Ưu tiên: {{ $priority }})
                             @endif
-                        </a>
+                        </span>
 
                         @if ($notif->message)
                             <div class="mt-1">
@@ -244,7 +242,8 @@
                             {{ $notif->created_at?->diffForHumans() }}
                         </div>
                     </div>
-                </div>
+                </a>
+
             @empty
                 <div class="text-muted fs-sm">
                     Không có thông báo cũ.
@@ -252,25 +251,26 @@
             @endforelse
             @if ($oldMore > 0)
                 <button class="btn btn-link btn-sm p-0" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#moreOldNotifications" aria-expanded="false" aria-controls="moreOldNotifications">
+                    data-bs-target="#moreOldNotifications" aria-expanded="false"
+                    aria-controls="moreOldNotifications">
                     Xem thêm ({{ $oldMore }})
                 </button>
 
                 <div class="collapse mt-3" id="moreOldNotifications">
                     @foreach ($oldRest as $notif)
-                        {{-- copy y nguyên block old notif giống phía trên --}}
                         @php
                             $senderId = $notif->data['sender_id'] ?? null;
                             $sender = $senderId ? $senders[$senderId] ?? null : null;
                             $senderName = $sender->full_name ?? ($notif->data['sender_name'] ?? 'Hệ thống');
                             $priority = $notif->data['priority'] ?? null;
+
+                            $openUrl = route('notifications.open', $notif);
                         @endphp
 
-                        <div class="d-flex align-items-start mb-3">
+                        <a href="{{ $openUrl }}"
+                            class="notification-item notification-read d-flex align-items-start mb-3 text-reset text-decoration-none opacity-75">
                             <div class="status-indicator-container me-3">
-                                @php
-                                    $thumb = $sender?->thumbnail;
-                                @endphp
+                                @php $thumb = $sender?->thumbnail; @endphp
 
                                 @if ($sender && filled($thumb))
                                     <img src="{{ Storage::url($thumb) }}" class="w-40px h-40px rounded-pill"
@@ -284,30 +284,29 @@
                                     <img src="{{ asset('assets/images/default-user-image.png') }}"
                                         class="w-40px h-40px rounded-pill" alt="">
                                 @endif
+                            </div>
 
-
-                                <div class="flex-fill opacity-75">
-                                    <span class="fw-semibold text-body">{{ $senderName }}</span>
-                                    <a href="{{ $notif->data['url'] ?? '#' }}"
-                                        class="ms-1 text-body text-decoration-none">
-                                        {{ $notif->title }}
-                                        @if ($priority)
-                                            (Ưu tiên: {{ $priority }})
-                                        @endif
-                                    </a>
-
-                                    @if ($notif->message)
-                                        <div class="mt-1">
-                                            <span class="text-muted">Tiêu đề:</span>
-                                            <span class="fw-semibold">{{ $notif->message }}</span>
-                                        </div>
+                            <div class="flex-fill">
+                                <span class="fw-semibold text-body">{{ $senderName }}</span>
+                                <span class="ms-1 text-body notif-title">
+                                    {{ $notif->title }}
+                                    @if ($priority)
+                                        (Ưu tiên: {{ $priority }})
                                     @endif
+                                </span>
 
-                                    <div class="fs-sm text-muted mt-1">
-                                        {{ $notif->created_at?->diffForHumans() }}
+                                @if ($notif->message)
+                                    <div class="mt-1">
+                                        <span class="text-muted">Tiêu đề:</span>
+                                        <span class="fw-semibold">{{ $notif->message }}</span>
                                     </div>
+                                @endif
+
+                                <div class="fs-sm text-muted mt-1">
+                                    {{ $notif->created_at?->diffForHumans() }}
                                 </div>
                             </div>
+                        </a>
                     @endforeach
                 </div>
             @endif

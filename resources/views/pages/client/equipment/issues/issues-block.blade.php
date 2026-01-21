@@ -91,7 +91,7 @@
                                                 'pending' => 'Chờ xử lý',
                                                 'in_progress' => 'Đang xử lý',
                                                 'resolved' => 'Đã xử lý',
-                                                'closed' => 'Đã đóng',
+                                                'closed' => 'Đã hủy',
                                                 'rejected' => 'Từ chối',
                                                 'cancelled' => 'Đã hủy',
                                                 default => $st,
@@ -192,7 +192,7 @@
                                                                             'pending' => 'Chờ xử lý',
                                                                             'in_progress' => 'Đang xử lý',
                                                                             'resolved' => 'Đã xử lý',
-                                                                            'closed' => 'Đã đóng',
+                                                                            'closed' => 'Đã hủy',
                                                                             'rejected' => 'Từ chối',
                                                                             'cancelled' => 'Đã hủy',
                                                                             'approved' => 'Đã chấp nhận',
@@ -253,7 +253,7 @@
                                                         {{ $issue->status === 'resolved' ? 'selected' : '' }}>Đã xử
                                                         lý</option>
                                                     <option value="closed"
-                                                        {{ $issue->status === 'closed' ? 'selected' : '' }}>Đã đóng
+                                                        {{ $issue->status === 'closed' ? 'selected' : '' }}>Đã hủy
                                                     </option>
                                                 </select>
                                             </div>
