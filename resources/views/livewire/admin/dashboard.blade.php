@@ -519,6 +519,17 @@
         const equipCanvas = document.getElementById('equipChart');
         const equipCtx = equipCanvas.getContext('2d');
 
+        const labelColors = {
+            'Bị Hỏng':  makeGradient(equipCtx, '#fb7185', '#be123c'),
+            'Có thể sử dụng': makeGradient(equipCtx, '#60a5fa', '#2563eb'),
+            'Đang trong sử dụng': makeGradient(equipCtx, '#4ade80', '#15803d'),
+            'Đang sửa chữa': makeGradient(equipCtx, '#facc15', '#ca8a04')
+        };
+
+        const Background = label.map(
+            l => labelColors[l] ?? '#9CA3AF'
+        );
+
         if (equipChart) {
             equipChart.destroy();
         }
@@ -529,11 +540,7 @@
                 labels: label,
                 datasets: [{
                     data: dat,
-                    backgroundColor: [
-                        makeGradient(equipCtx, '#fb7185', '#be123c'),
-                        makeGradient(equipCtx, '#60a5fa', '#2563eb'),
-                        makeGradient(equipCtx, '#facc15', '#ca8a04'),
-                    ],
+                    backgroundColor: Background,
                     borderWidth: 2,
                     hoverOffset: 12
                 }]
@@ -590,7 +597,8 @@
 
 
     function updatePieChart(Newdata) {
-        if (!pieChart) return; // 🔥 guard
+        if (!pieChart) return;
+
 
         pieChart.data.labels = Newdata.map(d => d.category);
         pieChart.data.datasets[0].data = Newdata.map(d => d.count);

@@ -19,7 +19,6 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
     protected int $counter = 0;
     protected string $start;
     protected string $end;
-
     public function __construct(Collection $events, string $start, string $end)
     {
         $this->events = $events;
@@ -54,10 +53,15 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function map($event): array
     {
         $this->counter++;
+        $categoryMap = [
+            'work' => "Làm việc-Nghiên cứu",
+            'seminar' => "Hội thảo-Seminar",
+            'other' => "Khác"
+        ];
         return [
             $this->counter,
             $event->title,
-            $event->category,
+            $categoryMap[$event->category]?? '',
             optional($event->start)->format('d/m/Y H:i'),
             optional($event->end)->format('d/m/Y H:i'),
             $event->lab?->name ?? $event->lab_code,
@@ -89,9 +93,9 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
         $sheet->setCellValue('A1', 'NHẬT KÝ SỬ DỤNG PHÒNG LAB');
 
         $sheet->mergeCells('A2:I2');
-            
-            $sheet->setCellValue('A2', $text);
-       
+
+        $sheet->setCellValue('A2', $text);
+
 
         $sheet->mergeCells('A3:I3');
         $sheet->setCellValue(

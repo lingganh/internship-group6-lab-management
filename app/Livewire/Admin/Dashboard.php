@@ -107,6 +107,7 @@ class Dashboard extends Component
         $monthEnd   = now('UTC')->endOfMonth();
 
         //Month barchart
+        
         $this->MonthBCData = collect();
         $cursor = $monthStart->copy();
         $weekIndex = 1;
