@@ -132,218 +132,230 @@
         </div>
     </div>
 
-</div>
+    <style>
+        .filter-bar {
+            border: 1px solid #e9ecef;
+        }
 
-<style>
-    .filter-bar {
-        border: 1px solid #e9ecef;
-    }
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #111827;
+        }
 
-    .filter-label {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: #111827;
-    }
+        .filter-input {
+            height: 52px;
+            border-radius: 14px;
+            font-size: 15px;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+        }
 
-    .filter-input {
-        height: 52px;
-        border-radius: 14px;
-        font-size: 15px;
-        padding: 12px 16px;
-        border: 1px solid #e5e7eb;
-    }
+        .filter-input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
+        }
 
-    .filter-input:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
-    }
+        .filter-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            pointer-events: none;
+        }
 
-    .filter-icon {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6b7280;
-        pointer-events: none;
-    }
+        .export-btn {
+            height: 52px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 15px;
+        }
 
-    .export-btn {
-        height: 52px;
-        border-radius: 14px;
-        font-weight: 600;
-        font-size: 15px;
-    }
+        .dashboard-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
 
-    .dashboard-wrapper {
-        max-width: 1600px;
-        margin: 0 auto;
-    }
+        .h-52 {
+            height: 52px;
+        }
 
-    .h-52 {
-        height: 52px;
-    }
+        .bg-light-subtle {
+            background: #f8fafc;
+        }
 
-    .bg-light-subtle {
-        background: #f8fafc;
-    }
+        .filter-input {
+            height: 52px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+        }
 
-    .filter-input {
-        height: 52px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-    }
+        .card {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
+        }
 
-    .card {
-        box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
-    }
+        .bg-light-subtle {
+            background: #f8fafc;
+        }
 
-    .bg-light-subtle {
-        background: #f8fafc;
-    }
+        .filter-input {
+            height: 52px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+        }
 
-    .filter-input {
-        height: 52px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-    }
+        .card {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
+        }
 
-    .card {
-        box-shadow: 0 10px 25px rgba(0, 0, 0, .05);
-    }
+        .chart-box {
+            height: 320px;
+            position: relative;
+        }
+    </style>
 
-    .chart-box {
-        height: 320px;
-        position: relative;
-    }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-@script
-<script>
-    let piechart1 = null;
-    let piechart2 = null;
+    @script
+    <script>
+        let piechart1 = null;
+        let piechart2 = null;
 
-    function translate(status) {
-        if (status == 'broken')
-            return 'Bị Hỏng'
-        else if (status == 'maintenance')
-            return 'Đang sửa chữa'
-        else if (status == 'available')
-            return 'Có thể sử dụng'
-        else if (status == 'In_use')
-            return 'Đang trong sử dụng'
-        else
-            return status
+        function translate(status) {
+            if (status == 'broken')
+                return 'Bị Hỏng'
+            else if (status == 'maintenance')
+                return 'Đang sửa chữa'
+            else if (status == 'available')
+                return 'Có thể sử dụng'
+            else if (status == 'In_use')
+                return 'Đang trong sử dụng'
+            else
+                return status
 
-    }
+        }
 
 
-    $wire.on('create_chart', () => {
-        const pieCtx1 = document.getElementById('chart1');
-        piechart1 = new Chart(pieCtx1, {
-            type: 'pie',
-            data: {
-                labels: [],
-                datasets: [{
-                    data: [],
-                    backgroundColor: [ // Array of colors for each slice
-                        'rgb(255, 99, 132)', // Red
-                        'rgb(54, 162, 235)', // Blue
-                        'rgb(255, 205, 86)' // Yellow
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Số dụng cụ theo trạng thái', // <-- Your title here
-                        font: {
-                            size: 18,
-                            weight: 'bold'
+        $wire.on('create_chart', () => {
+            const pieCtx1 = document.getElementById('chart1');
+            piechart1 = new Chart(pieCtx1, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [ // Array of colors for each slice
+                            'rgb(255, 99, 132)', // Red
+                            'rgb(54, 162, 235)', // Blue
+                            'rgb(255, 205, 86)', // Yellow
+                            'rgb(34, 197, 94)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Số thiết bị theo trạng thái',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 10
+                        legend: {
+                            display: true,
+                            position: 'bottom'
                         }
-                    },
-                    legend: {
-                        display: true,
-                        position: 'bottom'
                     }
                 }
-            }
-        })
+            })
 
-        const pieCtx2 = document.getElementById('chart2');
-        piechart2 = new Chart(pieCtx2, {
-            type: 'pie',
-            data: {
-                labels: [],
-                datasets: [{
-                    data: [],
-                    backgroundColor: [
-                        'rgb(34, 197, 94)', // Green 
-                        'rgb(168, 85, 247)', // Purple
-                        'rgb(251, 146, 60)', // Orange
-                        'rgb(20, 184, 166)', // Teal
-                        'rgb(244, 114, 182)', // Pink
-                        'rgb(255, 99, 132)', // Red
-                        'rgb(54, 162, 235)', // Blue
-                        'rgb(255, 205, 86)', // Yellow 
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Số dụng cụ theo trạng thái',
-                        font: {
-                            size: 18,
-                            weight: 'bold'
+            const pieCtx2 = document.getElementById('chart2');
+            piechart2 = new Chart(pieCtx2, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            'rgb(34, 197, 94)', // Green 
+                            'rgb(168, 85, 247)', // Purple
+                            'rgb(251, 146, 60)', // Orange
+                            'rgb(20, 184, 166)', // Teal
+                            'rgb(244, 114, 182)', // Pink
+                            'rgb(255, 99, 132)', // Red
+                            'rgb(54, 162, 235)', // Blue
+                            'rgb(255, 205, 86)', // Yellow 
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Số Thiết bị theo loại',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
                         },
-                        padding: {
-                            top: 10,
-                            bottom: 10
+                        legend: {
+                            display: true,
+                            position: 'bottom'
                         }
-                    },
-                    legend: {
-                        display: true,
-                        position: 'bottom'
                     }
                 }
-            }
+            });
+
+
+
+
         });
 
+        $wire.on('push_PCData1', ({
+            data
+        }) => {
+            const labelColors = {
+                'Bị Hỏng': 'rgb(255, 99, 132)',
+                'Có thể sử dụng': 'rgb(54, 162, 235)',
+                'Đang trong sử dụng': '#10B981',
+                'Đang sửa chữa': 'rgb(255, 205, 86)'
+            };
+          
+            piechart1.data.labels = data.map(i => translate(i.status));
+            piechart1.data.datasets[0].data = data.map(i => i.count)
+            piechart1.data.datasets[0].backgroundColor =
+                piechart1.data.labels.map(
+                    l => labelColors[l] ?? '#9CA3AF'
+                );
+            piechart1.update();
+        })
 
+        $wire.on('push_PCData2', ({
+            data
+        }) => {
+            piechart2.data.labels = data.map(i => i.type);
+            piechart2.data.datasets[0].data = data.map(i => i.count)
+            piechart2.update();
+        })
+    </script>
+    @endscript
 
-
-    });
-
-    $wire.on('push_PCData1', ({
-        data
-    }) => {
-        piechart1.data.labels = data.map(i => translate(i.status));
-        piechart1.data.datasets[0].data = data.map(i => i.count)
-        piechart1.update();
-    })
-
-    $wire.on('push_PCData2', ({
-        data
-    }) => {
-        piechart2.data.labels = data.map(i => i.type);
-        piechart2.data.datasets[0].data = data.map(i => i.count)
-        piechart2.update();
-    })
-</script>
-@endscript
+</div>
