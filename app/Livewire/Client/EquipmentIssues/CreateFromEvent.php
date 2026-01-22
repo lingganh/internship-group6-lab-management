@@ -46,6 +46,16 @@ class CreateFromEvent extends Component
         'submitIssueRequest' => 'saveRequest',
     ];
 
+    // Việt hóa
+    protected array $validationAttributes = [
+        'feedback'            => 'phản hồi',
+        'selectedEquipmentId' => 'thiết bị',
+        'description'         => 'mô tả chi tiết',
+        'brokenQuantity'      => 'số lượng hỏng',
+        'images'              => 'ảnh minh hoạ',
+        'images.*'            => 'ảnh minh hoạ',
+    ];
+
     public function mount(?int $labEventId = null): void
     {
         if ($labEventId) {
@@ -276,6 +286,25 @@ class CreateFromEvent extends Component
 
     public function removeItem(int $index): void
     {
+        // 1) Xoá ảnh temp của item (nếu có)
+        $images = $this->items[$index]['images'] ?? [];
+
+        if (!empty($images)) {
+            $disk = Storage::disk('public');
+
+            // Lọc chỉ xoá file trong thư mục temp 
+            $tempImages = array_filter($images, function ($path) {
+                return is_string($path) && str_starts_with($path, 'equipment_issue_requests/temp/');
+            });
+
+            if (!empty($tempImages)) {
+                // Tránh xoá trùng nếu mảng có path lặp
+                $tempImages = array_values(array_unique($tempImages));
+                $disk->delete($tempImages);
+            }
+        }
+
+        // 2) Xoá item khỏi danh sách
         unset($this->items[$index]);
         $this->items = array_values($this->items);
     }
