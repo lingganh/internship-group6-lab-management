@@ -110,6 +110,7 @@ class Report extends Component
             'approved'  => $this->exportLab->where('status', 'approved')->count(),
             'pending'   => $this->exportLab->where('status', 'pending')->count(),
             'completed' => $this->exportLab->where('status', 'completed')->count(),
+            'cancelled' => $this->exportLab->where('status', 'cancelled')->count()
         ];
 
         if ($this->selectedLab !== 'all') {
