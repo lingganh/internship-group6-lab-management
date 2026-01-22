@@ -52,13 +52,37 @@ class EquipmentIssueController extends Controller
     public function store(Request $request, $equipmentId)
     {
         // 1) Validate
-        $data = $request->validate([
-            'lab_id'          => 'required|exists:labs,id',
-            'description' => 'required|string|min:3',
-            'broken_quantity' => 'required|integer|min:1',
-            'images'      => 'nullable|array',
-            'images.*'    => 'image|mimes:jpg,jpeg,png,gif,webp|max:2048',
-        ]);
+        $data = $request->validate(
+            [
+                'lab_id'          => 'required|exists:labs,id',
+                'description' => 'required|string|min:3',
+                'broken_quantity' => 'required|integer|min:1',
+                'images'      => 'nullable|array',
+                'images.*'    => 'image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            ],
+            // messages (tiếng Việt)
+            [
+                'lab_id.required'          => 'Bạn phải chọn :attribute.',
+                'lab_id.exists'            => ':attribute không hợp lệ.',
+                'description.required'     => 'Trường :attribute không được bỏ trống.',
+                'description.min'          => 'Trường :attribute phải có ít nhất :min ký tự.',
+                'broken_quantity.required' => 'Trường :attribute không được bỏ trống.',
+                'broken_quantity.integer'  => 'Trường :attribute phải là số nguyên.',
+                'broken_quantity.min'      => 'Trường :attribute phải tối thiểu là :min.',
+                'images.array'             => 'Trường :attribute phải là danh sách ảnh.',
+                'images.*.image'           => 'File tải lên phải là hình ảnh.',
+                'images.*.mimes'           => 'Ảnh chỉ được định dạng: :values.',
+                'images.*.max'             => 'Mỗi ảnh tối đa :max KB.',
+            ],
+            // attributes (đổi tên field sang tiếng Việt)
+            [
+                'lab_id'          => 'phòng/lab',
+                'description'     => 'mô tả chi tiết',
+                'broken_quantity' => 'số lượng hỏng',
+                'images'          => 'ảnh minh hoạ',
+                'images.*'        => 'ảnh minh hoạ',
+            ]
+        );
 
         $user = Auth::user();
 

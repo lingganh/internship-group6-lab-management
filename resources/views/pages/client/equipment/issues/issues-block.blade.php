@@ -327,18 +327,7 @@
 
                 <div class="modal-body">
 
-                    {{-- Hiển thị lỗi validate --}}
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-
+                
                     @php
                         $labItems = $labItems ?? collect();
                         $first = $labItems->first();
