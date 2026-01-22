@@ -674,7 +674,7 @@
 
         console.log('[FORCE]', width, height);
 
-        // 🔥 force canvas size
+        
         canvas.style.width = width + 'px';
         canvas.style.height = height + 'px';
 

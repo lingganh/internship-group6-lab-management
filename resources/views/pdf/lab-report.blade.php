@@ -18,11 +18,12 @@
             top: 0;
             width: 90px;
             height: auto;
-         ">
+        ">
 
         <!-- CENTER TITLE -->
         <div style="text-align:center;">
-            <h1 style="margin:0;">KHOA CNTT HỌC VIỆN NÔNG NGHIỆP VN</h1>
+            <h1 style="margin:0;">HỌC VIỆN NÔNG NGHIỆP VIỆT NAM</h1>
+            <h1 style="margin:0;">KHOA CÔNG NGHỆ THÔNG TIN</h1>
             <h2 style="margin:0;">BÁO CÁO SỬ DỤNG PHÒNG LAB</h2>
 
             <p style="margin:4px 0; font-size:13px;">
@@ -31,9 +32,9 @@
                 →
                 {{ $toDate ? \Carbon\Carbon::parse($toDate)->format('d/m/Y') : '---' }}
             </p>
-             <p style="margin:4px 0; font-size:13px;">
+            <p style="margin:4px 0; font-size:13px;">
                 @if($lab=='all')
-                tất cả
+
                 @else
                 {{$lab}}
                 @endif
@@ -52,13 +53,16 @@
                 <th>Tổng sự kiện</th>
                 <th>Đã duyệt</th>
                 <th>Chờ duyệt</th>
+                <th>Đã Hủy</th>
                 <th>Hoàn thành</th>
             </tr>
             <tr>
                 <td class="summary-badge">{{ $summary['total'] }}</td>
                 <td class="summary-badge s-approved">{{ $summary['approved'] }}</td>
                 <td class="summary-badge s-pending">{{ $summary['pending'] }}</td>
+                <td class="summary-badge s-cancelled">{{ $summary['cancelled']}}</td>
                 <td class="summary-badge s-completed">{{ $summary['completed'] }}</td>
+
             </tr>
         </table>
     </div>
@@ -86,12 +90,14 @@
         $approved = $labEvents->where('status','approved')->count();
         $pending = $labEvents->where('status','pending')->count();
         $completed = $labEvents->where('status','completed')->count();
+        $cancelled=$labEvents->where('status','cancelled')->count();
         @endphp
 
         <div class="lab-summary">
             <span class="status status-approved">Đã duyệt: {{ $approved }}</span>
             <span class="status status-pending">Chờ duyệt: {{ $pending }}</span>
             <span class="status status-completed">Hoàn thành: {{ $completed }}</span>
+            <span class="status status-deleted">Đã Hủy: {{ $cancelled }}</span>
             <span><strong>Tổng:</strong> {{ $total }}</span>
         </div>
 
@@ -107,10 +113,25 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                $statusMap = [
+                'approved' => 'Đã duyệt',
+                'pending' => 'Chờ duyệt',
+                'completed' => 'Hoàn thành',
+                'cancelled'=> 'Đã Hủy'
+                ];
+
+                $categoryMap=[
+                'work'=>'Làm việc-Nghiên cứu',
+                'seminar'=>'Hội thảo-Seminar',
+                'other'=>'Khác'
+                ];
+                @endphp
+
                 @foreach($labEvents as $event)
                 <tr>
                     <td>{{ $event->title }} </td>
-                    <td>{{ ucfirst($event->category) }}</td>
+                    <td>{{  $categoryMap[$event->category] ?? 'Không xác định' }}</td>
                     <td>
                         {{ \Carbon\Carbon::parse($event->start)->format('d/m/Y H:i') }}
                         <br>
@@ -118,7 +139,7 @@
                     </td>
                     <td style="text-align:center;">
                         <span class="status status-{{ $event->status }}">
-                            {{ ucfirst($event->status) }}
+                            {{ $statusMap[$event->status] ?? 'Không xác định' }}
                         </span>
                     </td>
                     <td>{{ $event->description ?? '-' }}</td>
@@ -146,15 +167,15 @@
         </div>
         <div class="stat stat-available">
             <strong>{{ $equipmentStats['available'] }}</strong>
-            Available
+            Có thể sử dụng
         </div>
         <div class="stat stat-maintenance">
             <strong>{{ $equipmentStats['maintenance'] }}</strong>
-            Maintenance
+            Đang sửa chữa
         </div>
         <div class="stat stat-broken">
             <strong>{{ $equipmentStats['broken'] }}</strong>
-            Broken
+            Đã Hỏng
         </div>
     </div>
 
@@ -378,6 +399,10 @@
 
     .s-completed {
         color: #1565c0;
+    }
+
+    .s-cancelled {
+        color: #c62828
     }
 
     .lab-section {
