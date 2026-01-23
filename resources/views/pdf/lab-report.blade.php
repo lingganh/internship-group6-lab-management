@@ -53,7 +53,7 @@
                 <th>Tổng sự kiện</th>
                 <th>Đã duyệt</th>
                 <th>Chờ duyệt</th>
-                <th>Đã Hủy</th>
+                <th>Từ chối</th>
                 <th>Hoàn thành</th>
             </tr>
             <tr>
@@ -97,7 +97,7 @@
             <span class="status status-approved">Đã duyệt: {{ $approved }}</span>
             <span class="status status-pending">Chờ duyệt: {{ $pending }}</span>
             <span class="status status-completed">Hoàn thành: {{ $completed }}</span>
-            <span class="status status-deleted">Đã Hủy: {{ $cancelled }}</span>
+            <span class="status status-cancelled">Từ chối: {{ $cancelled }}</span>
             <span><strong>Tổng:</strong> {{ $total }}</span>
         </div>
 
@@ -118,7 +118,7 @@
                 'approved' => 'Đã duyệt',
                 'pending' => 'Chờ duyệt',
                 'completed' => 'Hoàn thành',
-                'cancelled'=> 'Đã Hủy'
+                'cancelled'=> 'Từ chối'
                 ];
 
                 $categoryMap=[
@@ -460,7 +460,7 @@
         /* xanh dương */
     }
 
-    .status-deleted {
+    .status-cancelled{
         color: #c62828;
         /* đỏ (nếu có) */
     }

@@ -89,11 +89,19 @@
                                 {{ $event->start->format('d/m/Y H:i') }} – {{ $event->end->format('H:i') }}
                             </td>
                             <td>
-                                <span class="badge bg-{{ 
-                                    $event->status=='approved'?'success':
-                                    ($event->status=='pending'?'warning':'secondary')
-                                }}">
-                                    {{ ucfirst($event->status) }}
+                                @php
+                                $statusMap = [
+                                'approved' => ['success', 'Đã duyệt'],
+                                'pending' => ['warning', 'Chờ duyệt'],
+                                'completed' => ['primary', 'Hoàn thành'],
+                                'cancelled' => ['danger', 'Từ chối'], 
+                                ];
+
+                                [$color, $text] = $statusMap[$event->status] ?? ['secondary', ucfirst($event->status)];
+                                @endphp
+
+                                <span class="badge bg-{{ $color }}">
+                                    {{ $text }}
                                 </span>
                             </td>
                         </tr>
@@ -338,7 +346,7 @@
                 'Đang trong sử dụng': '#10B981',
                 'Đang sửa chữa': 'rgb(255, 205, 86)'
             };
-          
+
             piechart1.data.labels = data.map(i => translate(i.status));
             piechart1.data.datasets[0].data = data.map(i => i.count)
             piechart1.data.datasets[0].backgroundColor =
