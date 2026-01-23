@@ -5,16 +5,20 @@ namespace App\Livewire;
 use App\Models\LabEvent;
 use App\Models\User;
 use App\Models\Lab;
+use App\Models\Group;
+use App\Models\LabEventFile;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-use App\Livewire\Storage;
-use App\Models\LabEventFile;
 
 class Approval extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     public $filterStatus = '';
     public $filterUserId = '';
@@ -38,6 +42,22 @@ class Approval extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    // Thêm các thuộc tính để chỉnh sửa
+    public $edit = [
+        'title' => '',
+        'category' => 'work',
+        'lab_code' => '',
+        'start' => '',
+        'end' => '',
+        'description' => '',
+        'status' => 'pending',
+        'user_id' => '',
+        'group_id' => '',
+        'feedback' => '',
+    ];
+
+    public $newFiles = [];
+    
     protected $queryString = [
         'filterStatus' => ['except' => 'pending'],
         'filterUserId' => ['except' => ''],
@@ -65,9 +85,44 @@ class Approval extends Component
         $this->resetPage();
     }
 
+    public function categoryLabel(?string $cat): string
+    {
+        return match ($cat) {
+            'work' => 'Làm việc / nghiên cứu',
+            'seminar' => 'Hội thảo / seminar',
+            'other' => 'Khác',
+            default => $cat ?: '—',
+        };
+    }
+
+    public function removeNewFile($index)
+    {
+        if (isset($this->newFiles[$index])) {
+            unset($this->newFiles[$index]);
+            $this->newFiles = array_values($this->newFiles);
+        }
+    }
+
     public function viewSchedule($scheduleId)
     {
         $this->selectedSchedule = LabEvent::with(['user', 'files', 'lab', 'group'])->findOrFail($scheduleId);
+        
+        // Khởi tạo dữ liệu edit
+        $this->edit = [
+            'title' => (string) ($this->selectedSchedule->title ?? ''),
+            'category' => (string) ($this->selectedSchedule->category ?? 'work'),
+            'lab_code' => (string) ($this->selectedSchedule->lab_code ?? ''),
+            'start' => $this->selectedSchedule->start ? $this->selectedSchedule->start->format('Y-m-d\TH:i') : '',
+            'end' => $this->selectedSchedule->end ? $this->selectedSchedule->end->format('Y-m-d\TH:i') : '',
+            'description' => (string) ($this->selectedSchedule->description ?? ''),
+            'status' => (string) ($this->selectedSchedule->status ?? 'pending'),
+            'user_id' => (string) ($this->selectedSchedule->user_id ?? ''),
+            'group_id' => (string) ($this->selectedSchedule->group_id ?? $this->selectedSchedule->registered_for ?? ''),
+            'feedback' => (string) ($this->selectedSchedule->feedback ?? ''),
+        ];
+        
+        $this->newFiles = [];
+        
         $this->dispatch('open-details-modal');
     }
 
@@ -265,6 +320,68 @@ class Approval extends Component
         $this->dispatch('close-details-modal');
     }
 
+    public function updateEvent()
+    {
+        if (!$this->selectedSchedule) {
+            return;
+        }
+
+        $this->validate([
+            'edit.title' => 'required|string|max:255',
+            'edit.category' => 'required|string|max:50',
+            'edit.lab_code' => 'required|string|max:50',
+            'edit.start' => 'required|date',
+            'edit.end' => 'required|date|after:edit.start',
+            'edit.description' => 'nullable|string|max:5000',
+            'edit.status' => 'required|in:pending,approved,cancelled,completed',
+            'edit.feedback' => 'nullable|string|max:2000',
+            'edit.user_id' => 'nullable|exists:users,id',
+            'edit.group_id' => 'nullable|exists:groups,id',
+            'newFiles.*' => 'nullable|file|max:5120',
+        ], [
+            'edit.title.required' => 'Tiêu đề không được để trống.',
+            'edit.end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+        ]);
+
+        $ev = LabEvent::findOrFail($this->selectedSchedule->id);
+
+        $ev->update([
+            'title' => $this->edit['title'],
+            'category' => $this->edit['category'],
+            'lab_code' => $this->edit['lab_code'],
+            'start' => $this->edit['start'],
+            'end' => $this->edit['end'],
+            'description' => $this->edit['description'] ?: null,
+            'status' => $this->edit['status'],
+            'user_id' => $this->edit['user_id'] ?: null,
+            'registered_for' => $this->edit['group_id'] ?: null,
+            'feedback' => trim((string) $this->edit['feedback']) !== '' ? trim((string) $this->edit['feedback']) : null,
+        ]);
+
+        // Lưu file mới
+        if (!empty($this->newFiles)) {
+            foreach ($this->newFiles as $file) {
+                try {
+                    $path = $file->store('lab_files', 'public');
+                    LabEventFile::create([
+                        'lab_event_id' => $ev->id,
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_path' => $path,
+                        'file_type' => $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('Approval upload error: ' . $e->getMessage());
+                }
+            }
+        }
+
+        $this->newFiles = [];
+        $this->selectedSchedule->refresh();
+
+        $this->dispatch('alert', type: 'success', message: 'Đã lưu thông tin lịch.');
+    }
+
     public function deleteSchedule($id = null)
     {
         $id = $id ?? $this->selectedSchedule?->id;
@@ -279,6 +396,19 @@ class Approval extends Component
             return;
         }
 
+        // Xóa file đính kèm
+        $files = LabEventFile::where('lab_event_id', $id)->get();
+        foreach ($files as $file) {
+            try {
+                if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Delete approval file error: ' . $e->getMessage());
+            }
+            $file->delete();
+        }
+
         $schedule->delete();
 
         if ($this->selectedSchedule && $this->selectedSchedule->id == $id) {
@@ -288,18 +418,47 @@ class Approval extends Component
         $this->dispatch('alert', type: 'success', message: 'Đã xóa lịch', sub: "Lịch #{$id} đã được xóa.");
         $this->dispatch('close-details-modal');
     }
-    public function downloadFile($fileId)
+
+    public function deleteFile(int $fileId)
     {
-    $file = LabEventFile::findOrFail($fileId);
-    
-    // Kiểm tra file có tồn tại thật không
-    if (!\Storage::exists($file->file_path)) {
-        session()->flash('error', 'File không tồn tại trên hệ thống.');
-        return;
+        if (!$this->selectedSchedule) {
+            return;
+        }
+
+        $file = LabEventFile::where('lab_event_id', $this->selectedSchedule->id)
+            ->where('id', $fileId)
+            ->first();
+
+        if (!$file) {
+            $this->dispatch('alert', type: 'warning', message: 'File đã bị xóa trước đó.');
+            return;
+        }
+
+        try {
+            if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+            $file->delete();
+
+            $this->selectedSchedule = $this->selectedSchedule->fresh('files');
+
+            $this->dispatch('alert', type: 'success', message: 'Đã xóa file đính kèm.');
+        } catch (\Throwable $e) {
+            Log::error('Delete approval file error: ' . $e->getMessage());
+            $this->dispatch('alert', type: 'error', message: 'Xóa file thất bại, vui lòng thử lại.');
+        }
     }
 
-    // Trả về response download với tên file gốc trong DB
-    return \Storage::download($file->file_path, $file->file_name);
+    public function downloadFile($fileId)
+    {
+        $file = LabEventFile::findOrFail($fileId);
+
+        if (!Storage::exists($file->file_path)) {
+            session()->flash('error', 'File không tồn tại trên hệ thống.');
+            return;
+        }
+
+        return Storage::download($file->file_path, $file->file_name);
     }
 
     public function render()
@@ -319,33 +478,39 @@ class Approval extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
+        $groups = Group::select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         return view('livewire.approval', [
-            'schedules'    => $schedules,
+            'schedules' => $schedules,
             'pendingCount' => LabEvent::where('status', 'pending')->count(),
-            'users'        => User::select('id', 'full_name')->orderBy('full_name')->get(),
-            'labs'         => $labs,
+            'users' => User::select('id', 'full_name', 'email')->orderBy('full_name')->get(),
+            'labs' => $labs,
+            'groups' => $groups,
         ])->layout('components.layouts.admin-layout');
     }
 
     private function notifyUserEventResult(LabEvent $event, string $status): void
-{
-    $userId = $event->user_id;
-    if (!$userId) return;
+    {
+        $userId = $event->user_id;
+        if (!$userId)
+            return;
 
-    $admin = auth()->user();
-     $statusText = $status === 'approved' ? 'đã được phê duyệt' : 'đã bị từ chối';
+        $admin = auth()->user();
+        $statusText = $status === 'approved' ? 'đã được phê duyệt' : 'đã bị từ chối';
 
-    \App\Models\Notification::create([
-        'user_id' => $userId,
-        'title'   => "Kết quả duyệt lịch: " . $event->title,
-        'message' => "Yêu cầu mượn phòng " . $event->lab_code . " của bạn " . $statusText . ".",
-        'data' => [
-            'event_id'    => $event->id,
-            'type'        => 'event_result',
-            'status'      => $status,
-            'admin_name'  => $admin->full_name ?? $admin->name ?? 'Quản trị viên',
-            'url'         => route('home'), 
-        ],
-    ]);
-}
+        \App\Models\Notification::create([
+            'user_id' => $userId,
+            'title' => "Kết quả duyệt lịch: " . $event->title,
+            'message' => "Yêu cầu mượn phòng " . $event->lab_code . " của bạn " . $statusText . ".",
+            'data' => [
+                'event_id' => $event->id,
+                'type' => 'event_result',
+                'status' => $status,
+                'admin_name' => $admin->full_name ?? $admin->name ?? 'Quản trị viên',
+                'url' => route('home'),
+            ],
+        ]);
+    }
 }

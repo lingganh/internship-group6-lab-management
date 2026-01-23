@@ -103,7 +103,7 @@
                                                     {{ $item->title }}
                                                 </div>
                                                 <div class="small text-muted">
-                                                    {{ $item->category }}
+                                                    {{ $this->categoryLabel($item->category) }}
                                                 </div>
                                             </td>
 
@@ -226,207 +226,278 @@
                 </div>
             </div>
 
-            <div wire:ignore.self
-                 class="modal fade"
-                 id="modalDetails"
-                 tabindex="-1"
-                 aria-hidden="true">
+            {{-- Modal Details --}}
+            <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content border-0 approval-modal">
                         <div class="modal-header border-0 pb-0">
                             <div>
-                                <h5 class="modal-title fw-semibold text-dark mb-1">
-                                    Chi tiết đăng ký
-                                </h5>
-                                <div class="small text-muted">
-                                    Xem thông tin và xử lý yêu cầu (nếu đang chờ).
-                                </div>
+                                <h5 class="modal-title fw-semibold text-dark mb-1">Chi tiết lịch đăng ký</h5>
+                                <div class="small text-muted">Xem và chỉnh sửa thông tin lịch sử dụng phòng lab.</div>
                             </div>
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                            <button type="button" class="btn-close mt-1" data-bs-dismiss="modal"></button>
                         </div>
 
                         <div class="modal-body pt-3">
                             @if($selectedSchedule)
                                 <div class="row g-3">
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-8">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Tiêu đề / Phân loại
-                                            </div>
-                                            <div class="fw-semibold text-dark">
-                                                {{ $selectedSchedule->title }}
-                                            </div>
-                                            <div class="small text-muted mt-1">
-                                                {{ $selectedSchedule->category }}
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
+                                            <input wire:model.defer="edit.title" type="text" class="form-control approval-control">
+                                            @error('edit.title') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="approval-info">
+                                            <label class="form-label small fw-semibold text-dark mb-1">Phân loại</label>
+                                            <select wire:model.defer="edit.category" class="form-select approval-control">
+                                                <option value="work">Làm việc / nghiên cứu</option>
+                                                <option value="seminar">Hội thảo / seminar</option>
+                                                <option value="other">Khác</option>
+                                            </select>
+                                            @error('edit.category') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
                                     <div class="col-12 col-md-6">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Phòng lab
-                                            </div>
-                                            <div class="fw-semibold text-dark">
-                                                {{ $selectedSchedule->lab?->name ?? 'N/A' }}
-                                            </div>
-                                            <div class="small text-muted mt-1">
-                                                Mã: {{ $selectedSchedule->lab_code ?? '-' }}
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
+                                            <select wire:model.defer="edit.lab_code" class="form-select approval-control">
+                                                <option value="">Chọn phòng...</option>
+                                                @foreach($labs as $lab)
+                                                    <option wire:key="lab-edit-{{ $lab->code }}" value="{{ $lab->code }}">
+                                                        {{ $lab->name }} ({{ $lab->code }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('edit.lab_code') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-6 col-md-3">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Người đăng ký
-                                            </div>
-                                            <div class="fw-semibold text-dark">
-                                                {{ $selectedSchedule->user?->full_name ?? 'N/A' }}
-                                            </div>
-                                            <div class="small text-muted mt-1">
-                                                {{ $selectedSchedule->user?->email }}
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Bắt đầu</label>
+                                            <input wire:model.defer="edit.start" type="datetime-local" class="form-control approval-control">
+                                            @error('edit.start') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-6 col-md-3">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Đăng ký cho nhóm (nếu có)
-                                            </div>
-                                            <div class="fw-semibold text-dark">
-                                                {{ $selectedSchedule->group?->name ?? 'N/A' }}
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Kết thúc</label>
+                                            <input wire:model.defer="edit.end" type="datetime-local" class="form-control approval-control">
+                                            @error('edit.end') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-4">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Trạng thái
-                                            </div>
-                                            <div class="fw-semibold text-dark">
-                                                @if($selectedSchedule->status === 'pending')
-                                                    Chờ duyệt
-                                                @elseif($selectedSchedule->status === 'approved')
-                                                    Đã duyệt
-                                                @elseif($selectedSchedule->status === 'completed')
-                                                    Đã hoàn thành
-                                                @else
-                                                    Từ chối
-                                                @endif
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
+                                            <select wire:model.defer="edit.status" class="form-select approval-control">
+                                                <option value="pending">Chờ duyệt</option>
+                                                <option value="approved">Đã duyệt</option>
+                                                <option value="cancelled">Từ chối</option>
+                                                <option value="completed">Đã hoàn thành</option>
+                                            </select>
+                                            @error('edit.status') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-4">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Thời gian
-                                            </div>
-                                            <div class="fw-semibold text-dark">
-                                                {{ optional($selectedSchedule->start)->format('H:i d/m/Y') }}
-                                                <span class="text-muted">—</span>
-                                                {{ optional($selectedSchedule->end)->format('H:i d/m/Y') }}
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Đăng ký bởi</label>
+                                            <select wire:model.defer="edit.user_id" class="form-select approval-control">
+                                                <option value="">Chọn người dùng...</option>
+                                                @foreach($users as $u)
+                                                    <option wire:key="user-{{ $u->id }}" value="{{ $u->id }}">
+                                                        {{ $u->full_name ?? $u->name ?? 'User #'.$u->id }}{{ $u->email ? ' ('.$u->email.')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('edit.user_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <div class="approval-info">
+                                            <label class="form-label small fw-semibold text-dark mb-1">Đăng ký cho nhóm</label>
+                                            <select wire:model.defer="edit.group_id" class="form-select approval-control">
+                                                <option value="">Chọn nhóm / lớp...</option>
+                                                @foreach($groups as $g)
+                                                    <option wire:key="group-{{ $g->id }}" value="{{ $g->id }}">
+                                                        {{ $g->name ?? ('Group #'.$g->id) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('edit.group_id') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Mô tả
-                                            </div>
-                                            <div class="approval-desc">
-                                                {{ $selectedSchedule->description ?? 'Không có mô tả.' }}
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
+                                            <textarea wire:model.defer="edit.description"
+                                                      class="form-control approval-control"
+                                                      rows="3"></textarea>
+                                            @error('edit.description') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
 
-                                    @if($selectedSchedule && $selectedSchedule->status === 'cancelled')
+                                    <div class="col-12">
+                                        <div class="approval-info">
+                                            <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
+                                            <textarea wire:model.defer="edit.feedback"
+                                                      class="form-control approval-control"
+                                                      rows="3"></textarea>
+                                            @error('edit.feedback') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
+
+                                    @if($selectedSchedule->status === 'cancelled' && $selectedSchedule->reason)
                                         <div class="col-12">
                                             <div class="approval-info">
-                                                <div class="small text-muted mb-1">
-                                                    Lý do từ chối
-                                                </div>
+                                                <label class="form-label small fw-semibold text-dark mb-1">Lý do từ chối</label>
                                                 <div class="approval-desc">
-                                                    {{ $selectedSchedule->reason ?: 'Không có lý do được lưu.' }}
+                                                    {{ $selectedSchedule->reason }}
                                                 </div>
                                             </div>
                                         </div>
                                     @endif
 
+                                    {{-- File hiện tại --}}
+                                    <div class="col-12">
+                                        <div class="approval-filebox">
+                                            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                                <div class="fw-bold text-dark">File đính kèm</div>
+                                                <div class="small text-muted">
+                                                    {{ optional($selectedSchedule->files)->count() ?? 0 }} file
+                                                </div>
+                                            </div>
+
+                                            @if($selectedSchedule->files && $selectedSchedule->files->count())
+                                                <div class="approval-files-grid">
+                                                    @foreach($selectedSchedule->files as $f)
+                                                        @php
+                                                            $p = $f->file_path; 
+                                                            $u = $p ? \Illuminate\Support\Facades\Storage::url($p) : '#';
+                                                            $n = $f->file_name ?? 'file';
+                                                        @endphp
+                                                        
+                                                        <div class="approval-file-item" wire:key="file-{{ $f->id }}">
+                                                            <a class="approval-file-link" 
+                                                            href="{{ $u != '#' ? $u : 'javascript:void(0)' }}" 
+                                                            target="{{ $u != '#' ? '_blank' : '' }}" 
+                                                            rel="noopener">
+                                                                <div class="approval-file-ic">
+                                                                    <i class="ph-file-text"></i>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <div class="small fw-semibold text-dark text-truncate">{{ $n }}</div>
+                                                                    <div class="small text-muted">
+                                                                        {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
+                                                                    </div>
+                                                                </div>
+                                                            </a>
+
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-link text-danger"
+                                                                wire:click.prevent="deleteFile({{ $f->id }})">
+                                                                Xóa
+                                                            </button>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="small text-muted">Chưa có file.</div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    {{-- Thêm file mới + preview file mới --}}
+                                    @if(count($newFiles) > 0)
+                                        @foreach($newFiles as $idx => $file)
+                                            <div class="col-12" wire:key="new-file-{{ $idx }}">
+                                                <div class="approval-file-item">
+                                                    <div class="approval-file-ic">
+                                                        <i class="ph-paperclip"></i>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <div class="small fw-semibold text-dark text-truncate">
+                                                            {{ $file->getClientOriginalName() }}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-link text-danger"
+                                                        wire:click.prevent="removeNewFile({{ $idx }})">
+                                                        Bỏ
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
+
+                                    {{-- Upload file mới --}}
                                     <div class="col-12">
                                         <div class="approval-info">
-                                            <div class="small text-muted mb-1">
-                                                Tệp đính kèm
+                                            <label class="form-label small fw-semibold text-dark mb-1">Thêm file mới</label>
+                                            <input type="file" 
+                                                   wire:model="newFiles" 
+                                                   class="form-control approval-control"
+                                                   multiple
+                                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                            <div class="small text-muted mt-1">
+                                                Tối đa 5MB/file. Hỗ trợ: PDF, Word, Excel, hình ảnh
                                             </div>
-                                                @if($selectedSchedule->files && $selectedSchedule->files->count())
-                                                    <div class="approval-files">
-                                                        @foreach($selectedSchedule->files as $file)
-                                                            @php
-                                                                 $filePath = $file->file_path; 
-                                                                $url = $filePath ? \Illuminate\Support\Facades\Storage::url($filePath) : 'javascript:void(0)';
-                                                                
-                                                                 $fileName = $file->file_name ?? 'Tệp đính kèm';
-                                                            @endphp
-
-                                                            <a href="javascript:void(0)" 
-                                                                wire:click="downloadFile({{ $file->id }})" 
-                                                                class="approval-file"
-                                                                wire:key="file-{{ $file->id }}">
-                                                                    <div class="approval-file-ic">
-                                                                        <i class="ph-file-text"></i>
-                                                                    </div>
-                                                                    <div class="flex-grow-1">
-                                                                        <div class="small fw-semibold text-dark text-truncate">
-                                                                            {{ $file->file_name }} </div>
-                                                                        {{-- <div class="small text-muted">
-                                                                            {{ number_format($file->file_size / 1024, 1) }} KB
-                                                                        </div> --}}
-                                                                    </div>
-                                                                </a>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <div class="small text-muted">
-                                                        Không có tệp đính kèm.
-                                                    </div>
-                                                @endif  
-                                                                                        </div>
+                                            @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
+                                        </div>
                                     </div>
                                 </div>
                             @endif
                         </div>
 
                         <div class="modal-footer border-0 pt-0">
-                            <button type="button"
-                                    class="btn approval-btn approval-btn-ghost"
-                                    data-bs-dismiss="modal">
-                                Đóng
-                            </button>
+                            <div class="d-flex w-100 justify-content-between align-items-center gap-2">
+                                <button type="button" class="btn approval-btn approval-btn-ghost" data-bs-dismiss="modal">
+                                    Đóng
+                                </button>
 
-                            @if($selectedSchedule && $selectedSchedule->status === 'pending')
-                                <button type="button"
-                                        wire:click="approveNow({{ $selectedSchedule->id }})"
-                                        class="btn approval-btn approval-btn-success">
-                                    Phê duyệt
-                                </button>
-                                <button type="button"
-                                        wire:click="confirmReject({{ $selectedSchedule->id }})"
-                                        class="btn approval-btn approval-btn-danger">
-                                    Từ chối
-                                </button>
-                            @endif
+                                <div class="d-flex gap-2">
+                                    @if($selectedSchedule && $selectedSchedule->status === 'pending')
+                                        <button type="button" 
+                                                wire:click="approveNow({{ $selectedSchedule->id }})" 
+                                                class="btn approval-btn approval-btn-success">
+                                            Phê duyệt
+                                        </button>
+                                        <button type="button" 
+                                                wire:click="confirmReject({{ $selectedSchedule->id }})" 
+                                                class="btn approval-btn approval-btn-danger">
+                                            Từ chối
+                                        </button>
+                                    @endif
+                                    
+                                    <button wire:click="confirmDelete" 
+                                            type="button"
+                                            class="btn approval-btn approval-btn-danger">
+                                        Xóa
+                                    </button>
+
+                                    <button wire:click="updateEvent" 
+                                            type="button"
+                                            class="btn approval-btn approval-btn-success">
+                                        Lưu
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {{-- Modal Confirm --}}
             <div wire:ignore.self
                  class="modal fade"
                  id="modalConfirm"
@@ -483,6 +554,7 @@
                 </div>
             </div>
 
+            {{-- Modal Password --}}
             <div wire:ignore.self
                  class="modal fade"
                  id="modalPassword"
@@ -529,6 +601,7 @@
                 </div>
             </div>
 
+            {{-- Modal Conflict --}}
             <div wire:ignore.self
                  class="modal fade"
                  id="modalConflict"
@@ -576,7 +649,7 @@
                             @endif
 
                             <p class="text-muted mb-0">
-                                Bạn có chắc muốn <strong> phê duyệt</strong> và tiếp tục nhập mã phòng?
+                                Bạn có chắc muốn <strong>phê duyệt</strong> và tiếp tục nhập mã phòng?
                             </p>
                         </div>
                         <div class="modal-footer border-0">
@@ -719,37 +792,42 @@
         }
 
         .approval-info {
-            border: 1px solid var(--ap-border);
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        .approval-filebox {
+            background: #f9fafb;
             border-radius: 10px;
-            padding: 10px;
-            background: #fff;
-        }
-
-        .approval-desc {
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            white-space: pre-line;
             border: 1px solid var(--ap-border);
+            padding: 10px 12px;
         }
 
-        .approval-files {
+        .approval-files-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 6px;
         }
 
-        .approval-file {
+        .approval-file-item {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 6px 8px;
             border-radius: 8px;
             border: 1px solid var(--ap-border);
+            background: #fff;
+        }
+
+        .approval-file-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
             color: inherit;
-            background: #fff;
+            flex: 1;
         }
 
         .approval-file-ic {
@@ -798,6 +876,21 @@
             border-radius: 8px;
             font-size: 0.86rem;
             min-width: 140px;
+        }
+
+        .approval-modal {
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .approval-desc {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: pre-line;
+            border: 1px solid var(--ap-border);
+            color: var(--ap-text);
         }
 
         @media (max-width: 991.98px) {
