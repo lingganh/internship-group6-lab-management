@@ -43,15 +43,19 @@ class Edit extends Component
 
         $this->specifications = json_decode($eq->specifications, true) ?? [];
 
-        $count = $eq->labItems->count();
 
-        if ($count === 1) {
-            $item = $eq->labItems->first();
-            $this->lab_id = $item->lab_id;
-            $this->quantity = (int) $item->quantity;
-            $this->broken_quantity = (int) $item->broken_quantity;
-            $this->actual_quantity = (int) $item->actual_quantity; // nếu cột có sẵn
+        $this->notes = $eq->notes;
+
+
+        $firstItem = $eq->labItems->first();
+
+        if ($firstItem) {
+            $this->lab_id = $firstItem->lab_id;
+            $this->quantity = (int) $firstItem->quantity;
+            $this->broken_quantity = (int) $firstItem->broken_quantity;
+            $this->actual_quantity = (int) $firstItem->actual_quantity;
         } else {
+            // Nếu thiết bị chưa được gán vào lab nào
             $this->lab_id = null;
             $this->quantity = 0;
             $this->broken_quantity = 0;
@@ -59,6 +63,18 @@ class Edit extends Component
         }
     }
 
+    protected function messages()
+    {
+        return [
+            'name.required' => 'Trường tên thiết bị không được bỏ trống.',
+            'code.required' => 'Trường mã thiết bị không được bỏ trống.',
+            'code.unique' => 'Mã thiết bị này đã tồn tại.',
+            'type.required' => 'Trường loại thiết bị không được bỏ trống.',
+            'lab_id.required' => 'Vui lòng chọn phòng Lab.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'broken_quantity.max' => 'Số lượng hỏng không được vượt quá tổng số lượng.',
+        ];
+    }
 
     protected function rules()
     {
@@ -93,7 +109,7 @@ class Edit extends Component
                 'code' => $this->code,
                 'type' => $this->type,
                 'status' => $this->status,
-                'purchased_date' => $this->purchased_date,
+                'purchased_date' => now(),
                 'notes' => $this->notes,
                 'specifications' => json_encode($this->specifications),
             ]);
@@ -120,7 +136,18 @@ class Edit extends Component
 
         return redirect()->route('equipment.index');
     }
+    public function updated($propertyName)
+    {
+        if ($propertyName === 'quantity' || $propertyName === 'broken_quantity') {
 
+            $qty = $this->quantity === "" ? 0 : (int) $this->quantity;
+            $broken = $this->broken_quantity === "" ? 0 : (int) $this->broken_quantity;
+
+            $this->actual_quantity = max(0, $qty - $broken);
+
+            $this->validateOnly($propertyName);
+        }
+    }
     public function render()
     {
         $issues = EquipmentIssue::with(['reporter', 'logs.changer'])
@@ -133,8 +160,8 @@ class Edit extends Component
             ->get();
 
         return view('livewire.admin.equipment.edit', [
-            'labs'     => Lab::orderBy('name')->get(),
-            'issues'   => $issues,
+            'labs' => Lab::orderBy('name')->get(),
+            'issues' => $issues,
             'labItems' => $labItems,
         ])->layout('components.layouts.admin-layout');
     }

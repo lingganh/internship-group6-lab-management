@@ -45,7 +45,7 @@ class Index extends Component
     public function openDeleteModal($id)
     {
         $this->deleteId = $id;
-
+        // dd($id);
         $this->dispatch(
             'openModel',
             type: 'warning',
@@ -57,7 +57,7 @@ class Index extends Component
     public function confirmDeleteEquipment()  
     {
         $eq = Equipment::with('labItems')->find($this->deleteId);
-
+        // dd($this->deleteId);
         if (!$eq) {
             $this->dispatch(
                 'alert',
