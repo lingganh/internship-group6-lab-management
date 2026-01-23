@@ -5,7 +5,7 @@
             <div class="page-header-content d-flex align-items-center justify-content-between py-2 px-3">
                 <div class="breadcrumb mb-0">
                     <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house me-2"></i></a>
-                    <span class="breadcrumb-item">Danh sách thiết bị</span>
+                    <a class="breadcrumb-item" href="{{route('equipment.index')}}">Danh sách thiết bị</a>
                     <span class="breadcrumb-item active fw-semibold text-primary">{{ $name }} - {{ $code }}</span>
                     <span class="breadcrumb-item active fw-semibold text-warning">Chỉnh sửa</span>
                 </div>
