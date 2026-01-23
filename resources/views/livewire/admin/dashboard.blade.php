@@ -49,7 +49,7 @@
             <div class="kpi-card">
                 <div class="kpi-icon bg-primary"><i class="fa fa-calendar"></i></div>
                 <div>
-                    <small>Sự kiện 7 ngày</small>
+                    <small>Sự kiện tuần tới</small>
                     <h3>{{ $AllEvent }}</h3>
                 </div>
             </div>
@@ -674,7 +674,7 @@
 
         console.log('[FORCE]', width, height);
 
-        // 🔥 force canvas size
+        
         canvas.style.width = width + 'px';
         canvas.style.height = height + 'px';
 

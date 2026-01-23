@@ -95,7 +95,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="row g-3 mt-3">
+                        {{-- <div class="row g-3 mt-3">
                             <div class="col-md-6 col-12">
                                 <label for="purchased_date" class="col-form-label">Ngày thêm:</label>
                                 <input wire:model.live="purchased_date" type="date" id="purchased_date" class="form-control @error('purchased_date') is-invalid @enderror">
@@ -103,7 +103,7 @@
                                 <label class="validation-error-label text-danger">{{ $message }}</label>
                                 @enderror
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="row g-3 mt-3">
                             <div class="col-12">
@@ -127,11 +127,11 @@
                     </div>
 
                     <div class="card-body d-flex gap-2 flex-wrap">
-                        <button wire:loading.remove wire:target="update" wire:click="update" class="btn btn-primary flex-grow-1 text-nowrap">
+                        <button wire:loading.remove wire:target="save" wire:click="save" class="btn btn-primary flex-grow-1 text-nowrap">
                             <i class="ph-floppy-disk"></i> Thêm
                         </button>
 
-                        <button wire:loading wire:target="update" class="btn btn-primary flex-grow-1 text-nowrap" disabled>
+                        <button wire:loading wire:target="s" class="btn btn-primary flex-grow-1 text-nowrap" disabled>
                             <i class="ph-spinner-gap animate-spin"></i> Đang Thêm...
                         </button>
 

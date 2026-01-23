@@ -1,5 +1,5 @@
 @php
-    use App\Enums\User\UserRoleEnum;
+use App\Enums\User\UserRoleEnum;
 @endphp
 <div class="sidebar sidebar-dark sidebar-main sidebar-expand-lg">
 
@@ -29,11 +29,11 @@
 
         <!-- Main navigation -->
         <div class="sidebar-section">
-            
+
             <ul class="nav nav-sidebar" data-nav-type="accordion">
                 <li class="nav-item">
                     <a href="{{route('admin.dashboard')}}"
-                       class="nav-link">
+                        class="nav-link">
                         <i class="ph-house"></i>
                         <span>Dashboard</span>
                     </a>
@@ -49,7 +49,7 @@
                         <span>Đăng ký lịch</span>
                     </a>
                 </li>
-                 
+
 
                 <li class="nav-item">
                     <a href="{{ route('admin.approval') }}" class="nav-link ">
@@ -59,14 +59,14 @@
                 </li>
                 {{-- <li class="nav-item">
                     <a href="{{route('admin.approval')}}"
-                       class="nav-link ">
-                        <i class="ph-calendar-check"></i>
-                        <span>Lịch đã đăng ký</span>
-                    </a>
+                class="nav-link ">
+                <i class="ph-calendar-check"></i>
+                <span>Lịch đã đăng ký</span>
+                </a>
                 </li> --}}
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a href="{{route('admin.lab-diary')}}"
-                       class="nav-link">
+                        class="nav-link">
                         <i class="ph-note-blank"></i>
                         <span>Nhật ký sử dụng</span>
                     </a>
@@ -84,10 +84,10 @@
 
                 {{-- <li class="nav-item">
                     <a href="{{route('admin.coming-soon')}}"
-                       class="nav-link">
-                        <i class="ph-activity"></i>
-                        <span>Hoạt động nhóm</span>
-                    </a>
+                class="nav-link">
+                <i class="ph-activity"></i>
+                <span>Hoạt động nhóm</span>
+                </a>
                 </li> --}}
                 <li class="nav-item-header pt-0">
                     <div class="text-uppercase fs-sm lh-sm opacity-50 sidebar-resize-hide">Báo cáo - Thống kê</div>
@@ -95,7 +95,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{route('admin.report')}}"
-                       class="nav-link">
+                        class="nav-link">
                         <i class="ph-chart-bar"></i>
                         <span>Báo cáo - Thống kê</span>
                     </a>
@@ -122,14 +122,14 @@
                 </li>
                 <li class="nav-item">
                     <a href="{{route('equipment.index')}}"
-                       class="nav-link {{ request()->routeIs('equipment.index') ? 'active' : '' }}">
+                        class="nav-link {{ request()->routeIs('equipment.index') ? 'active' : '' }}">
                         <i class="ph-chart-bar"></i>
                         <span>Thiết bị</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{route('admin.lab.index')}}"
-                       class="nav-link {{ request()->routeIs('admin.lab.index') ? 'active' : '' }}">
+                        class="nav-link {{ request()->routeIs('admin.lab.index') ? 'active' : '' }}">
                         <i class="ph-test-tube"></i>
                         <span>Phòng Lab</span>
                     </a>
@@ -140,5 +140,36 @@
 
     </div>
     <!-- /sidebar content -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar-main');
+            if (!sidebar) return;
 
+           //remove unfold
+            sidebar.classList.remove('sidebar-main-unfold');
+
+            // stop adding
+            const observer = new MutationObserver(() => {
+                if (sidebar.classList.contains('sidebar-main-unfold')) {
+                    sidebar.classList.remove('sidebar-main-unfold');
+                }
+            });
+
+            observer.observe(sidebar, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+    </script>
+
+    <style>
+        /* Force disable unfold behavior */
+        .sidebar-main.sidebar-main-unfold {
+            width: var(--sidebar-width-collapsed) !important;
+        }
+
+        .sidebar-main.sidebar-main-unfold .sidebar-content {
+            overflow: hidden !important;
+        }
+    </style>
 </div>

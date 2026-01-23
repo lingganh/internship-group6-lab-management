@@ -62,7 +62,7 @@ class Create extends Component
             'code' => $this->code,
             'type' => $this->type,
             'status' => $this->status,
-            'purchased_date' => $this->purchased_date,
+            'purchased_date' => now(),
             'notes' => $this->notes,
             'specifications' => json_encode($this->specifications),
         ]);
@@ -72,6 +72,7 @@ class Create extends Component
             'lab_id' => $this->lab_id,
             'quantity' => $this->quantity,
             'broken_quantity' => $this->broken_quantity,
+            'actual_quantity' => $this->quantity - $this->broken_quantity,
 
         ]);
 

@@ -67,8 +67,8 @@
                 <thead>
                 <tr class="table-light">
                     <th>STT</th>
-                    <th>PHÒNG LAB</th>
                     <th>TÊN THIẾT BỊ </th>
+                    <th>PHÒNG LAB</th>
                     <th> SỐ LƯỢNG </th>
                     <th>SỐ LƯỢNG HỎNG </th>
                     <th>SỐ LƯỢNG THỰC </th>
@@ -81,8 +81,8 @@
                 @forelse ($items as $index => $item)
                     <tr>
                         <td>{{ $items->firstItem() + $index }}</td>
-                        <td>{{ $item->lab->name ?? '—' }}</td>
                         <td>{{ $item->equipment->name ?? '—' }}</td>
+                        <td>{{ $item->lab->name ?? '—' }}</td>
                         <td>{{ $item->quantity }}</td>
                         <td>{{ $item->broken_quantity }}</td>
                         <td>{{ $item->actual_quantity }}</td>
@@ -118,7 +118,7 @@
                                         <i class="ph-note-pencil px-1"></i> Chỉnh sửa
                                     </a>
                                     <a href="#"
-                                       wire:click.prevent="openDeleteModal({{ $item->id }})" class="dropdown-item">
+                                       wire:click.prevent="openDeleteModal({{ $item->equipment->id }})" class="dropdown-item">
                                         <i class="ph-trash px-1"></i> Xóa
                                     </a>
                                 </div>
