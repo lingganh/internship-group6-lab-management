@@ -818,6 +818,10 @@ async function saveEvent() {
         fd.append('description', description)
         fd.append('registered_for', registeredFor)
 
+        // Đánh dấu đây là lịch lặp và chỉ gửi thông báo ở lần đầu
+        fd.append('is_recurring', 'true')
+        fd.append('is_first_occurrence', i === 0 ? 'true' : 'false')
+        fd.append('total_occurrences', occurrences.length)
         // CHỈ gửi file ở occurrence đầu
         if (i === 0 && files && files.length > 0) {
           for (let j = 0; j < files.length; j++) fd.append('files[]', files[j])

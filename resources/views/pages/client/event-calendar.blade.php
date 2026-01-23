@@ -135,7 +135,10 @@
             <option value="">Tất cả loại</option>
             @foreach($categories as $c)
               <option value="{{ $c }}" {{ request('category') == $c ? 'selected' : '' }}>
-                {{ ucfirst($c) }}
+                @php
+                  $catMap = ['work' => 'Làm việc', 'seminar' => 'Hội thảo', 'other' => 'Khác'];
+                  echo $catMap[$c] ?? ucfirst($c);
+                @endphp
               </option>
             @endforeach
           </select>
@@ -153,10 +156,15 @@
           $labName = $event->lab->name ?? ($event->lab->code ?? ($event->lab_code ?? 'Chưa rõ'));
           $labCode = $event->lab->code ?? ($event->lab_code ?? null);
 
+          $categoryMap = ['work' => 'Làm việc', 'seminar' => 'Hội thảo', 'other' => 'Khác'];
+          $categoryText = $categoryMap[$event->category] ?? ucfirst($event->category ?? 'Chưa phân loại');
+
+          $userName = $event->user?->full_name ?? $event->user?->name ?? 'Chưa rõ';
+
           $filesPayload = $event->files?->map(function($f){
             return [
-              'name' => $f->name ?? basename($f->path ?? ''),
-              'url'  => $f->url ?? (isset($f->path) ? asset($f->path) : null),
+              'name' => $f->file_name ?? basename($f->file_path ?? ''),
+              'url'  => $f->file_path ? asset('storage/' . $f->file_path) : null,
             ];
           })->values() ?? collect([]);
         @endphp
@@ -169,8 +177,8 @@
           data-bs-target="#eventDetailModal"
           data-id="{{ $event->id }}"
           data-title="{{ e($event->title) }}"
-          data-category="{{ e($event->category ?? 'General') }}"
-          data-user="{{ e($event->user?->name ?? 'Unknown') }}"
+          data-category="{{ e($categoryText) }}"
+          data-user="{{ e($userName) }}"
           data-date="{{ e($event->start->format('d/m/Y')) }}"
           data-day="{{ e($event->start->isoFormat('dddd')) }}"
           data-time="{{ e($event->start->format('H:i')) }}"
@@ -190,21 +198,21 @@
                 <p class="seminar-name">{{ $event->title }}</p>
 
                 <div class="seminar-tags">
-                  <span class="seminar-tag"><i class="fa-solid fa-tag"></i>{{ ucfirst($event->category ?? 'General') }}</span>
+                  <span class="seminar-tag"><i class="fa-solid fa-tag"></i>{{ $categoryText }}</span>
                   <span class="seminar-tag"><i class="fa-solid fa-door-open"></i>{{ $labName }}</span>
                 </div>
               </div>
               <span class="seminar-chip {{ $badge }}">{{ $badgeText }}</span>
             </div>
 
-            <p class="seminar-desc">
+            {{-- <p class="seminar-desc">
               {{ $event->description ? \Illuminate\Support\Str::limit($event->description, 110) : 'Nội dung đang cập nhật.' }}
-            </p>
+            </p> --}}
 
             <div class="seminar-meta">
               <span class="item"><i class="fa-regular fa-clock"></i> {{ $event->start->format('H:i') }}</span>
-              <span class="item"><i class="fa-regular fa-user"></i> {{ $event->user ? \Illuminate\Support\Str::limit($event->user->name, 18) : 'Unknown' }}</span>
-              <span class="item"><i class="fa-solid fa-door-open"></i> {{ $labName }}</span>
+              <span class="item"><i class="fa-regular fa-user"></i> {{ \Illuminate\Support\Str::limit($userName, 18) }}</span>
+              {{-- <span class="item"><i class="fa-solid fa-door-open"></i> {{ $labName }}</span> --}}
             </div>
           </div>
 
@@ -270,10 +278,6 @@
             </ul>
           </div>
         </div>
-
-        {{-- <div class="modal-footer">
-          <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal">Đóng</button>
-        </div> --}}
       </div>
     </div>
   </div>

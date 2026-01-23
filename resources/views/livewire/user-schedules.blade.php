@@ -1,4 +1,20 @@
 <div>
+    <x-slot name="header">
+        <div class="page-header page-header-light shadow">
+            <div class="page-header-content d-lg-flex border-top">
+                <div class="d-flex">
+                    <div class="breadcrumb py-2">
+                        <a href="{{route('home')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
+                        <span class="breadcrumb-item active">Lịch trình cá nhân </span>
+                    </div>
+                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
+                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </x-slot>
     <div class="container py-4">
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
@@ -55,7 +71,6 @@
                             <tr>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $item->title }}</div>
-                                    <div class="text-muted small">Phòng máy trung tâm</div>
                                 </td>
 
                                 <td>
@@ -79,10 +94,12 @@
                                             <i class="bi bi-eye-fill"></i>
                                         </button>
 
-                                        <button type="button" wire:click="cancelSchedule({{ $item->id }})"
+                                       <button type="button" 
+                                            wire:click="confirmCancel({{ $item->id }})"
                                             class="icon-pill icon-cancel {{ $canCancel ? 'active-icon' : 'disabled-icon' }}"
-                                            @disabled(!$canCancel) data-bs-toggle="tooltip"
-                                            title="{{ $canCancel ? 'Hủy lịch' : 'Không thể hủy (chỉ hủy trước giờ bắt đầu tối thiểu 1 giờ)' }}">
+                                            @disabled(!$canCancel) 
+                                            data-bs-toggle="tooltip"
+                                            title="{{ $canCancel ? 'Hủy lịch' : 'Không thể hủy' }}">
                                             <i class="bi bi-x-circle-fill"></i>
                                         </button>
 
@@ -124,48 +141,32 @@
             {{ $schedules->links() }}
         </div>
 
-        <div wire:ignore.self class="modal fade" id="detailModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content modal-clean">
-                    <div class="modal-header border-0">
-                        <h6 class="fw-semibold m-0">Chi tiết đăng ký</h6>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        @if ($selectedSchedule)
-                            <div class="info-box">
-                                <label>Tên sự kiện</label>
-                                <div>{{ $selectedSchedule->title }}</div>
-                            </div>
-
-                            <div class="row g-3 mb-3">
-                                <div class="col-6">
-                                    <label>Bắt đầu</label>
-                                    <div class="small fw-medium">
-                                        {{ \Carbon\Carbon::parse($selectedSchedule->start)->format('H:i d/m/Y') }}
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <label>Kết thúc</label>
-                                    <div class="small fw-medium">
-                                        {{ \Carbon\Carbon::parse($selectedSchedule->end)->format('H:i d/m/Y') }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="info-box">
-                                <label>Ghi chú</label>
-                                <div class="small">
-                                    {{ $selectedSchedule->description ?? 'Không có ghi chú.' }}
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                </div>
+        <div wire:ignore.self class="modal fade" id="modalConfirmCancel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content modal-clean shadow-lg border-0">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold text-warning m-0">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy lịch
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-muted small mb-0">
+                    Bạn có chắc chắn muốn hủy lịch trình này không? Lịch đã hủy sẽ không thể khôi phục.
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                    Không
+                </button>
+                <button type="button" wire:click="cancelSchedule" class="btn btn-sm btn-warning rounded-pill px-3">
+                    <span wire:loading.remove wire:target="cancelSchedule">Đồng ý hủy</span>
+                    <span wire:loading wire:target="cancelSchedule" class="spinner-border spinner-border-sm"></span>
+                </button>
             </div>
         </div>
+    </div>
+</div>
 
         <div wire:ignore.self class="modal fade" id="feedbackModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -218,7 +219,73 @@
             </div>
         </div>
     </div>
+    <div wire:ignore.self class="modal fade" id="detailModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content modal-clean">
+                    <div class="modal-header border-0">
+                        <h6 class="fw-semibold m-0">Chi tiết đăng ký</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
 
+                    <div class="modal-body">
+                        @if ($selectedSchedule)
+                            <div class="info-box">
+                                <label>Tên sự kiện</label>
+                                <div>{{ $selectedSchedule->title }}</div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label>Bắt đầu</label>
+                                    <div class="small fw-medium">
+                                        {{ \Carbon\Carbon::parse($selectedSchedule->start)->format('H:i d/m/Y') }}
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label>Kết thúc</label>
+                                    <div class="small fw-medium">
+                                        {{ \Carbon\Carbon::parse($selectedSchedule->end)->format('H:i d/m/Y') }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <label>Ghi chú</label>
+                                <div class="small">
+                                    {{ $selectedSchedule->description ?? 'Không có ghi chú.' }}
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    <div wire:ignore.self class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content modal-clean shadow-lg border-0">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold text-danger m-0">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-muted small mb-0">
+                    Bạn có chắc chắn muốn hủy lịch trình này không? Hành động này không thể hoàn tác.
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Bỏ qua</button>
+                <button type="button" wire:click="deleteSchedule" class="btn btn-sm btn-danger rounded-pill px-3">
+                    <span wire:loading.remove wire:target="deleteSchedule">Đồng ý xóa</span>
+                    <span wire:loading wire:target="deleteSchedule" class="spinner-border spinner-border-sm"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <style>
         .clean-card {
             border: 1px solid #ececec;

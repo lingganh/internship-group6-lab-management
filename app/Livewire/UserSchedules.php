@@ -106,32 +106,52 @@ class UserSchedules extends Component
         }
     }
 
+    public $scheduleIdToCancel = null;
 
-    public function cancelSchedule($id): void
-    {
-        $event = LabEvent::find($id);
-
-        if (! $event) {
-            $this->dispatch('toaster', 'Không tìm thấy lịch');
-            return;
-        }
-
-        if (! $this->canCancel($event)) {
-            $this->dispatch('toaster', 'Không thể hủy (chỉ hủy trước giờ bắt đầu tối thiểu 1 giờ)');
-            return;
-        }
-
-        $event->status = 'cancelled';
-        $event->updated_by = Auth::id();
-        $event->updated_at = now();
-        $event->save();
-
-        $this->dispatch('toaster', 'Đã hủy lịch');
-
-        $this->reset('selectedSchedule');
-        $this->dispatch('$refresh');
+// Thêm method confirmCancel:
+public function confirmCancel($id): void
+{
+    $event = LabEvent::find($id);
+    
+    if (!$event) {
+        $this->dispatch('toaster', 'Không tìm thấy lịch');
+        return;
     }
+    
+    if (!$this->canCancel($event)) {
+        $this->dispatch('toaster', 'Không thể hủy (chỉ hủy trước giờ bắt đầu tối thiểu 1 giờ)');
+        return;
+    }
+    
+    $this->scheduleIdToCancel = $id;
+    $this->dispatch('open-modal', id: 'modalConfirmCancel');
+}
 
+// Thêm method cancelSchedule:
+public function cancelSchedule(): void
+{
+    if (!$this->scheduleIdToCancel) {
+        return;
+    }
+    
+    $event = LabEvent::find($this->scheduleIdToCancel);
+    
+    if (!$event) {
+        $this->dispatch('toaster', 'Không tìm thấy lịch');
+        return;
+    }
+    
+    $event->status = 'cancelled';
+    $event->updated_by = Auth::id();
+    $event->updated_at = now();
+    $event->save();
+    
+    $this->dispatch('close-modal', id: 'modalConfirmCancel');
+    $this->dispatch('toaster', 'Đã hủy lịch trình thành công');
+    
+    $this->scheduleIdToCancel = null;
+}
+    
     public function submitFeedback(): void
     {
         if (! $this->selectedSchedule) {
