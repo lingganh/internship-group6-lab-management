@@ -166,8 +166,13 @@ class LabCalendar extends Component
             $this->handleFileUploads($request->file('files'), $event->id);
         }
 
-        if (!$isAdmin) {
-            $this->notifyAdminsPendingEvent($event, 'created');
+        // CHỈ gửi thông báo nếu là occurrence đầu tiên của lịch lặp
+        $isRecurring = $request->input('is_recurring') === 'true';
+        $isFirstOccurrence = $request->input('is_first_occurrence') === 'true';
+        $totalOccurrences = (int) $request->input('total_occurrences', 1);
+
+        if (!$isAdmin && (!$isRecurring || $isFirstOccurrence)) {
+            $this->notifyAdminsPendingEvent($event, 'created', $totalOccurrences);
         }
         $event->refresh();
 
@@ -336,7 +341,7 @@ class LabCalendar extends Component
         }
     }
 
-    private function notifyAdminsPendingEvent(LabEvent $event, string $action = 'created'): void
+    private function notifyAdminsPendingEvent(LabEvent $event, string $action = 'created', int $totalOccurrences = 1): void
     {
         $user = Auth::user();
 
@@ -348,12 +353,14 @@ class LabCalendar extends Component
 
         $title = $action === 'created' ? 'Lịch đặt phòng mới chờ duyệt' : 'Lịch đặt phòng đã được cập nhật';
         $senderName = $user->full_name ?? $user->name ?? 'Người dùng';
-
+        $eventInfo = $totalOccurrences > 1
+            ? "{$event->title} ({$totalOccurrences} lịch lặp)"
+            : $event->title;
         foreach ($admins as $admin) {
             Notification::create([
                 'user_id' => $admin->id,
                 'title' => $title,
-                'message' => "{$senderName} đã đăng ký: {$event->title} tại phòng {$event->lab_code}",
+                'message' => "{$senderName} đã đăng ký: {$eventInfo} tại phòng {$event->lab_code}",
                 'data' => [
                     'event_id' => $event->id,
                     'type' => 'pending_event',
@@ -362,10 +369,10 @@ class LabCalendar extends Component
                 ],
             ]);
             if ($admin->email) {
-            \Illuminate\Support\Facades\Mail::to($admin->email)->queue(
-                new \App\Mail\AdminPendingEventNotification($event, $senderName, $action)
-            );
-        }
+                \Illuminate\Support\Facades\Mail::to($admin->email)->queue(
+                    new \App\Mail\AdminPendingEventNotification($event, $senderName, $action)
+                );
+            }
         }
     }
 }
