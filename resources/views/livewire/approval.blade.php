@@ -54,7 +54,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-12 col-md-3">
+                                {{-- <div class="col-12 col-md-3">
                                     <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
                                     <select wire:model.live="filterLabCode" class="form-select approval-control">
                                         <option value="">Tất cả phòng</option>
@@ -62,7 +62,7 @@
                                             <option value="{{ $lab->code }}">{{ $lab->name }}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                </div> --}}
 
                                 <div class="col-12 col-md-3">
                                     <label class="form-label small fw-semibold text-dark mb-1">Người dùng</label>
