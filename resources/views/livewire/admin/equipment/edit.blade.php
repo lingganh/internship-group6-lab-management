@@ -50,7 +50,7 @@
                                 @error('type') <small class="text-danger mt-1 d-block">{{ $message }}</small> @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            {{-- <div class="col-md-6">
                                 <label class="form-label fw-semibold">Phòng Lab <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0"><i class="ph-buildings text-muted"></i></span>
@@ -62,7 +62,7 @@
                                     </select>
                                 </div>
                                 @error('lab_id') <small class="text-danger mt-1 d-block">{{ $message }}</small> @enderror
-                            </div>
+                            </div> --}}
 
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Ghi chú</label>

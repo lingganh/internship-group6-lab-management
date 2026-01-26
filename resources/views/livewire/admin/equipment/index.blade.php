@@ -41,7 +41,7 @@
                     <input wire:model.live="search" type="text" class="form-control" placeholder="Tìm kiếm...">
                 </div>
 
-                <div>
+                {{-- <div>
                     <select wire:model.live="lab" class="form-select d-inline-block w-auto"
                         style="padding: 8px 24px 8px 10px;">
                         <option value="">Tất cả phòng</option>
@@ -49,7 +49,7 @@
                             <option value="{{ $l->id }}">{{ $l->name }}</option>
                         @endforeach
                     </select>
-                </div>
+                </div> --}}
             </div>
 
             <div class="d-flex gap-2 align-items-center">

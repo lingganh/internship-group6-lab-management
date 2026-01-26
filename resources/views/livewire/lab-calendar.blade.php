@@ -26,17 +26,17 @@
                         <div class="lab-checklist">
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="pending">
-                                {{-- <span class="lab-check-color status-pending"></span> --}}
+                                <span class="lab-check-color status-pending"></span>
                                 <span class="lab-check-label">Chờ duyệt</span>
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="approved">
-                                {{-- <span class="lab-check-color status-approved"></span> --}}
+                                <span class="lab-check-color status-approved"></span>
                                 <span class="lab-check-label">Đã duyệt</span>
                             </label>
                             <label class="lab-check-item">
                                 <input type="checkbox" checked data-filter-status="completed">
-                                {{-- <span class="lab-check-color status-completed"></span> --}}
+                                <span class="lab-check-color status-completed"></span>
                                 <span class="lab-check-label">Đã hoàn thành</span>
                             </label>
                         </div>
@@ -63,7 +63,7 @@
                         </div>
                     </div>
 
-                    <div class="lab-sidebar-section">
+                    {{-- <div class="lab-sidebar-section">
                         <div class="lab-sidebar-section-title">Phòng Lab</div>
                         <select id="labRoomFilter" class="lab-room-filter-select">
                             <option value="">Tất cả phòng</option>
@@ -71,7 +71,7 @@
                                 <option value="{{ $room->code }}">{{ $room->name }}</option>
                             @endforeach
                         </select>
-                    </div>
+                    </div> --}}
                 </aside>
 
                 {{-- MAIN CALENDAR --}}
@@ -131,7 +131,7 @@
                                         </select>
                                     </div>
 
-                                    {{-- Phòng lab --}}
+                                    {{-- Phòng lab
                                     <div>
                                         <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
                                         <select
@@ -146,7 +146,7 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                    </div>
+                                    </div> --}}
 
                                     {{-- Nhóm / lớp --}}
                                     <div>

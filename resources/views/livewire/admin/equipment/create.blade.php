@@ -49,20 +49,20 @@
                             {{-- MODE --}}
                             <div class="col-12">
                                 <div class="d-flex gap-3 flex-wrap">
-                                    <label class="form-check">
+                                    {{-- <label class="form-check">
                                         <input class="form-check-input" type="radio" wire:model.live="mode" value="existing">
                                         <span class="form-check-label">Thiết bị đã có</span>
-                                    </label>
+                                    </label> --}}
 
-                                    <label class="form-check">
+                                    {{-- <label class="form-check">
                                         <input class="form-check-input" type="radio" wire:model.live="mode" value="new">
                                         <span class="form-check-label">Thiết bị mới</span>
-                                    </label>
+                                    </label> --}}
                                 </div>
                                 @error('mode') <div class="text-danger">{{ $message }}</div> @enderror
                             </div>
 
-                            {{-- EXISTING --}}
+                            {{-- EXISTING
                             @if($mode === 'existing')
                                 <div class="col-md-12 col-12">
                                     <label class="col-form-label">
@@ -79,10 +79,10 @@
                                     </select>
                                     @error('equipment_id') <div class="text-danger">{{ $message }}</div> @enderror
                                 </div>
-                            @endif
+                            @endif --}}
 
                             {{-- NEW --}}
-                            @if($mode === 'new')
+                            {{-- @if($mode === 'new') --}}
                                 <div class="col-md-6 col-12">
                                     <label class="col-form-label">Tên thiết bị <span class="required">*</span></label>
                                     <input wire:model.live="name" type="text"
@@ -122,12 +122,12 @@
                                               class="form-control @error('notes') is-invalid @enderror"></textarea>
                                     @error('notes') <div class="text-danger">{{ $message }}</div> @enderror
                                 </div>
-                            @endif
+                            {{-- @endif --}}
 
                             <hr class="my-2">
 
                             {{-- PIVOT --}}
-                            <div class="col-md-6 col-12">
+                            {{-- <div class="col-md-6 col-12">
                                 <label class="col-form-label">Phòng LAB <span class="required">*</span></label>
                                 <select wire:model.live="lab_id"
                                         class="form-control @error('lab_id') is-invalid @enderror">
@@ -137,7 +137,7 @@
                                     @endforeach
                                 </select>
                                 @error('lab_id') <div class="text-danger">{{ $message }}</div> @enderror
-                            </div>
+                            </div> --}}
 
                             <div class="col-md-6 col-12">
                                 <label class="col-form-label">Số lượng <span class="required">*</span></label>
