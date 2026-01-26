@@ -127,13 +127,13 @@ use App\Enums\User\UserRoleEnum;
                         <span>Thiết bị</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a href="{{route('admin.lab.index')}}"
                         class="nav-link {{ request()->routeIs('admin.lab.index') ? 'active' : '' }}">
                         <i class="ph-test-tube"></i>
                         <span>Phòng Lab</span>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </div>
         <!-- /main navigation -->

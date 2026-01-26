@@ -125,7 +125,7 @@ class LabCalendar extends Component
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:work,seminar,other',
             'color' => 'nullable|string|max:20',
-            'lab_code' => 'required|string|exists:labs,code',
+            // 'lab_code' => 'required|string|exists:labs,code',
             'start' => 'required|date',
             'end' => 'required|date|after:start',
             'description' => 'nullable|string|max:1000',
@@ -139,6 +139,7 @@ class LabCalendar extends Component
             'end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
+         $validated['lab_code'] = 'LAB-304';
         // ====== CHECK TRÙNG TRƯỚC KHI TẠO ======
         if (
             $this->hasConflict(

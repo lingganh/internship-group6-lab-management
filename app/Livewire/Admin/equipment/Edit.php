@@ -16,7 +16,7 @@ class Edit extends Component
 
     public $equipmentId;        // ID của bảng equipment
     public $labEquipmentItemId; // ID của dòng trong bảng lab_equipment_items
-    public $lab_id;
+    public $lab_id ='1';
     public $name;
     public $code;
     public $type;

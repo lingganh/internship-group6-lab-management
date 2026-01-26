@@ -143,61 +143,69 @@ function initCalendar() {
     },
 
     eventContent: function (arg) {
-      const event = arg.event
-      const props = event.extendedProps || {}
+  const event = arg.event
+  const props = event.extendedProps || {}
 
-      const status = props.status || 'pending'
-      const roomName = props.roomName || ''
+  const status = props.status || 'pending'
+  const category = props.category || 'work'
 
-      let statusIcon = '<i class="fa-solid fa-clock"></i>'
+  // Icon trạng thái
+  let statusIcon = '<i class="fa-solid fa-clock"></i>'
+  if (status === 'approved') statusIcon = '<i class="fa-solid fa-circle-check"></i>'
+  else if (status === 'completed') statusIcon = '<i class="fa-solid fa-check-double"></i>'
+  else if (status === 'cancelled') statusIcon = '<i class="fa-solid fa-ban"></i>'
 
-      if (status === 'approved') statusIcon = '<i class="fa-solid fa-circle-check"></i>'
-      else if (status === 'completed') statusIcon = '<i class="fa-solid fa-check-double"></i>'
-      else if (status === 'cancelled') statusIcon = '<i class="fa-solid fa-ban"></i>'
+  // Icon loại sự kiện
+  let categoryIcon = '<i class="fa-solid fa-briefcase"></i>'
+  let categoryText = 'Làm việc / Nghiên cứu'
+  
+  if (category === 'seminar') {
+    categoryIcon = '<i class="fa-solid fa-chalkboard-user"></i>'
+    categoryText = 'Hội thảo / Seminar'
+  } else if (category === 'other') {
+    categoryIcon = '<i class="fa-solid fa-ellipsis"></i>'
+    categoryText = 'Khác'
+  }
 
-      const color = props._color || event.backgroundColor || '#3788d8'
-      const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
-      const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
+  const color = props._color || event.backgroundColor || '#3788d8'
+  const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
+  const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
 
-      const html = `
-        <div class="fc-event-main-custom" style="padding:6px 8px;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-            <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;">
-              ${arg.timeText || ''}
-            </div>
-            <span
-              style="
-                margin-left:auto;
-                display:inline-flex;
-                align-items:center;
-                justify-content:center;
-                width:22px;
-                height:22px;
-                border-radius:999px;
-                background:${chipBg};
-                border:1px solid ${chipBorder};
-                font-size:11px;
-              "
-            >
-              ${statusIcon}
-            </span>
-          </div>
-
-          <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;">
-            ${event.title || ''}
-          </div>
-
-          ${
-            roomName
-              ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;">
-                   <i class="fa-solid fa-door-open" style="font-size:10px;"></i>
-                   <span>${roomName}</span>
-                 </div>`
-              : ''
-          }
+  const html = `
+    <div class="fc-event-main-custom" style="padding:6px 8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;">
+          ${arg.timeText || ''}
         </div>
-      `
-      return { html }
+        <span
+          style="
+            margin-left:auto;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:22px;
+            height:22px;
+            border-radius:999px;
+            background:${chipBg};
+            border:1px solid ${chipBorder};
+            font-size:11px;
+          "
+        >
+          ${statusIcon}
+        </span>
+      </div>
+
+      <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;">
+        ${event.title || ''}
+      </div>
+
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;">
+        ${categoryIcon}
+        <span>${categoryText}</span>
+      </div>
+    </div>
+  `
+  return { html }
     },
 
     eventClick: function (info) {
@@ -705,7 +713,7 @@ async function saveEvent() {
   const title = document.getElementById('eventTitle').value.trim()
   const category = document.getElementById('eventCategory').value
   const color = document.getElementById('eventColor').value
-  const labCode = document.getElementById('eventRoom').value
+  const labCode = "LAB-304";
   const registeredFor = document.getElementById('eventRegisteredFor').value.trim()
 
   const startDate = document.getElementById('eventStartDate').value
@@ -732,11 +740,11 @@ async function saveEvent() {
     return
   }
 
-  console.log('📅 Occurrences to create:', occurrences.length)
+  // console.log('📅 Occurrences to create:', occurrences.length)
 
   // Check trùng với events hiện tại (chỉ lịch approved)
   const hasConflict = hasLocalConflict(occurrences, labCode, eventId || null)
-  console.log('⚠️ Has conflict:', hasConflict)
+  // console.log('⚠️ Has conflict:', hasConflict)
   
   // if (hasConflict) {
   //   const ok = window.confirm(
