@@ -183,7 +183,7 @@ body {
   color: var(--lab-text-main);
   letter-spacing: 0.2px;
 }
-
+/* 
 .fc .fc-button {
   background: #fff;
   color: #3c4043;
@@ -224,9 +224,9 @@ body {
   color: #6b7280;
   font-weight: 600;
   text-decoration: none;
-}
+} */
 
-.fc .fc-daygrid-day-number {
+/* .fc .fc-daygrid-day-number {
   font-size: 12px;
   padding-top: 4px;
   padding-right: 6px;
@@ -236,7 +236,7 @@ body {
 
 .fc .fc-daygrid-day.fc-day-today {
   background: #fff8e1;
-}
+/* } */
 
 /* ====== EVENT: HIỆN MÀU THEO DB + ĐẸP HƠN ====== */
 
@@ -339,7 +339,7 @@ body {
   border-radius: 10px;
   box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.18);
   pointer-events: none;
-}
+} */
 
 /* ===== MODAL / FORM – IMPROVED UI ===== */
 
@@ -960,7 +960,79 @@ body {
   background: #fff;
   box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.12);
 }
+/* REMOVE TẤT CẢ HEIGHT CONSTRAINTS - Để FullCalendar tự tính */
+.fc .fc-timegrid-event {
+  overflow: hidden !important;
+  min-height: unset !important;
+  max-height: unset !important;
+  height: 100% !important; /* Chiếm full chiều cao được tính bởi FullCalendar */
+}
 
+.fc .fc-timegrid-event .fc-event-main {
+  overflow: hidden !important;
+  height: 100% !important;
+  min-height: unset !important;
+  max-height: unset !important;
+}
+
+.fc .fc-timegrid-event .fc-event-main-frame {
+  height: 100% !important;
+  min-height: unset !important;
+  max-height: unset !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Đảm bảo harness không bị constraint */
+.fc-timegrid-event-harness {
+  position: absolute !important;
+  overflow: visible !important; /* ĐỔI THÀNH visible để không cắt event */
+  min-height: unset !important;
+  max-height: unset !important;
+}
+
+.fc-timegrid-event-harness > .fc-timegrid-event {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important; /* Kéo full từ top đến bottom */
+  left: 0 !important;
+  right: 0 !important;
+  overflow: hidden !important;
+}
+
+/* QUAN TRỌNG: Remove box-shadow constraints */
+.fc .fc-h-event,
+.fc .fc-v-event,
+.fc .fc-event {
+  background: var(--fc-event-bg-color) !important;
+  border-color: var(--fc-event-border-color, var(--fc-event-bg-color)) !important;
+  color: var(--fc-event-text-color, #fff) !important;
+  opacity: 1 !important;
+  filter: none !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18) !important;
+  overflow: hidden !important;
+  
+  /* REMOVE HEIGHT CONSTRAINTS */
+  min-height: unset !important;
+  max-height: unset !important;
+  height: 100% !important;
+}
+
+/* Content phải fit trong event */
+.fc-event-main-custom {
+  font-size: 11px;
+  line-height: 1.35;
+  color: inherit;
+  overflow: hidden !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
 /* ===== RESPONSIVE ===== */
 
 @media (max-width: 992px) {

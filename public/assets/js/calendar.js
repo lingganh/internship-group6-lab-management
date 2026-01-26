@@ -121,33 +121,44 @@ function initCalendar() {
     },
 
     eventDidMount: function (info) {
-      const el = info.el
-      const props = info.event.extendedProps || {}
-      const status = props.status || 'pending'
-      const color = props._color || info.event.backgroundColor || '#3788d8'
-      const textColor = props._textColor || readableTextColor(color)
+  const el = info.el
+  const props = info.event.extendedProps || {}
+  const status = props.status || 'pending'
+  const color = props._color || info.event.backgroundColor || '#3788d8'
+  const textColor = props._textColor || readableTextColor(color)
 
-      el.style.setProperty('--fc-event-bg-color', color)
-      el.style.setProperty('--fc-event-border-color', color)
-      el.style.setProperty('--fc-event-text-color', textColor)
+  el.style.setProperty('--fc-event-bg-color', color)
+  el.style.setProperty('--fc-event-border-color', color)
+  el.style.setProperty('--fc-event-text-color', textColor)
 
-      if (status === 'pending') el.classList.add('is-pending')
-      else el.classList.remove('is-pending')
+  if (status === 'pending') el.classList.add('is-pending')
+  else el.classList.remove('is-pending')
 
-      const canEdit = checkPermission(info.event)
-      if (!canEdit) el.classList.add('is-no-edit')
-      else el.classList.remove('is-no-edit')
+  const canEdit = checkPermission(info.event)
+  if (!canEdit) el.classList.add('is-no-edit')
+  else el.classList.remove('is-no-edit')
+ console.log('Event:', info.event.title)
+  console.log('Start:', info.event.start)
+  console.log('End:', info.event.end)
+  console.log('Element height:', info.el.offsetHeight, 'px')
+  console.log('Harness height:', info.el.closest('.fc-timegrid-event-harness')?.offsetHeight, 'px')
+   
+},
 
-      el.style.position = 'relative'
-      el.style.willChange = 'transform'
-    },
-
-    eventContent: function (arg) {
+   eventContent: function (arg) {
   const event = arg.event
   const props = event.extendedProps || {}
-
   const status = props.status || 'pending'
   const category = props.category || 'work'
+
+  // Tính thời lượng event (phút)
+  const durationMinutes = (event.end - event.start) / (1000 * 60)
+  
+  // Phân loại event theo độ dài
+  const isTiny = durationMinutes <= 30      // <= 30 phút: Chỉ hiển thị time + title (1 dòng)
+  const isShort = durationMinutes <= 60     // <= 1 tiếng: Time + title + icon status
+  const isMedium = durationMinutes <= 90    // <= 1.5 tiếng: + category icon
+  // > 90 phút: Hiển thị đầy đủ tất cả
 
   // Icon trạng thái
   let statusIcon = '<i class="fa-solid fa-clock"></i>'
@@ -171,42 +182,93 @@ function initCalendar() {
   const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
   const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
 
-  const html = `
-    <div class="fc-event-main-custom" style="padding:6px 8px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-        <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;">
+  let html = ''
+
+  // === 1. EVENT CỰC NGẮN (<= 30 phút): Chỉ time + title inline ===
+  if (isTiny) {
+    html = `
+      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;">
+        <div style="font-weight:800;font-size:10px;white-space:nowrap;">
           ${arg.timeText || ''}
         </div>
-        <span
-          style="
-            margin-left:auto;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            width:22px;
-            height:22px;
-            border-radius:999px;
-            background:${chipBg};
-            border:1px solid ${chipBorder};
-            font-size:11px;
-          "
-        >
-          ${statusIcon}
-        </span>
+        <div style="font-weight:700;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">
+          ${event.title || ''}
+        </div>
       </div>
+    `
+  }
+  
+  // === 2. EVENT NGẮN (<= 1 tiếng): Time + title + status icon ===
+  else if (isShort) {
+    html = `
+      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <div style="font-weight:800;font-size:10px;letter-spacing:.2px;">
+            ${arg.timeText || ''}
+          </div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;">
+            ${statusIcon}
+          </span>
+        </div>
+        <div style="font-weight:700;line-height:1.2;font-size:12px;;text-overflow:ellipsis;white-space:nowrap;">
+          ${event.title || ''}
+        </div>
+      </div>
+    `
+  }
+  
+  // === 3. EVENT VỪA (<= 1.5 tiếng): + category icon ===
+  else if (isMedium) {
+    html = `
+      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <div style="font-weight:800;font-size:11px;letter-spacing:.2px;">
+            ${arg.timeText || ''}
+          </div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;">
+            ${statusIcon}
+          </span>
+        </div>
+        <div style="font-weight:800;line-height:1.2;margin-bottom:3px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${event.title || ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${categoryIcon}
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${categoryText}</span>
+        </div>
+      </div>
+    `
+  }
+  
+  // === 4. EVENT DÀI (> 1.5 tiếng): Hiển thị đầy đủ ===
+  else {
+    html = `
+      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;font-size:11px;">
+            ${arg.timeText || ''}
+          </div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;">
+            ${statusIcon}
+          </span>
+        </div>
 
-      <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;">
-        ${event.title || ''}
-      </div>
+        <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+          ${event.title || ''}
+        </div>
 
-      <div style="display:flex;align-items:center;gap:6px;font-size:10px;">
-        ${categoryIcon}
-        <span>${categoryText}</span>
+        <div style="display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:3px;white-space:nowrap;">
+          ${categoryIcon}
+          <span style="white-space:nowrap;">${categoryText}</span>
+        </div>
+        
+
       </div>
-    </div>
-  `
+    `
+  }
+
   return { html }
-    },
+},
 
     eventClick: function (info) {
       showEventDetails(info.event)
@@ -337,9 +399,9 @@ function initRepeatControls() {
   const startDateInput = document.getElementById('eventStartDate')
   const startTimeInput = document.getElementById('eventStartTime')
   const endTimeInput = document.getElementById('eventEndTime')
-  ;[startDateInput, startTimeInput, endTimeInput].forEach((el) => {
-    if (el) el.addEventListener('change', () => buildOccurrencesFromForm({ preview: true }))
-  })
+    ;[startDateInput, startTimeInput, endTimeInput].forEach((el) => {
+      if (el) el.addEventListener('change', () => buildOccurrencesFromForm({ preview: true }))
+    })
 }
 
 /* =============== TÍNH LỊCH LẶP + SUMMARY BẰNG JS =============== */
@@ -745,7 +807,7 @@ async function saveEvent() {
   // Check trùng với events hiện tại (chỉ lịch approved)
   const hasConflict = hasLocalConflict(occurrences, labCode, eventId || null)
   // console.log('⚠️ Has conflict:', hasConflict)
-  
+
   // if (hasConflict) {
   //   const ok = window.confirm(
   //     'Khung giờ bạn chọn bị trùng với một số lịch ĐÃ DUYỆT trong cùng phòng.\n' +
@@ -958,7 +1020,7 @@ function editEvent() {
 
   const startDate = new Date(eventData.start)
   const endDate = eventData.end ? new Date(eventData.end) : new Date(startDate.getTime() + 3600000)
-  
+
   document.getElementById('eventStartDate').value = startDate.toISOString().split('T')[0]
   document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5)
   document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
