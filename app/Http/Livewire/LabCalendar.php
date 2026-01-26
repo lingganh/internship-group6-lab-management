@@ -139,7 +139,7 @@ class LabCalendar extends Component
             'end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
         ]);
 
-         $validated['lab_code'] = 'LAB-304';
+        $validated['lab_code'] = 'LAB-304';
         // ====== CHECK TRÙNG TRƯỚC KHI TẠO ======
         if (
             $this->hasConflict(
@@ -315,6 +315,9 @@ class LabCalendar extends Component
             }
             $file->delete();
         }
+        if ($event->status === 'approved') {
+            $this->notifyAdminsDeletedEvent($event);
+        }
 
         $event->delete();
 
@@ -376,4 +379,36 @@ class LabCalendar extends Component
             }
         }
     }
+    private function notifyAdminsDeletedEvent(LabEvent $event): void
+    {
+        $user = Auth::user();
+        $admins = User::where('role_id', 1)->get();
+
+        if ($admins->isEmpty()) {
+            return;
+        }
+
+        $senderName = $user->full_name ?? $user->name ?? 'Người dùng';
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'title' => 'Lịch đặt phòng đã bị hủy',
+                'message' => "{$senderName} đã hủy lịch: {$event->title} tại phòng {$event->lab_code}",
+                'data' => [
+                    'event_id' => $event->id,
+                    'type' => 'deleted_event',
+                    'sender_name' => $senderName,
+                    'url' => route('admin.approval'),
+                ],
+            ]);
+
+            if ($admin->email) {
+                \Illuminate\Support\Facades\Mail::to($admin->email)->queue(
+                    new \App\Mail\AdminDeletedEventNotification($event, $senderName)
+                );
+            }
+        }
+    }
+
 }
