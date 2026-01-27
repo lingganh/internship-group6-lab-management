@@ -186,7 +186,7 @@ class LabCalendar extends Component
         if (empty($createdEvents)) {
             return response()->json([
                 'type' => 'error',
-                'message' => 'Tất cả lịch đều bị trùng với lịch đã duyệt.'
+                'message' => 'Lịch bị trùng với lịch đã duyệt.'
             ], 409);
         }
 
