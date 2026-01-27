@@ -34,7 +34,10 @@
             </p>
             <p style="margin:4px 0; font-size:13px;">
                 @if($lab=='all')
-
+                <!-- delete this if multiple labs -->
+                <!-- Start -->
+                Lab Phát triển phần mềm và hệ thống thông minh 
+                <!-- End -->
                 @else
                 {{$lab}}
                 @endif
@@ -191,7 +194,7 @@
             <tr>
                 <th style="width:5%">#</th>
                 <th style="width:20%">Tên thiết bị</th>
-                <th style="width:10%">Lab id</th>
+                <th style="width:10%">Phòng Lab</th>
                 <th style="width:15%">Mã</th>
                 <th style="width:10%">Số lượng thực tế</th>
                 <th style="width:10%">Số lượng bị hỏng</th>
