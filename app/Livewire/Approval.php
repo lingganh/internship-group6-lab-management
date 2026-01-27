@@ -67,6 +67,18 @@ class Approval extends Component
     // Conflict
     public $conflictId = null;
     public $conflictSchedule = null;
+    // Conflict (single)
+    public array $conflictDetails = [];
+
+    // Conflict (batch/series)
+    public array $batchCandidateIds = [];
+    public array $batchOkIds = [];
+    public array $batchConflictIds = [];
+    public array $batchConflictDetails = [];
+    public int $batchOkCount = 0;
+    public int $batchConflictCount = 0;
+
+    public bool $batchForceApproveConflicts = false;
 
     protected $queryString = [
         'filterStatus' => ['except' => 'pending'],
@@ -93,6 +105,44 @@ class Approval extends Component
     public function updatingFilterDate()
     {
         $this->resetPage();
+    }
+    private function getConflictEvents(LabEvent $event)
+    {
+        return LabEvent::query()
+            ->with(['user:id,full_name', 'lab:id,code,name'])
+            ->where('lab_code', $event->lab_code)
+            ->whereIn('status', ['approved', 'completed'])
+            ->where('id', '!=', $event->id)
+            ->where('start', '<', $event->end)
+            ->where('end', '>', $event->start)
+            ->orderBy('start')
+            ->get(['id', 'title', 'lab_code', 'start', 'end', 'status', 'user_id']);
+    }
+
+    private function makeConflictPayload(LabEvent $event, $conflicts): array
+    {
+        $fmt = fn($dt) => Carbon::parse($dt)->format('d/m/Y H:i');
+
+        return [
+            'event' => [
+                'id' => $event->id,
+                'title' => $event->title,
+                'lab_code' => $event->lab_code,
+                'start' => $fmt($event->start),
+                'end' => $fmt($event->end),
+                'user' => $event->user?->full_name,
+                'series_id' => $event->series_id,
+            ],
+            'conflicts' => $conflicts->map(fn($c) => [
+                'id' => $c->id,
+                'title' => $c->title,
+                'lab_code' => $c->lab_code,
+                'start' => $fmt($c->start),
+                'end' => $fmt($c->end),
+                'status' => $c->status,
+                'user' => $c->user?->full_name,
+            ])->toArray(),
+        ];
     }
 
     public function categoryLabel(?string $cat): string
@@ -243,7 +293,8 @@ class Approval extends Component
         $schedule = LabEvent::findOrFail($id);
 
         if ($schedule->status !== 'pending') {
-            $this->dispatch('alert',
+            $this->dispatch(
+                'alert',
                 type: 'warning',
                 message: 'Không thể phê duyệt',
                 sub: 'Lịch không còn ở trạng thái chờ.'
@@ -267,35 +318,93 @@ class Approval extends Component
     public function approveSelected()
     {
         if (empty($this->selectedIds)) {
-            $this->dispatch('alert',
-                type: 'warning',
-                message: 'Chưa chọn lịch nào.'
-            );
+            $this->dispatch('alert', type: 'warning', message: 'Chưa chọn lịch nào.');
             return;
         }
 
-        // Chỉ lấy lịch pending
-        $count = LabEvent::whereIn('id', $this->selectedIds)
+        $events = LabEvent::with(['user:id,full_name'])
+            ->whereIn('id', $this->selectedIds)
             ->where('status', 'pending')
-            ->count();
+            ->orderBy('start')
+            ->get();
 
-        if ($count === 0) {
-            $this->dispatch('alert',
-                type: 'warning',
-                message: 'Không có lịch chờ duyệt.'
-            );
+        if ($events->isEmpty()) {
+            $this->dispatch('alert', type: 'warning', message: 'Không có lịch chờ duyệt.');
             return;
         }
 
-        $this->seriesApproveCount = $count;
+        // reset state
+        $this->batchCandidateIds = $events->pluck('id')->toArray();
+        $this->batchOkIds = [];
+        $this->batchConflictIds = [];
+        $this->batchConflictDetails = [];
+        $this->batchForceApproveConflicts = false;
+
+        foreach ($events as $event) {
+            $conflicts = $this->getConflictEvents($event);
+
+            if ($conflicts->isNotEmpty()) {
+                $this->batchConflictIds[] = $event->id;
+                $this->batchConflictDetails[] = $this->makeConflictPayload($event, $conflicts);
+            } else {
+                $this->batchOkIds[] = $event->id;
+            }
+        }
+
+        $this->batchOkCount = count($this->batchOkIds);
+        $this->batchConflictCount = count($this->batchConflictIds);
+
+        // có trùng => mở modal (ẩn/xổ)
+        if ($this->batchConflictCount > 0) {
+            $this->dispatch('open-batch-conflict-modal');
+            return;
+        }
+
+        // không trùng => mở password modal như cũ
         $this->passwordModalId = 'batch';
+        $this->seriesApproveCount = count($this->batchCandidateIds);
         $this->dispatch('open-password-modal');
     }
+    public function continueBatchAfterConflict()
+    {
+        $idsToApprove = $this->batchForceApproveConflicts
+            ? $this->batchCandidateIds
+            : $this->batchOkIds;
+
+        if (empty($idsToApprove)) {
+            $this->dispatch('alert', type: 'warning', message: 'Không có lịch nào có thể duyệt', sub: 'Tất cả lịch đã chọn đều bị trùng.');
+            $this->dispatch('close-batch-conflict-modal');
+            return;
+        }
+
+        // gán lại selectedIds => approveSchedule() nhánh batch dùng bình thường
+        $this->selectedIds = $idsToApprove;
+
+        $this->passwordModalId = 'batch';
+        $this->seriesApproveCount = count($idsToApprove);
+
+        $this->dispatch('close-batch-conflict-modal');
+        $this->dispatch('open-password-modal');
+    }
+
+    public function cancelBatchConflict()
+    {
+        $this->dispatch('close-batch-conflict-modal');
+        $this->batchCandidateIds = [];
+        $this->batchOkIds = [];
+        $this->batchConflictIds = [];
+        $this->batchConflictDetails = [];
+        $this->batchOkCount = 0;
+        $this->batchConflictCount = 0;
+        $this->batchForceApproveConflicts = false;
+    }
+
 
     public function rejectSelected()
     {
         if (empty($this->selectedIds)) {
-            $this->dispatch('alert',
+            $this->dispatch(
+                'alert',
                 type: 'warning',
                 message: 'Chưa chọn lịch nào.'
             );
@@ -308,7 +417,8 @@ class Approval extends Component
             ->count();
 
         if ($count === 0) {
-            $this->dispatch('alert',
+            $this->dispatch(
+                'alert',
                 type: 'warning',
                 message: 'Không có lịch chờ duyệt.'
             );
@@ -338,18 +448,18 @@ class Approval extends Component
                 // Duyệt hàng loạt - sử dụng chunk
                 $eventIds = $this->selectedIds;
                 $count = 0;
-                
+
                 LabEvent::whereIn('id', $eventIds)
                     ->where('status', 'pending')
                     ->chunk(50, function ($events) use (&$count) {
                         foreach ($events as $event) {
                             $event->update(['status' => 'approved']);
                             $count++;
-                            
+
                             // Queue notification và email
                             dispatch(function () use ($event) {
                                 $this->notifyUserEventResult($event, 'approved');
-                                
+
                                 if ($event->user && $event->user->email) {
                                     Mail::to($event->user->email)->queue(
                                         new \App\Mail\ApprovalNotification($event, $this->roomCode)
@@ -360,7 +470,8 @@ class Approval extends Component
                     });
 
                 $this->selectedIds = [];
-                $this->dispatch('alert',
+                $this->dispatch(
+                    'alert',
                     type: 'success',
                     message: "Đã phê duyệt {$count} lịch",
                     sub: 'Email sẽ được gửi trong giây lát.'
@@ -368,13 +479,27 @@ class Approval extends Component
             } else {
                 // Duyệt đơn lẻ
                 $event = LabEvent::findOrFail($this->passwordModalId);
+                // Duyệt đơn lẻ
+                $event = LabEvent::with(['lab', 'user'])->findOrFail($this->passwordModalId);
+
+                // CHECK TRÙNG
+                $conflicts = $this->getConflictEvents($event);
+                if ($conflicts->isNotEmpty()) {
+                    $this->conflictId = $event->id;
+                    $this->conflictDetails = $this->makeConflictPayload($event, $conflicts);
+
+                    $this->dispatch('close-password-modal');
+                    $this->dispatch('open-conflict-modal'); // modal "lịch trùng" (ẩn/xổ)
+                    return;
+                }
+
 
                 $event->update(['status' => 'approved']);
-                
+
                 // Queue notification và email
                 dispatch(function () use ($event) {
                     $this->notifyUserEventResult($event, 'approved');
-                    
+
                     if ($event->user && $event->user->email) {
                         Mail::to($event->user->email)->queue(
                             new \App\Mail\ApprovalNotification($event, $this->roomCode)
@@ -382,7 +507,8 @@ class Approval extends Component
                     }
                 })->afterResponse();
 
-                $this->dispatch('alert',
+                $this->dispatch(
+                    'alert',
                     type: 'success',
                     message: 'Đã phê duyệt lịch',
                     sub: $event->series_id ? 'Đây là 1 buổi trong lịch lặp.' : null
@@ -505,7 +631,8 @@ class Approval extends Component
                 ->get();
 
             if ($events->isEmpty()) {
-                $this->dispatch('alert',
+                $this->dispatch(
+                    'alert',
                     type: 'warning',
                     message: 'Không có lịch chờ duyệt.'
                 );
@@ -523,10 +650,10 @@ class Approval extends Component
 
             // Gửi email và notification cho từng user
             $userEmails = $events->pluck('user.email')->filter()->unique();
-            
+
             foreach ($userEmails as $email) {
                 $userEvents = $events->filter(fn($e) => $e->user?->email === $email);
-                
+
                 if ($userEvents->isNotEmpty()) {
                     // Gửi 1 email cho nhiều lịch của cùng user
                     Mail::to($email)->queue(
@@ -559,7 +686,8 @@ class Approval extends Component
             $this->selectedIds = [];
             $this->selectedCount = 0;
 
-            $this->dispatch('alert',
+            $this->dispatch(
+                'alert',
                 type: 'success',
                 message: "Đã từ chối {$count} lịch",
                 sub: 'Email thông báo đã được gửi.'
@@ -604,25 +732,26 @@ class Approval extends Component
 
     public function forceApprove()
     {
-        if (!$this->conflictId) {
+        if (!$this->conflictId)
             return;
-        }
 
-        $schedule = LabEvent::with(['lab', 'user'])->findOrFail($this->conflictId);
+        $event = LabEvent::findOrFail($this->conflictId);
 
-        if ($schedule->status !== 'pending') {
+        if ($event->status !== 'pending') {
             $this->dispatch('alert', type: 'warning', message: 'Không thể xử lý', sub: 'Lịch không còn ở trạng thái chờ.');
             $this->conflictId = null;
-            $this->conflictSchedule = null;
+            $this->conflictDetails = [];
             $this->dispatch('close-conflict-modal');
             return;
         }
 
-        $this->passwordModalId = $schedule->id;
+        $this->passwordModalId = $event->id;
         $this->roomCode = '';
+
         $this->dispatch('close-conflict-modal');
         $this->dispatch('open-password-modal');
     }
+
 
     private function notifyUserEventResult(LabEvent $event, string $status): void
     {
@@ -658,9 +787,17 @@ class Approval extends Component
 
         // Query schedules với tối ưu hóa
         $schedules = LabEvent::select([
-                'id', 'title', 'category', 'lab_code', 'user_id', 
-                'start', 'end', 'status', 'series_id', 'created_at'
-            ])
+            'id',
+            'title',
+            'category',
+            'lab_code',
+            'user_id',
+            'start',
+            'end',
+            'status',
+            'series_id',
+            'created_at'
+        ])
             ->with([
                 'user:id,full_name,email',
                 'lab:id,code,name'
@@ -674,7 +811,7 @@ class Approval extends Component
 
         // Đếm pending với CÙNG filters - QUAN TRỌNG!
         $pendingQuery = LabEvent::where('status', 'pending');
-        
+
         if ($this->filterUserId !== '') {
             $pendingQuery->where('user_id', $this->filterUserId);
         }
@@ -684,7 +821,7 @@ class Approval extends Component
         if ($this->filterLabCode !== '') {
             $pendingQuery->where('lab_code', $this->filterLabCode);
         }
-        
+
         $pendingCount = $pendingQuery->count();
 
         $labs = Lab::select('code', 'name')->orderBy('name')->get();

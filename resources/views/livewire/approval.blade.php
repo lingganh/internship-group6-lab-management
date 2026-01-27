@@ -631,6 +631,42 @@
                                     </div>
                                 </div>
                             @endif
+                                    {{-- Chi tiết trùng (ẩn/xổ) --}}
+@if(!empty($conflictDetails['conflicts']))
+    <button class="btn btn-sm approval-btn approval-btn-ghost mt-2"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#conflictDetailCollapse">
+        Xem chi tiết lịch trùng
+    </button>
+
+    <div class="collapse mt-2" id="conflictDetailCollapse">
+        <div class="approval-filebox">
+            <div class="fw-bold text-dark mb-2">Trùng với các lịch sau:</div>
+
+            <div class="d-grid gap-2">
+                @foreach($conflictDetails['conflicts'] as $c)
+                    <div class="approval-file-item">
+                        <div class="approval-file-ic">
+                            <i class="ph-warning-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small fw-semibold text-dark">
+                                #{{ $c['id'] }} — {{ $c['title'] }}
+                            </div>
+                            <div class="small text-muted">
+                                {{ $c['start'] }} – {{ $c['end'] }}
+                                • {{ $c['lab_name'] ?? '' }} ({{ $c['lab_code'] ?? '' }})
+                                @if(!empty($c['user'])) • {{ $c['user'] }} @endif
+                            </div>
+                        </div>
+                        <span class="badge approval-pill approval-pill-approved">{{ $c['status'] }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+@endif
 
                             <p class="text-muted mb-0">
                                 Bạn có chắc muốn <strong>phê duyệt</strong> và tiếp tục nhập mã phòng?
@@ -642,7 +678,8 @@
                             </button>
                             <button type="button"
                                     wire:click="forceApprove"
-                                    class="btn approval-btn approval-btn-success">
+                                    class="btn approval-btn approval-btn-ghost" style ="color:#16a34a"
+                                    > 
                                 Vẫn phê duyệt
                             </button>
                         </div>
@@ -652,6 +689,115 @@
 
         </div>
     </div>
+{{-- Modal Batch Conflict --}}
+<div x-show="modals.batchConflict"
+     x-cloak
+     @open-batch-conflict-modal.window="showModal('batchConflict')"
+     @close-batch-conflict-modal.window="hideModal('batchConflict')"
+     class="modal fade"
+     :class="{ 'show d-block': modals.batchConflict }"
+     tabindex="-1"
+     style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 approval-modal">
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <h5 class="modal-title fw-semibold text-danger mb-1">⚠ Có lịch bị trùng trong danh sách đã chọn</h5>
+                    <div class="small text-muted">
+                        Tổng đã chọn: <b>{{ count($batchCandidateIds) }}</b> —
+                        Không trùng: <b>{{ $batchOkCount }}</b> —
+                        Bị trùng: <b>{{ $batchConflictCount }}</b>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" @click="hideModal('batchConflict')"></button>
+            </div>
+
+            <div class="modal-body pt-3">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="forceBatch"
+                           wire:model.live="batchForceApproveConflicts">
+                    <label class="form-check-label" for="forceBatch">
+                        Vẫn phê duyệt cả lịch bị trùng 
+                    </label>
+                </div>
+
+                <button class="btn btn-sm approval-btn approval-btn-ghost mb-2"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#batchConflictCollapse">
+                    Xem danh sách lịch bị trùng
+                </button>
+
+                <div class="collapse" id="batchConflictCollapse">
+                    <div class="accordion" id="batchConflictAccordion">
+                        @foreach($batchConflictDetails as $idx => $row)
+                            @php $e = $row['event'] ?? []; @endphp
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading{{ $idx }}">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ $idx }}">
+                                         {{ $e['title'] ?? '' }}
+                                        ({{ $e['start'] ?? '' }} → {{ $e['end'] ?? '' }})
+                                        • {{ $e['lab_code'] ?? '' }}
+                                    </button>
+                                </h2>
+
+                                <div id="collapse{{ $idx }}" class="accordion-collapse collapse"
+                                     data-bs-parent="#batchConflictAccordion">
+                                    <div class="accordion-body">
+                                        <div class="small text-muted mb-2">Trùng với:</div>
+
+                                        <div class="d-grid gap-2">
+                                            @foreach(($row['conflicts'] ?? []) as $c)
+                                                <div class="approval-file-item">
+                                                    <div class="approval-file-ic">
+                                                        <i class="ph-warning-circle"></i>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <div class="small fw-semibold text-dark">
+                                                             {{ $c['title'] }}
+                                                        </div>
+                                                        <div class="small text-muted">
+                                                            {{ $c['start'] }} – {{ $c['end'] }}
+                                                            • {{ $c['lab_name'] ?? '' }} ({{ $c['lab_code'] ?? '' }})
+                                                            @if(!empty($c['user'])) • {{ $c['user'] }} @endif
+                                                        </div>
+                                                    </div>
+                                                    {{-- <span class="badge approval-pill approval-pill-approved">{{ $c['status'] }}</span> --}}
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="small text-muted mt-3">
+                    Nhấn <b>Duyệt tiếp</b> để chuyển sang bước nhập mã phòng. Hệ thống sẽ duyệt theo lựa chọn ở trên.
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn approval-btn approval-btn-ghost"
+                        wire:click="cancelBatchConflict"
+                        @click="hideModal('batchConflict')">
+                    Hủy
+                </button>
+
+                <button type="button"
+                                    class="btn approval-btn approval-btn-ghost" style ="color:#16a34a"
+                        wire:click="continueBatchAfterConflict">
+                    Duyệt tiếp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -949,7 +1095,8 @@
                     details: false,
                     confirm: false,
                     password: false,
-                    conflict: false
+                    conflict: false,
+                    batchConflict: false,
                 },
                 
                 showModal(type) {
