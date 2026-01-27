@@ -42,23 +42,26 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
-        $this->EquipCData = LabEquipmentItem::join('equipment', 'equipment.id', '=', 'lab_equipment_items.equipment_id')
-            ->select('equipment.status')
-            ->selectRaw('SUM(lab_equipment_items.quantity) as count')
-            ->groupBy('equipment.status')
-            ->get()
-            ->map(fn($row) => [
-                'status' => ucfirst($row->status),
-                'count'  => (int) $row->count,
-            ])
-            ->values();
-
         $this->FaultyEquip  = LabEquipmentItem::sum('broken_quantity');;
         $this->EuqipNum = LabEquipmentItem::sum('quantity');
-        $this->MaintaceEquip = $maintenanceCount = LabEquipmentItem::whereHas('equipment', function ($q) {
+        $this->MaintaceEquip = LabEquipmentItem::whereHas('equipment', function ($q) {
             $q->where('status', 'maintenance');
         })
             ->sum('quantity');
+        $this->EquipCData = [
+            [
+                'status' => 'Available',
+                'count'  => $this->EuqipNum-$this->MaintaceEquip-$this->FaultyEquip ,
+            ],
+            [
+                'status' => 'Maintenance',
+                'count'  => $this->MaintaceEquip,
+            ],
+            [
+                'status' => 'Broken',
+                'count'  => $this->FaultyEquip ,
+            ],
+        ];
 
         //
         $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek())->where('end', '<=', now('UTC')->endOfWeek())->get();
