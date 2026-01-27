@@ -49,6 +49,20 @@
                                             Đang xử lý...
                                         </span>
                                     </button>
+                                     
+                                    <button class="btn btn-danger"
+                                            wire:click="rejectSelected"
+                                            wire:loading.attr="disabled"
+                                            wire:target="rejectSelected,rejectScheduleBatch,performConfirm">
+                                        <span wire:loading.remove wire:target="rejectSelected,rejectScheduleBatch,performConfirm">
+                                            <i class="ph-x-circle me-1"></i>
+                                            Từ chối {{ count($selectedIds) }} lịch
+                                        </span>
+                                        <span wire:loading wire:target="rejectSelected,rejectScheduleBatch,performConfirm">
+                                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                            Đang từ chối...
+                                        </span>
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -493,61 +507,46 @@
             </div>
 
             {{-- Modal Confirm --}}
-            <div x-show="modals.confirm"
-                 x-cloak
-                 @open-confirm-modal.window="showModal('confirm')"
-                 @close-confirm-modal.window="hideModal('confirm')"
-                 class="modal fade"
-                 :class="{ 'show d-block': modals.confirm }"
-                 tabindex="-1"
-                 style="background: rgba(0,0,0,0.5)">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-0 approval-modal">
-                        <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-semibold text-dark">
-                                {{ $confirmTitle ?: 'Xác nhận' }}
-                            </h5>
-                            <button type="button" class="btn-close" @click="hideModal('confirm')"></button>
-                        </div>
-                        <div class="modal-body">
-                            @if($confirmType === 'reject')
-                                <div class="approval-info border-0 p-0">
-                                    <label class="form-label small fw-bold">Lý do từ chối</label>
-                                    <textarea wire:model.defer="rejectionNote"
-                                              class="form-control approval-control"
-                                              rows="3"
-                                              placeholder="Nhập lý do..."></textarea>
-                                    <div class="small text-muted mt-2">
-                                        💡 Lý do này sẽ được lưu vào lịch và gửi cho người đăng ký.
-                                    </div>
-                                </div>
-                            @elseif($confirmType === 'delete')
-                                <p class="mb-0 text-muted">
-                                    {{ $confirmMessage ?: 'Bạn có chắc chắn muốn xóa lịch này? Hành động này không thể hoàn tác.' }}
-                                </p>
-                            @endif
-                        </div>
-                        <div class="modal-footer border-0">
-                            <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('confirm')">
-                                Hủy
-                            </button>
-                            <button wire:click="performConfirm"
-                                    type="button"
-                                    class="btn approval-btn approval-btn-danger"
-                                    wire:loading.attr="disabled">
-                                <span wire:loading.remove wire:target="performConfirm">
-                                    @if($confirmType === 'delete')
-                                        Xác nhận xóa
-                                    @else
-                                        Xác nhận từ chối
-                                    @endif
-                                </span>
-                                <span wire:loading wire:target="performConfirm">Đang xử lý...</span>
-                            </button>
-                        </div>
-                    </div>
+            {{-- Modal Confirm --}}
+<div x-show="modals.confirm" 
+     x-cloak
+     @open-confirm-modal.window="showModal('confirm')"
+     @close-confirm-modal.window="hideModal('confirm')"
+     class="modal fade" 
+     :class="{ 'show d-block': modals.confirm }"
+     style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 approval-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-semibold">{{ $confirmTitle ?: 'Xác nhận từ chối' }}</h5>
+                <button type="button" class="btn-close" @click="hideModal('confirm')"></button>
+            </div>
+            <div class="modal-body">
+                <div class="approval-info border-0 p-0">
+                    <p class="text-muted">{{ $confirmMessage }}</p>
+                    
+                    <label class="form-label small fw-bold">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea wire:model.defer="rejectionNote" 
+                              class="form-control approval-control" 
+                              rows="3" 
+                              placeholder="Nhập lý do cụ thể để người dùng biết..."></textarea>
+                    @error('rejectionNote') <span class="text-danger small">{{ $message }}</span> @enderror
                 </div>
             </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('confirm')">Hủy</button>
+                <button wire:click="performConfirm" 
+                        class="btn approval-btn approval-btn-danger"
+                        wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="performConfirm">Xác nhận từ chối</span>
+                    <span wire:loading wire:target="performConfirm">
+                        <span class="spinner-border spinner-border-sm"></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
             {{-- Modal Password --}}
             <div x-show="modals.password"

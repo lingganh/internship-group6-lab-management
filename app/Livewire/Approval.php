@@ -20,7 +20,6 @@ class Approval extends Component
     use WithPagination, WithFileUploads;
 
     protected $paginationTheme = 'bootstrap';
-    public int $selectedCount = 0;
 
     // Loading states
     public $isApproving = false;
@@ -95,12 +94,6 @@ class Approval extends Component
     {
         $this->resetPage();
     }
-
- 
-public function updatedSelectedIds()
-{
-    $this->selectedCount = count($this->selectedIds);
-}
 
     public function categoryLabel(?string $cat): string
     {
@@ -299,196 +292,111 @@ public function updatedSelectedIds()
         $this->dispatch('open-password-modal');
     }
 
+    public function rejectSelected()
+    {
+        if (empty($this->selectedIds)) {
+            $this->dispatch('alert',
+                type: 'warning',
+                message: 'Chưa chọn lịch nào.'
+            );
+            return;
+        }
+
+        // Chỉ lấy lịch pending
+        $count = LabEvent::whereIn('id', $this->selectedIds)
+            ->where('status', 'pending')
+            ->count();
+
+        if ($count === 0) {
+            $this->dispatch('alert',
+                type: 'warning',
+                message: 'Không có lịch chờ duyệt.'
+            );
+            return;
+        }
+
+        // Mở modal confirm với type batch-reject
+        $this->confirmType = 'batch-reject';
+        $this->confirmTitle = 'Từ chối nhiều lịch';
+        $this->confirmMessage = "Bạn chắc chắn muốn từ chối {$count} lịch đã chọn?";
+        $this->confirmId = null; // Không cần ID cụ thể
+        $this->rejectionNote = '';
+
+        $this->dispatch('open-confirm-modal');
+    }
+
     public function approveSchedule()
-{
-    if ($this->isApproving) {
-        return;
-    }
-
-    $this->isApproving = true;
-
-    try {
-        /**
-         * ============================
-         * DUYỆT NHIỀU LỊCH (BATCH)
-         * ============================
-         */
-        if ($this->passwordModalId === 'batch') {
-
-            // Lấy toàn bộ lịch pending đã chọn
-            $events = LabEvent::with('user')
-                ->whereIn('id', $this->selectedIds)
-                ->where('status', 'pending')
-                ->get();
-
-            if ($events->isEmpty()) {
-                $this->dispatch('alert',
-                    type: 'warning',
-                    message: 'Không có lịch chờ duyệt.'
-                );
-                return;
-            }
-
-            // Update status hàng loạt
-            LabEvent::whereIn('id', $events->pluck('id'))
-                ->update(['status' => 'approved']);
-
-            // ===== GỬI 1 MAIL DUY NHẤT =====
-            // Giả định batch này cùng 1 user (đúng với UI hiện tại)
-            $user = $events->first()->user;
-
-            if ($user && $user->email) {
-                Mail::to($user->email)->queue(
-                    new \App\Mail\BatchApprovalNotification(
-                        $events,
-                        $this->roomCode
-                    )
-                );
-            }
-
-            // Notification gộp
-            \App\Models\Notification::create([
-                'user_id' => $user?->id,
-                'title' => 'Lịch đã được phê duyệt',
-                'message' => 'Bạn có ' . $events->count() . ' lịch đã được phê duyệt.',
-                'data' => [
-                    'type' => 'batch_approved',
-                    'event_ids' => $events->pluck('id')->toArray(),
-                    'url' => route('home'),
-                ],
-            ]);
-
-            // Reset state
-            $this->selectedIds = [];
-            $this->selectedCount = 0;
-
-            $this->dispatch('alert',
-                type: 'success',
-                message: 'Đã phê duyệt ' . $events->count() . ' lịch',
-                sub: 'Email đã được gửi cho người đăng ký.'
-            );
+    {
+        if ($this->isApproving) {
+            return;
         }
 
-        /**
-         * ============================
-         * DUYỆT 1 LỊCH
-         * ============================
-         */
-        else {
+        $this->isApproving = true;
 
-            $event = LabEvent::with('user')->findOrFail($this->passwordModalId);
-
-            if ($event->status !== 'pending') {
-                $this->dispatch('alert',
-                    type: 'warning',
-                    message: 'Lịch không còn ở trạng thái chờ duyệt.'
-                );
-                return;
-            }
-
-            $event->update(['status' => 'approved']);
-
-            // Gửi mail đơn
-            if ($event->user && $event->user->email) {
-                Mail::to($event->user->email)->queue(
-                    new \App\Mail\ApprovalNotification($event, $this->roomCode)
-                );
-            }
-
-            // Notification đơn
-            $this->notifyUserEventResult($event, 'approved');
-
-            $this->dispatch('alert',
-                type: 'success',
-                message: 'Đã phê duyệt lịch',
-                sub: $event->series_id ? 'Đây là một buổi trong lịch lặp.' : null
-            );
-        }
-
-        // Đóng modal + reset
-        $this->dispatch('close-password-modal');
-        $this->dispatch('close-details-modal');
-
-        $this->passwordModalId = null;
-        $this->roomCode = '';
-    }
-    finally {
-        $this->isApproving = false;
-    }
-}
-
-    // public function approveSchedule()
-    // {
-    //     if ($this->isApproving) {
-    //         return;
-    //     }
-
-    //     $this->isApproving = true;
-
-    //     try {
-    //         if ($this->passwordModalId === 'batch') {
-    //             // Duyệt hàng loạt - sử dụng chunk
-    //             $eventIds = $this->selectedIds;
-    //             $count = 0;
+        try {
+            if ($this->passwordModalId === 'batch') {
+                // Duyệt hàng loạt - sử dụng chunk
+                $eventIds = $this->selectedIds;
+                $count = 0;
                 
-    //             LabEvent::whereIn('id', $eventIds)
-    //                 ->where('status', 'pending')
-    //                 ->chunk(50, function ($events) use (&$count) {
-    //                     foreach ($events as $event) {
-    //                         $event->update(['status' => 'approved']);
-    //                         $count++;
+                LabEvent::whereIn('id', $eventIds)
+                    ->where('status', 'pending')
+                    ->chunk(50, function ($events) use (&$count) {
+                        foreach ($events as $event) {
+                            $event->update(['status' => 'approved']);
+                            $count++;
                             
-    //                         // Queue notification và email
-    //                         dispatch(function () use ($event) {
-    //                             $this->notifyUserEventResult($event, 'approved');
+                            // Queue notification và email
+                            dispatch(function () use ($event) {
+                                $this->notifyUserEventResult($event, 'approved');
                                 
-    //                             if ($event->user && $event->user->email) {
-    //                                 Mail::to($event->user->email)->queue(
-    //                                     new \App\Mail\ApprovalNotification($event, $this->roomCode)
-    //                                 );
-    //                             }
-    //                         })->afterResponse();
-    //                     }
-    //                 });
+                                if ($event->user && $event->user->email) {
+                                    Mail::to($event->user->email)->queue(
+                                        new \App\Mail\ApprovalNotification($event, $this->roomCode)
+                                    );
+                                }
+                            })->afterResponse();
+                        }
+                    });
 
-    //             $this->selectedIds = [];
-    //             $this->dispatch('alert',
-    //                 type: 'success',
-    //                 message: "Đã phê duyệt {$count} lịch",
-    //                 sub: 'Email sẽ được gửi trong giây lát.'
-    //             );
-    //         } else {
-    //             // Duyệt đơn lẻ
-    //             $event = LabEvent::findOrFail($this->passwordModalId);
+                $this->selectedIds = [];
+                $this->dispatch('alert',
+                    type: 'success',
+                    message: "Đã phê duyệt {$count} lịch",
+                    sub: 'Email sẽ được gửi trong giây lát.'
+                );
+            } else {
+                // Duyệt đơn lẻ
+                $event = LabEvent::findOrFail($this->passwordModalId);
 
-    //             $event->update(['status' => 'approved']);
+                $event->update(['status' => 'approved']);
                 
-    //             // Queue notification và email
-    //             dispatch(function () use ($event) {
-    //                 $this->notifyUserEventResult($event, 'approved');
+                // Queue notification và email
+                dispatch(function () use ($event) {
+                    $this->notifyUserEventResult($event, 'approved');
                     
-    //                 if ($event->user && $event->user->email) {
-    //                     Mail::to($event->user->email)->queue(
-    //                         new \App\Mail\ApprovalNotification($event, $this->roomCode)
-    //                     );
-    //                 }
-    //             })->afterResponse();
+                    if ($event->user && $event->user->email) {
+                        Mail::to($event->user->email)->queue(
+                            new \App\Mail\ApprovalNotification($event, $this->roomCode)
+                        );
+                    }
+                })->afterResponse();
 
-    //             $this->dispatch('alert',
-    //                 type: 'success',
-    //                 message: 'Đã phê duyệt lịch',
-    //                 sub: $event->series_id ? 'Đây là 1 buổi trong lịch lặp.' : null
-    //             );
-    //         }
+                $this->dispatch('alert',
+                    type: 'success',
+                    message: 'Đã phê duyệt lịch',
+                    sub: $event->series_id ? 'Đây là 1 buổi trong lịch lặp.' : null
+                );
+            }
 
-    //         $this->dispatch('close-password-modal');
-    //         $this->dispatch('close-details-modal');
-    //         $this->passwordModalId = null;
-    //         $this->roomCode = '';
-    //     } finally {
-    //         $this->isApproving = false;
-    //     }
-    // }
+            $this->dispatch('close-password-modal');
+            $this->dispatch('close-details-modal');
+            $this->passwordModalId = null;
+            $this->roomCode = '';
+        } finally {
+            $this->isApproving = false;
+        }
+    }
 
     public function confirmReject($id = null)
     {
@@ -523,18 +431,21 @@ public function updatedSelectedIds()
 
     public function performConfirm()
     {
-        if (!$this->confirmId || !$this->confirmType) {
+        if ($this->confirmType === 'reject' && !$this->confirmId) {
             $this->dispatch('alert', type: 'error', message: 'Không hợp lệ', sub: 'Thiếu dữ liệu xác nhận.');
             return;
         }
 
-        if ($this->confirmType === 'reject') {
-            if (trim($this->rejectionNote) === '') {
-                $this->dispatch('alert', type: 'warning', message: 'Thiếu lý do', sub: 'Vui lòng nhập lý do từ chối.');
-                return;
-            }
+        // Kiểm tra lý do từ chối
+        if (($this->confirmType === 'reject' || $this->confirmType === 'batch-reject') && trim($this->rejectionNote) === '') {
+            $this->dispatch('alert', type: 'warning', message: 'Thiếu lý do', sub: 'Vui lòng nhập lý do từ chối.');
+            return;
+        }
 
+        if ($this->confirmType === 'reject') {
             $this->rejectSchedule($this->confirmId);
+        } elseif ($this->confirmType === 'batch-reject') {
+            $this->rejectScheduleBatch();
         } elseif ($this->confirmType === 'delete') {
             $this->deleteSchedule($this->confirmId);
         }
@@ -576,6 +487,87 @@ public function updatedSelectedIds()
 
         $this->dispatch('alert', type: 'success', message: 'Đã từ chối', sub: 'Yêu cầu đã được cập nhật.');
         $this->dispatch('close-details-modal');
+    }
+
+    public function rejectScheduleBatch()
+    {
+        if ($this->isRejecting) {
+            return;
+        }
+
+        $this->isRejecting = true;
+
+        try {
+            // Lấy toàn bộ lịch pending đã chọn
+            $events = LabEvent::with('user')
+                ->whereIn('id', $this->selectedIds)
+                ->where('status', 'pending')
+                ->get();
+
+            if ($events->isEmpty()) {
+                $this->dispatch('alert',
+                    type: 'warning',
+                    message: 'Không có lịch chờ duyệt.'
+                );
+                return;
+            }
+
+            $reason = trim($this->rejectionNote) ?: null;
+
+            // Update status hàng loạt
+            LabEvent::whereIn('id', $events->pluck('id'))
+                ->update([
+                    'status' => 'cancelled',
+                    'reason' => $reason,
+                ]);
+
+            // Gửi email và notification cho từng user
+            $userEmails = $events->pluck('user.email')->filter()->unique();
+            
+            foreach ($userEmails as $email) {
+                $userEvents = $events->filter(fn($e) => $e->user?->email === $email);
+                
+                if ($userEvents->isNotEmpty()) {
+                    // Gửi 1 email cho nhiều lịch của cùng user
+                    Mail::to($email)->queue(
+                        new \App\Mail\BatchRejectionNotification(
+                            $userEvents,
+                            $this->rejectionNote
+                        )
+                    );
+
+                    // Tạo notification
+                    $userId = $userEvents->first()->user_id;
+                    if ($userId) {
+                        \App\Models\Notification::create([
+                            'user_id' => $userId,
+                            'title' => 'Lịch đã bị từ chối',
+                            'message' => 'Bạn có ' . $userEvents->count() . ' lịch đã bị từ chối. Lý do: ' . ($reason ?: 'Không có lý do cụ thể'),
+                            'data' => [
+                                'type' => 'batch_rejected',
+                                'event_ids' => $userEvents->pluck('id')->toArray(),
+                                'reason' => $reason,
+                                'url' => route('home'),
+                            ],
+                        ]);
+                    }
+                }
+            }
+
+            // Reset state
+            $count = $events->count();
+            $this->selectedIds = [];
+            $this->selectedCount = 0;
+
+            $this->dispatch('alert',
+                type: 'success',
+                message: "Đã từ chối {$count} lịch",
+                sub: 'Email thông báo đã được gửi.'
+            );
+
+        } finally {
+            $this->isRejecting = false;
+        }
     }
 
     public function deleteSchedule($id)

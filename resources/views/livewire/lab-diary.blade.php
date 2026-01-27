@@ -64,7 +64,7 @@
                                     <input type="text"
                                            wire:model.live="keyword"
                                            class="form-control diary-control"
-                                           placeholder="Tiêu đề / mô tả / feedback...">
+                                           placeholder="Tiêu đề / mô tả ...">
                                 </div>
                             </div>
                         </div>
@@ -89,7 +89,7 @@
                                                     {{ $item->title }}
                                                 </div>
                                                 <div class="small text-muted">
-                                                    #{{ $item->id }} • {{ $this->categoryLabel($item->category) }}
+                                                    {{ $this->categoryLabel($item->category) }}
                                                 </div>
                                             </td>
 
@@ -286,7 +286,7 @@
 
                                     <div class="col-12">
                                         <div class="diary-info">
-                                            <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Ý kiến sử dụng phòng</label>
                                             <textarea wire:model.defer="edit.feedback"
                                                       class="form-control diary-control"
                                                       rows="3"></textarea>
