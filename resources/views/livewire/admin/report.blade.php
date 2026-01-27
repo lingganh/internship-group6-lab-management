@@ -16,30 +16,20 @@
     <div class="container-fluid px-4 mb-4">
         <div class="card border-0 shadow-sm rounded-4 p-4">
             <div class="row g-3 align-items-end">
+                <!-- multiple labs -->
 
-                <div class="col-lg-3 col-md-6">
-                    <label class="filter-label">Phòng Lab</label>
-                    <select class="form-select filter-input" wire:model.live="selectedLab">
-                        <option value="all">Tất cả</option>
-                        @foreach($LabList as $lab)
-                        <option value="{{ $lab->id }}">
-                            {{ $lab->name }} ({{ $lab->code }})
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
 
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <label class="filter-label">Từ ngày</label>
                     <input type="date" class="form-control filter-input" wire:model.live="fromDate">
                 </div>
 
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <label class="filter-label">Đến ngày</label>
                     <input type="date" class="form-control filter-input" wire:model.live="toDate">
                 </div>
 
-                <div class="col-lg-3 col-md-12">
+                <div class="col-lg-4 col-md-12">
                     <button class="btn btn-primary w-100 h-52 rounded-3 fw-semibold"
                         wire:click="exportPdf"
                         wire:loading.attr="disabled">

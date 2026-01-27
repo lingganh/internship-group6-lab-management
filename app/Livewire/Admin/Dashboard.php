@@ -43,15 +43,19 @@ class Dashboard extends Component
             ->get();
 
         $this->FaultyEquip  = LabEquipmentItem::sum('broken_quantity');;
-        $this->EuqipNum = LabEquipmentItem::sum('quantity');
+        $this->EuqipNum = LabEquipmentItem::sum('actual_quantity');
         $this->MaintaceEquip = LabEquipmentItem::whereHas('equipment', function ($q) {
             $q->where('status', 'maintenance');
+        })
+            ->sum('quantity');
+        $temp=LabEquipmentItem::whereHas('equipment', function ($q) {
+            $q->where('status', 'in_use');
         })
             ->sum('quantity');
         $this->EquipCData = [
             [
                 'status' => 'Available',
-                'count'  => $this->EuqipNum-$this->MaintaceEquip-$this->FaultyEquip ,
+                'count'  => $this->EuqipNum,
             ],
             [
                 'status' => 'Maintenance',
@@ -61,6 +65,10 @@ class Dashboard extends Component
                 'status' => 'Broken',
                 'count'  => $this->FaultyEquip ,
             ],
+            [
+                'status'=>'In_use',
+                'count'=>$temp,
+            ]
         ];
 
         //
