@@ -57,4 +57,10 @@ class LabEvent extends Model
 
         return $this->status;
     }
+
+    public function isSeries(): bool
+    {
+        return !is_null($this->series_id);
+    }
+
 }

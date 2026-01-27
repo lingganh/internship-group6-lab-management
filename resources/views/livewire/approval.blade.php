@@ -1,4 +1,4 @@
-<div>
+<div x-data="approvalComponent()">
     <div class="page-header page-header-light shadow-sm">
         <div class="page-header-content d-lg-flex">
             <div class="d-flex">
@@ -36,10 +36,38 @@
                                     <span class="me-1">Đang chờ</span>
                                     <span class="fw-bold">{{ $pendingCount }}</span>
                                 </span>
+                               
+                                @if(count($selectedIds) > 0)
+                                    <button class="btn btn-success"
+                                            wire:click="approveSelected"
+                                            wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="approveSelected">
+                                            Phê duyệt {{ count($selectedIds) }} lịch
+                                        </span>
+                                        <span wire:loading wire:target="approveSelected">
+                                            <span class="spinner-border spinner-border-sm me-1"></span>
+                                            Đang xử lý...
+                                        </span>
+                                    </button>
+                                     
+                                    <button class="btn btn-danger"
+                                            wire:click="rejectSelected"
+                                            wire:loading.attr="disabled"
+                                            wire:target="rejectSelected,rejectScheduleBatch,performConfirm">
+                                        <span wire:loading.remove wire:target="rejectSelected,rejectScheduleBatch,performConfirm">
+                                            <i class="ph-x-circle me-1"></i>
+                                            Từ chối {{ count($selectedIds) }} lịch
+                                        </span>
+                                        <span wire:loading wire:target="rejectSelected,rejectScheduleBatch,performConfirm">
+                                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                            Đang từ chối...
+                                        </span>
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>
-
+                    
                     <div class="card-body pt-3">
                         <div class="approval-filters mb-3">
                             <div class="row g-2 g-md-3 align-items-end">
@@ -53,16 +81,6 @@
                                         <option value="">Tất cả</option>
                                     </select>
                                 </div>
-
-                                {{-- <div class="col-12 col-md-3">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                                    <select wire:model.live="filterLabCode" class="form-select approval-control">
-                                        <option value="">Tất cả phòng</option>
-                                        @foreach($labs as $lab)
-                                            <option value="{{ $lab->code }}">{{ $lab->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div> --}}
 
                                 <div class="col-12 col-md-3">
                                     <label class="form-label small fw-semibold text-dark mb-1">Người dùng</label>
@@ -87,6 +105,13 @@
                             <table class="table align-middle mb-0 approval-table">
                                 <thead>
                                     <tr>
+                                        <th>
+                                            @if($pendingCount > 0)
+                                            <input type="checkbox" 
+                                                   wire:click="toggleSelectAll"
+                                                   @if(count($selectedIds) > 0) checked @endif>
+                                            @endif
+                                        </th>
                                         <th>Sự kiện</th>
                                         <th>Mã phòng</th>
                                         <th>Người đăng ký</th>
@@ -97,110 +122,92 @@
                                 </thead>
                                 <tbody>
                                     @forelse($schedules as $item)
-                                        <tr>
+                                        <tr wire:key="schedule-{{ $item->id }}">
+                                            <td>
+                                                @if($item->status === 'pending')
+                                                    <input type="checkbox"
+                                                           wire:model.live="selectedIds"
+                                                           value="{{ $item->id }}">
+                                                @endif
+                                            </td>
+
                                             <td data-label="Sự kiện">
-                                                <div class="fw-semibold text-dark text-wrap-mobile">
+                                                <div class="fw-semibold text-dark text-wrap-mobile d-flex align-items-center gap-1">
                                                     {{ $item->title }}
+                                                    {{-- @if($item->series_id)
+                                                        <span class="badge bg-info text-white" title="Lịch lặp"><i class="fa-solid fa-repeat"></i></span>
+                                                    @endif --}}
                                                 </div>
                                                 <div class="small text-muted">
                                                     {{ $this->categoryLabel($item->category) }}
+                                                    @if($item->series_id)
+                                                        <span class="ms-1">(lịch lặp)</span>
+                                                    @endif
                                                 </div>
                                             </td>
 
                                             <td data-label="Mã phòng">
-                                                <div class="fw-semibold text-dark">
-                                                    {{ $item->lab_code ?? '' }}
-                                                </div>
-                                                <div class="small text-muted">
-                                                    {{ $item->lab?->name }}
-                                                </div>
+                                                <div class="fw-semibold text-dark">{{ $item->lab_code ?? '' }}</div>
+                                                <div class="small text-muted">{{ $item->lab?->name }}</div>
                                             </td>
 
                                             <td data-label="Người đăng ký">
-                                                <div class="fw-semibold text-dark">
-                                                    {{ $item->user?->full_name ?? '' }}
-                                                </div>
-                                                <div class="small text-muted text-break">
-                                                    ID: {{ $item->user_id }}
-                                                </div>
+                                                <div class="fw-semibold text-dark">{{ $item->user?->full_name ?? '' }}</div>
+                                                <div class="small text-muted text-break">ID: {{ $item->user_id }}</div>
                                             </td>
 
                                             <td data-label="Thời gian">
-                                                <div class="fw-semibold text-dark">
-                                                    {{ optional($item->start)->format('d/m/Y') }}
-                                                </div>
+                                                <div class="fw-semibold text-dark">{{ optional($item->start)->format('d/m/Y') }}</div>
                                                 <div class="small text-muted">
-                                                    {{ optional($item->start)->format('H:i') }}
-                                                    –
-                                                    {{ optional($item->end)->format('H:i') }}
+                                                    {{ optional($item->start)->format('H:i') }} – {{ optional($item->end)->format('H:i') }}
                                                 </div>
                                             </td>
 
                                             <td data-label="Trạng thái" class="text-center-desktop">
                                                 @if($item->status === 'pending')
-                                                    <span class="badge approval-pill approval-pill-pending">
-                                                        Chờ duyệt
-                                                    </span>
+                                                    <span class="badge approval-pill approval-pill-pending">Chờ duyệt</span>
                                                 @elseif($item->status === 'approved')
-                                                    <span class="badge approval-pill approval-pill-approved">
-                                                        Đã duyệt
-                                                    </span>
+                                                    <span class="badge approval-pill approval-pill-approved">Đã duyệt</span>
                                                 @elseif($item->status === 'completed')
-                                                    <span class="badge approval-pill approval-pill-approved">
-                                                        Đã hoàn thành
-                                                    </span>
+                                                    <span class="badge approval-pill approval-pill-approved">Đã hoàn thành</span>
                                                 @else
-                                                    <span class="badge approval-pill approval-pill-cancelled">
-                                                        Từ chối
-                                                    </span>
+                                                    <span class="badge approval-pill approval-pill-cancelled">Từ chối</span>
                                                 @endif
                                             </td>
 
                                             <td class="text-center action-cell" data-label="Hành động">
                                                 <div class="dropdown approval-action-dropdown">
-                                                    <button
-                                                        class="btn btn-sm btn-link approval-action-toggle"
-                                                        type="button"
-                                                        data-bs-toggle="dropdown"
-                                                        aria-expanded="false">
+                                                    <button class="btn btn-sm btn-link approval-action-toggle"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false">
                                                         <i class="ph-dots-three-outline"></i>
                                                     </button>
-
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                         <li>
-                                                            <button
-                                                                type="button"
-                                                                class="dropdown-item"
-                                                                wire:click="viewSchedule({{ $item->id }})">
+                                                            <button type="button" class="dropdown-item"
+                                                                    wire:click="viewSchedule({{ $item->id }})">
                                                                 Chi tiết
                                                             </button>
                                                         </li>
-
                                                         @if($item->status === 'pending')
                                                             <li>
-                                                                <button
-                                                                    type="button"
-                                                                    class="dropdown-item"
-                                                                    wire:click="approveNow({{ $item->id }})">
+                                                                <button type="button" class="dropdown-item"
+                                                                        wire:click="approveNow({{ $item->id }})">
                                                                     Phê duyệt
                                                                 </button>
                                                             </li>
                                                             <li>
-                                                                <button
-                                                                    type="button"
-                                                                    class="dropdown-item"
-                                                                    wire:click="confirmReject({{ $item->id }})">
+                                                                <button type="button" class="dropdown-item"
+                                                                        wire:click="confirmReject({{ $item->id }})">
                                                                     Từ chối
                                                                 </button>
                                                             </li>
                                                         @endif
-
                                                         <li><hr class="dropdown-divider"></li>
                                                         <li>
-                                                            <button
-                                                                type="button"
-                                                                class="dropdown-item text-danger"
-                                                                wire:click="confirmDelete({{ $item->id }})">
+                                                            <button type="button" class="dropdown-item text-danger"
+                                                                    wire:click="confirmDelete({{ $item->id }})">
                                                                 Xóa lịch
                                                             </button>
                                                         </li>
@@ -210,9 +217,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center py-5">
-                                                Không có dữ liệu phù hợp.
-                                            </td>
+                                            <td colspan="7" class="text-center py-5">Không có dữ liệu phù hợp.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -227,7 +232,14 @@
             </div>
 
             {{-- Modal Details --}}
-            <div wire:ignore.self class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
+            <div x-show="$wire.selectedSchedule !== null"
+                 x-cloak
+                 @open-details-modal.window="showModal('details')"
+                 @close-details-modal.window="hideModal('details')"
+                 class="modal fade"
+                 :class="{ 'show d-block': modals.details }"
+                 tabindex="-1"
+                 style="background: rgba(0,0,0,0.5)">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content border-0 approval-modal">
                         <div class="modal-header border-0 pb-0">
@@ -235,7 +247,7 @@
                                 <h5 class="modal-title fw-semibold text-dark mb-1">Chi tiết lịch đăng ký</h5>
                                 <div class="small text-muted">Xem và chỉnh sửa thông tin lịch sử dụng phòng lab.</div>
                             </div>
-                            <button type="button" class="btn-close mt-1" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn-close mt-1" @click="hideModal('details')"></button>
                         </div>
 
                         <div class="modal-body pt-3">
@@ -359,9 +371,7 @@
                                         <div class="col-12">
                                             <div class="approval-info">
                                                 <label class="form-label small fw-semibold text-dark mb-1">Lý do từ chối</label>
-                                                <div class="approval-desc">
-                                                    {{ $selectedSchedule->reason }}
-                                                </div>
+                                                <div class="approval-desc">{{ $selectedSchedule->reason }}</div>
                                             </div>
                                         </div>
                                     @endif
@@ -387,9 +397,9 @@
                                                         
                                                         <div class="approval-file-item" wire:key="file-{{ $f->id }}">
                                                             <a class="approval-file-link" 
-                                                            href="{{ $u != '#' ? $u : 'javascript:void(0)' }}" 
-                                                            target="{{ $u != '#' ? '_blank' : '' }}" 
-                                                            rel="noopener">
+                                                               href="{{ $u != '#' ? $u : 'javascript:void(0)' }}" 
+                                                               target="{{ $u != '#' ? '_blank' : '' }}" 
+                                                               rel="noopener">
                                                                 <div class="approval-file-ic">
                                                                     <i class="ph-file-text"></i>
                                                                 </div>
@@ -400,11 +410,9 @@
                                                                     </div>
                                                                 </div>
                                                             </a>
-
-                                                            <button
-                                                                type="button"
-                                                                class="btn btn-sm btn-link text-danger"
-                                                                wire:click.prevent="deleteFile({{ $f->id }})">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-link text-danger"
+                                                                    wire:click.prevent="deleteFile({{ $f->id }})">
                                                                 Xóa
                                                             </button>
                                                         </div>
@@ -429,10 +437,9 @@
                                                             {{ $file->getClientOriginalName() }}
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-link text-danger"
-                                                        wire:click.prevent="removeNewFile({{ $idx }})">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-link text-danger"
+                                                            wire:click.prevent="removeNewFile({{ $idx }})">
                                                         Bỏ
                                                     </button>
                                                 </div>
@@ -461,7 +468,7 @@
 
                         <div class="modal-footer border-0 pt-0">
                             <div class="d-flex w-100 justify-content-between align-items-center gap-2">
-                                <button type="button" class="btn approval-btn approval-btn-ghost" data-bs-dismiss="modal">
+                                <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('details')">
                                     Đóng
                                 </button>
 
@@ -487,8 +494,10 @@
 
                                     <button wire:click="updateEvent" 
                                             type="button"
-                                            class="btn approval-btn approval-btn-success">
-                                        Lưu
+                                            class="btn approval-btn approval-btn-success"
+                                            wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="updateEvent">Lưu</span>
+                                        <span wire:loading wire:target="updateEvent">Đang lưu...</span>
                                     </button>
                                 </div>
                             </div>
@@ -498,83 +507,65 @@
             </div>
 
             {{-- Modal Confirm --}}
-            <div wire:ignore.self
-                 class="modal fade"
-                 id="modalConfirm"
-                 tabindex="-1"
-                 aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-0 approval-modal">
-                        <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-semibold text-dark">
-                                {{ $confirmTitle ?: 'Xác nhận' }}
-                            </h5>
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            @if($confirmType === 'reject')
-                                <div class="approval-info border-0 p-0">
-                                    <label class="form-label small fw-bold">
-                                        Lý do từ chối
-                                    </label>
-                                    <textarea
-                                        wire:model.defer="rejectionNote"
-                                        class="form-control approval-control"
-                                        rows="3"
-                                        placeholder="Nhập lý do..."></textarea>
-                                    <div class="small text-muted mt-2">
-                                        💡 Lý do này sẽ được lưu vào lịch và gửi cho người đăng ký.
-                                    </div>
-                                </div>
-                            @elseif($confirmType === 'delete')
-                                <p class="mb-0 text-muted">
-                                    {{ $confirmMessage ?: 'Bạn có chắc chắn muốn xóa lịch này? Hành động này không thể hoàn tác.' }}
-                                </p>
-                            @endif
-                        </div>
-                        <div class="modal-footer border-0">
-                            <button type="button"
-                                    class="btn approval-btn approval-btn-ghost"
-                                    data-bs-dismiss="modal">
-                                Hủy
-                            </button>
-                            <button wire:click="performConfirm"
-                                    type="button"
-                                    class="btn approval-btn approval-btn-danger">
-                                @if($confirmType === 'delete')
-                                    Xác nhận xóa
-                                @else
-                                    Xác nhận từ chối
-                                @endif
-                            </button>
-                        </div>
-                    </div>
+            {{-- Modal Confirm --}}
+<div x-show="modals.confirm" 
+     x-cloak
+     @open-confirm-modal.window="showModal('confirm')"
+     @close-confirm-modal.window="hideModal('confirm')"
+     class="modal fade" 
+     :class="{ 'show d-block': modals.confirm }"
+     style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 approval-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-semibold">{{ $confirmTitle ?: 'Xác nhận từ chối' }}</h5>
+                <button type="button" class="btn-close" @click="hideModal('confirm')"></button>
+            </div>
+            <div class="modal-body">
+                <div class="approval-info border-0 p-0">
+                    <p class="text-muted">{{ $confirmMessage }}</p>
+                    
+                    <label class="form-label small fw-bold">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea wire:model.defer="rejectionNote" 
+                              class="form-control approval-control" 
+                              rows="3" 
+                              placeholder="Nhập lý do cụ thể để người dùng biết..."></textarea>
+                    @error('rejectionNote') <span class="text-danger small">{{ $message }}</span> @enderror
                 </div>
             </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('confirm')">Hủy</button>
+                <button wire:click="performConfirm" 
+                        class="btn approval-btn approval-btn-danger"
+                        wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="performConfirm">Xác nhận từ chối</span>
+                    <span wire:loading wire:target="performConfirm">
+                        <span class="spinner-border spinner-border-sm"></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
             {{-- Modal Password --}}
-            <div wire:ignore.self
+            <div x-show="modals.password"
+                 x-cloak
+                 @open-password-modal.window="showModal('password')"
+                 @close-password-modal.window="hideModal('password')"
                  class="modal fade"
-                 id="modalPassword"
+                 :class="{ 'show d-block': modals.password }"
                  tabindex="-1"
-                 aria-hidden="true">
+                 style="background: rgba(0,0,0,0.5)">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 approval-modal">
                         <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-semibold text-dark">
-                                🔑 Nhập mã phòng
-                            </h5>
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"></button>
+                            <h5 class="modal-title fw-semibold text-dark">🔑 Nhập mã phòng</h5>
+                            <button type="button" class="btn-close" @click="hideModal('password')"></button>
                         </div>
                         <div class="modal-body">
                             <div class="approval-info border-0 p-0">
-                                <label class="form-label small fw-bold">
-                                    Mã phòng lab
-                                </label>
+                                <label class="form-label small fw-bold">Mã phòng lab</label>
                                 <input type="text"
                                        wire:model="roomCode"
                                        class="form-control approval-control"
@@ -582,19 +573,22 @@
                                        autofocus>
                                 <div class="small text-muted mt-2">
                                     💡 Mã phòng sẽ được gửi qua email cho người dùng.
+                                    @if($seriesApproveCount > 1)
+                                        <br>Có {{ $seriesApproveCount }} lịch sẽ được phê duyệt.
+                                    @endif
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer border-0">
-                            <button type="button"
-                                    class="btn approval-btn approval-btn-ghost"
-                                    data-bs-dismiss="modal">
+                            <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('password')">
                                 Hủy
                             </button>
                             <button wire:click="approveSchedule"
                                     type="button"
-                                    class="btn approval-btn approval-btn-success">
-                                Xác nhận phê duyệt
+                                    class="btn approval-btn approval-btn-success"
+                                    wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="approveSchedule">Xác nhận phê duyệt</span>
+                                <span wire:loading wire:target="approveSchedule">Đang xử lý...</span>
                             </button>
                         </div>
                     </div>
@@ -602,20 +596,19 @@
             </div>
 
             {{-- Modal Conflict --}}
-            <div wire:ignore.self
+            <div x-show="modals.conflict"
+                 x-cloak
+                 @open-conflict-modal.window="showModal('conflict')"
+                 @close-conflict-modal.window="hideModal('conflict')"
                  class="modal fade"
-                 id="modalConflict"
+                 :class="{ 'show d-block': modals.conflict }"
                  tabindex="-1"
-                 aria-hidden="true">
+                 style="background: rgba(0,0,0,0.5)">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 approval-modal">
                         <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-semibold text-danger">
-                                ⚠ Trùng lịch với 1 lịch đã duyệt
-                            </h5>
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"></button>
+                            <h5 class="modal-title fw-semibold text-danger">⚠ Trùng lịch với 1 lịch đã duyệt</h5>
+                            <button type="button" class="btn-close" @click="hideModal('conflict')"></button>
                         </div>
                         <div class="modal-body">
                             <p class="mb-2 text-dark fw-semibold">
@@ -624,26 +617,17 @@
 
                             @if($conflictSchedule)
                                 <div class="approval-info mb-3">
-                                    <div class="small text-muted mb-1">
-                                        Lịch đang trùng
-                                    </div>
-                                    <div class="fw-semibold text-dark">
-                                        {{ $conflictSchedule->title }}
-                                    </div>
+                                    <div class="small text-muted mb-1">Lịch đang trùng</div>
+                                    <div class="fw-semibold text-dark">{{ $conflictSchedule->title }}</div>
                                     <div class="small text-muted">
-                                        Phòng:
-                                        {{ $conflictSchedule->lab?->name ?? 'N/A' }}
-                                        ({{ $conflictSchedule->lab_code ?? '-' }})
+                                        Phòng: {{ $conflictSchedule->lab?->name ?? 'N/A' }} ({{ $conflictSchedule->lab_code ?? '-' }})
                                     </div>
                                     <div class="small text-muted mt-1">
-                                        Thời gian:
-                                        {{ optional($conflictSchedule->start)->format('H:i d/m/Y') }}
-                                        –
-                                        {{ optional($conflictSchedule->end)->format('H:i d/m/Y') }}
+                                        Thời gian: {{ optional($conflictSchedule->start)->format('H:i d/m/Y') }}
+                                        – {{ optional($conflictSchedule->end)->format('H:i d/m/Y') }}
                                     </div>
                                     <div class="small text-muted mt-1">
-                                        Người đăng ký:
-                                        {{ $conflictSchedule->user?->full_name ?? 'N/A' }}
+                                        Người đăng ký: {{ $conflictSchedule->user?->full_name ?? 'N/A' }}
                                     </div>
                                 </div>
                             @endif
@@ -653,9 +637,7 @@
                             </p>
                         </div>
                         <div class="modal-footer border-0">
-                            <button type="button"
-                                    class="btn approval-btn approval-btn-ghost"
-                                    data-bs-dismiss="modal">
+                            <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('conflict')">
                                 Hủy
                             </button>
                             <button type="button"
@@ -672,6 +654,8 @@
     </div>
 
     <style>
+        [x-cloak] { display: none !important; }
+        
         .approval-page {
             --ap-bg: #f8fafc;
             --ap-card: #ffffff;
@@ -959,42 +943,25 @@
     </style>
 
     <script>
-        function apGetModal(id) {
-            const el = document.getElementById(id);
-            if (!el) return null;
-            return bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
+        function approvalComponent() {
+            return {
+                modals: {
+                    details: false,
+                    confirm: false,
+                    password: false,
+                    conflict: false
+                },
+                
+                showModal(type) {
+                    this.modals[type] = true;
+                    document.body.classList.add('modal-open');
+                },
+                
+                hideModal(type) {
+                    this.modals[type] = false;
+                    document.body.classList.remove('modal-open');
+                }
+            }
         }
-
-        window.addEventListener('open-details-modal', () =>
-            apGetModal('modalDetails')?.show()
-        );
-
-        window.addEventListener('close-details-modal', () =>
-            bootstrap.Modal.getInstance(document.getElementById('modalDetails'))?.hide()
-        );
-
-        window.addEventListener('open-confirm-modal', () =>
-            apGetModal('modalConfirm')?.show()
-        );
-
-        window.addEventListener('close-confirm-modal', () =>
-            bootstrap.Modal.getInstance(document.getElementById('modalConfirm'))?.hide()
-        );
-
-        window.addEventListener('open-password-modal', () =>
-            apGetModal('modalPassword')?.show()
-        );
-
-        window.addEventListener('close-password-modal', () =>
-            bootstrap.Modal.getInstance(document.getElementById('modalPassword'))?.hide()
-        );
-
-        window.addEventListener('open-conflict-modal', () =>
-            apGetModal('modalConflict')?.show()
-        );
-
-        window.addEventListener('close-conflict-modal', () =>
-            bootstrap.Modal.getInstance(document.getElementById('modalConflict'))?.hide()
-        );
     </script>
 </div>

@@ -14,6 +14,7 @@ use App\Models\Group;
 use App\Models\Notification;
 use App\Models\User;
 use App\Enums\Role as RoleEnum;
+use Illuminate\Support\Str;
 
 class LabCalendar extends Component
 {
@@ -109,93 +110,190 @@ class LabCalendar extends Component
             ->where('end', '>', $start)
             ->exists();
     }
-
     public function store(Request $request)
     {
-        $this->autoUpdateStatuses();
-
         if (!auth()->check()) {
             return response()->json([
                 'type' => 'error',
-                'message' => 'Bạn cần đăng nhập để đăng ký sự kiện.'
+                'message' => 'Bạn cần đăng nhập.'
             ], 401);
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:work,seminar,other',
-            'color' => 'nullable|string|max:20',
-            // 'lab_code' => 'required|string|exists:labs,code',
-            'start' => 'required|date',
-            'end' => 'required|date|after:start',
+            'lab_code' => 'required|string|exists:labs,code',
             'description' => 'nullable|string|max:1000',
             'registered_for' => 'nullable|string|max:255',
-        ], [
-            'title.required' => 'Vui lòng nhập tiêu đề sự kiện.',
-            'lab_code.required' => 'Vui lòng chọn phòng lab.',
-            'lab_code.exists' => 'Phòng lab không tồn tại.',
-            'start.required' => 'Vui lòng chọn thời gian bắt đầu.',
-            'end.required' => 'Vui lòng chọn thời gian kết thúc.',
-            'end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+            'occurrences' => 'nullable|array',
+            'occurrences.*.start' => 'required_with:occurrences|date',
+            'occurrences.*.end' => 'required_with:occurrences|date|after:occurrences.*.start',
         ]);
 
-        $validated['lab_code'] = 'LAB-304';
-        // ====== CHECK TRÙNG TRƯỚC KHI TẠO ======
-        if (
-            $this->hasConflict(
-                $validated['lab_code'],
-                $validated['start'],
-                $validated['end']
-            )
-        ) {
+        $user = Auth::user();
+        $isAdmin = (int) $user->role_id === 1;
+
+        $seriesId = Str::uuid()->toString();
+        $createdEvents = [];
+
+        // nếu không có occurrences → tạo 1 lịch
+        $occurrences = $request->input('occurrences');
+
+        if (empty($occurrences)) {
+            $occurrences = [
+                [
+                    'start' => $request->start,
+                    'end' => $request->end,
+                ]
+            ];
+        }
+
+        foreach ($occurrences as $index => $occ) {
+            // check trùng CHỈ với approved
+            $conflict = LabEvent::where('lab_code', $request->lab_code)
+                ->where('status', 'approved')
+                ->where('start', '<', $occ['end'])
+                ->where('end', '>', $occ['start'])
+                ->exists();
+
+            if ($conflict) {
+                continue; // bỏ occurrence bị trùng
+            }
+
+            $event = LabEvent::create([
+                'series_id' => count($occurrences) > 1 ? $seriesId : null,
+                'title' => $request->title,
+                'category' => $request->category,
+                'color' => $request->color,
+                'lab_code' => $request->lab_code,
+                'start' => $occ['start'],
+                'end' => $occ['end'],
+                'description' => $request->description,
+                'registered_for' => $request->registered_for,
+                'status' => 'pending',
+                'user_id' => $user->id,
+                'updated_by' => $user->id,
+            ]);
+
+            // chỉ upload file cho event đầu
+            if ($index === 0 && $request->hasFile('files')) {
+                $this->handleFileUploads($request->file('files'), $event->id);
+            }
+
+            $createdEvents[] = $event;
+        }
+
+        if (empty($createdEvents)) {
             return response()->json([
                 'type' => 'error',
-                'message' => 'Thời gian bạn chọn đang bị trùng với một lịch khác trong cùng phòng lab.'
+                'message' => 'Tất cả lịch đều bị trùng với lịch đã duyệt.'
             ], 409);
         }
 
-        $user = Auth::user();
-        $isAdmin = $user->role_id == 1;
-
-        $validated['status'] = 'pending';
-        $validated['user_id'] = $user->id;
-        $validated['updated_by'] = $user->id;
-
-        $event = LabEvent::create($validated);
-
-        if ($request->hasFile('files')) {
-            $this->handleFileUploads($request->file('files'), $event->id);
+        // notify admin 1 lần
+        if (!$isAdmin) {
+            $this->notifyAdminsPendingEvent(
+                $createdEvents[0],
+                'created',
+                count($createdEvents)
+            );
         }
-
-        // CHỈ gửi thông báo nếu là occurrence đầu tiên của lịch lặp
-        $isRecurring = $request->input('is_recurring') === 'true';
-        $isFirstOccurrence = $request->input('is_first_occurrence') === 'true';
-        $totalOccurrences = (int) $request->input('total_occurrences', 1);
-
-        if (!$isAdmin && (!$isRecurring || $isFirstOccurrence)) {
-            $this->notifyAdminsPendingEvent($event, 'created', $totalOccurrences);
-        }
-        $event->refresh();
 
         return response()->json([
-            'message' => $isAdmin
-                ? 'Sự kiện đã được tạo và tự động duyệt.'
-                : 'Đã gửi yêu cầu đăng ký. Vui lòng chờ quản trị viên phê duyệt.',
+            'messages' => 'Đã gửi yêu cầu đăng ký lịch.',
             'data' => [
-                'id' => $event->id,
-                'title' => $event->title,
-                'category' => $event->category,
-                'color' => $event->color,
-                'lab_code' => $event->lab_code,
-                'start' => $event->start,
-                'end' => $event->end,
-                'description' => $event->description,
-                'registered_for' => $event->registered_for,
-                'status' => $event->status,
-                'user_id' => $event->user_id,
-            ],
+                'created' => count($createdEvents),
+                'series_id' => count($createdEvents) > 1 ? $seriesId : null,
+            ]
         ], 201);
     }
+
+    // public function store(Request $request)
+    // {
+    //     $this->autoUpdateStatuses();
+
+    //     if (!auth()->check()) {
+    //         return response()->json([
+    //             'type' => 'error',
+    //             'message' => 'Bạn cần đăng nhập để đăng ký sự kiện.'
+    //         ], 401);
+    //     }
+
+    //     $validated = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'category' => 'required|string|in:work,seminar,other',
+    //         'color' => 'nullable|string|max:20',
+    //         // 'lab_code' => 'required|string|exists:labs,code',
+    //         'start' => 'required|date',
+    //         'end' => 'required|date|after:start',
+    //         'description' => 'nullable|string|max:1000',
+    //         'registered_for' => 'nullable|string|max:255',
+    //     ], [
+    //         'title.required' => 'Vui lòng nhập tiêu đề sự kiện.',
+    //         'lab_code.required' => 'Vui lòng chọn phòng lab.',
+    //         'lab_code.exists' => 'Phòng lab không tồn tại.',
+    //         'start.required' => 'Vui lòng chọn thời gian bắt đầu.',
+    //         'end.required' => 'Vui lòng chọn thời gian kết thúc.',
+    //         'end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+    //     ]);
+
+    //     $validated['lab_code'] = 'LAB-304';
+    //     // ====== CHECK TRÙNG TRƯỚC KHI TẠO ======
+    //     if (
+    //         $this->hasConflict(
+    //             $validated['lab_code'],
+    //             $validated['start'],
+    //             $validated['end']
+    //         )
+    //     ) {
+    //         return response()->json([
+    //             'type' => 'error',
+    //             'message' => 'Thời gian bạn chọn đang bị trùng với một lịch khác trong cùng phòng lab.'
+    //         ], 409);
+    //     }
+
+    //     $user = Auth::user();
+    //     $isAdmin = $user->role_id == 1;
+
+    //     $validated['status'] = 'pending';
+    //     $validated['user_id'] = $user->id;
+    //     $validated['updated_by'] = $user->id;
+
+    //     $event = LabEvent::create($validated);
+
+    //     if ($request->hasFile('files')) {
+    //         $this->handleFileUploads($request->file('files'), $event->id);
+    //     }
+
+    //     // CHỈ gửi thông báo nếu là occurrence đầu tiên của lịch lặp
+    //     $isRecurring = $request->input('is_recurring') === 'true';
+    //     $isFirstOccurrence = $request->input('is_first_occurrence') === 'true';
+    //     $totalOccurrences = (int) $request->input('total_occurrences', 1);
+
+    //     if (!$isAdmin && (!$isRecurring || $isFirstOccurrence)) {
+    //         $this->notifyAdminsPendingEvent($event, 'created', $totalOccurrences);
+    //     }
+    //     $event->refresh();
+
+    //     return response()->json([
+    //         'message' => $isAdmin
+    //             ? 'Sự kiện đã được tạo và tự động duyệt.'
+    //             : 'Đã gửi yêu cầu đăng ký. Vui lòng chờ quản trị viên phê duyệt.',
+    //         'data' => [
+    //             'id' => $event->id,
+    //             'title' => $event->title,
+    //             'category' => $event->category,
+    //             'color' => $event->color,
+    //             'lab_code' => $event->lab_code,
+    //             'start' => $event->start,
+    //             'end' => $event->end,
+    //             'description' => $event->description,
+    //             'registered_for' => $event->registered_for,
+    //             'status' => $event->status,
+    //             'user_id' => $event->user_id,
+    //         ],
+    //     ], 201);
+    // }
 
     public function update(Request $request, $id)
     {
@@ -315,11 +413,12 @@ class LabCalendar extends Component
             }
             $file->delete();
         }
+        $event->delete();
         if ($event->status === 'approved') {
             $this->notifyAdminsDeletedEvent($event);
         }
 
-        $event->delete();
+
 
         return response()->json([
             'message' => 'Đã xóa sự kiện thành công.'

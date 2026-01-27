@@ -1,4 +1,4 @@
-<div>
+<div x-data="registerComponent()">
     {{-- HEADER --}}
     <div class="page-header page-header-light shadow">
         <div class="page-header-content d-lg-flex">
@@ -24,8 +24,7 @@
             <div class="col-12 col-xxl-10">
                 <div class="card border-0 register-card">
                     <div class="card-header bg-white border-0 pb-0">
-                        <h4 class="fw-bold text-dark mb-0">Tạo lịch </h4>
-                        {{-- <div class="small text-muted mt-1">Lịch được tạo sẽ tự động duyệt.</div> --}}
+                        <h4 class="fw-bold text-dark mb-0">Tạo lịch</h4>
                     </div>
 
                     <div class="card-body pt-3">
@@ -37,8 +36,10 @@
                                     {{-- Tiêu đề --}}
                                     <div>
                                         <label class="form-label small fw-semibold text-dark mb-1">Tiêu đề</label>
-                                        <input wire:model.defer="form.title" type="text"
-                                            class="form-control register-control" placeholder="Nhập tiêu đề...">
+                                        <input wire:model.defer="form.title" 
+                                               type="text"
+                                               class="form-control register-control" 
+                                               placeholder="Nhập tiêu đề...">
                                         @error('form.title')
                                             <div class="small text-danger mt-1">{{ $message }}</div>
                                         @enderror
@@ -57,29 +58,32 @@
                                         @enderror
                                     </div>
 
-                                    {{-- Phòng lab --}}
-                                    <div>
+                                    {{-- Phòng lab - HIDDEN, giá trị mặc định LAB-304 --}}
+                                    <input type="hidden" wire:model.defer="form.lab_code" value="LAB-304">
+
+                                    {{-- Hiển thị thông tin phòng (read-only) --}}
+                                    {{-- <div>
                                         <label class="form-label small fw-semibold text-dark mb-1">Phòng lab</label>
-                                        <select wire:model.defer="form.lab_code" class="form-select register-control">
-                                            <option value="">Chọn phòng lab...</option>
-                                            @foreach($labs as $lab)
-                                                <option value="{{ $lab['code'] }}">
-                                                    {{ $lab['name'] }} ({{ $lab['code'] }})
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('form.lab_code')
-                                            <div class="small text-danger mt-1">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                        <div class="form-control register-control bg-light text-muted" style="cursor: not-allowed;">
+                                            @php
+                                                $defaultLab = collect($labs)->firstWhere('code', 'LAB-304');
+                                            @endphp
+                                            @if($defaultLab)
+                                                {{ $defaultLab['name'] }} ({{ $defaultLab['code'] }})
+                                            @else
+                                                LAB-304
+                                            @endif
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            <i class="ph-info"></i> Phòng mặc định: LAB-304
+                                        </div>
+                                    </div> --}}
 
                                     {{-- Người đăng ký + Nhóm --}}
                                     <div class="row g-3">
                                         <div class="col-12 col-sm-6">
-                                            <label class="form-label small fw-semibold text-dark mb-1">Người đăng
-                                                ký</label>
-                                            <select wire:model.defer="form.user_id"
-                                                class="form-select register-control">
+                                            <label class="form-label small fw-semibold text-dark mb-1">Người đăng ký</label>
+                                            <select wire:model.defer="form.user_id" class="form-select register-control">
                                                 <option value="">Chọn người dùng...</option>
                                                 @foreach($users as $u)
                                                     <option value="{{ $u->id }}">
@@ -93,8 +97,7 @@
                                         </div>
                                         <div class="col-12 col-sm-6">
                                             <label class="form-label small fw-semibold text-dark mb-1">Nhóm</label>
-                                            <select wire:model.defer="form.group_id"
-                                                class="form-select register-control">
+                                            <select wire:model.defer="form.group_id" class="form-select register-control">
                                                 <option value="">Chọn nhóm / lớp...</option>
                                                 @foreach($groups as $g)
                                                     <option value="{{ $g->id }}">{{ $g->name }}</option>
@@ -109,8 +112,7 @@
                                     {{-- Trạng thái --}}
                                     <div class="row g-3">
                                         <div class="col-12 col-sm-6">
-                                            <label class="form-label small fw-semibold text-dark mb-1">Trạng
-                                                thái</label>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Trạng thái</label>
                                             <select wire:model.defer="form.status" class="form-select register-control">
                                                 <option value="approved">Đã duyệt</option>
                                                 <option value="pending">Chờ duyệt</option>
@@ -125,9 +127,10 @@
                                     {{-- Mô tả --}}
                                     <div>
                                         <label class="form-label small fw-semibold text-dark mb-1">Mô tả</label>
-                                        <textarea wire:model.defer="form.description" rows="4"
-                                            class="form-control register-control"
-                                            placeholder="Nhập mô tả..."></textarea>
+                                        <textarea wire:model.defer="form.description" 
+                                                  rows="4"
+                                                  class="form-control register-control"
+                                                  placeholder="Nhập mô tả..."></textarea>
                                         @error('form.description')
                                             <div class="small text-danger mt-1">{{ $message }}</div>
                                         @enderror
@@ -153,39 +156,21 @@
                                         <div class="row g-3 align-items-end">
                                             <div class="col-12 col-sm-4">
                                                 <label class="form-label small fw-semibold text-dark mb-1">Ngày</label>
-                                                <input type="date" wire:model.live="eventDate"
-                                                    class="form-control register-control">
-                                                @if(!empty($eventDate))
-                                                    @php
-                                                        $d = \Carbon\Carbon::parse($eventDate);
-                                                        $dowMap = [
-                                                            0 => 'Chủ nhật',
-                                                            1 => 'Thứ hai',
-                                                            2 => 'Thứ ba',
-                                                            3 => 'Thứ tư',
-                                                            4 => 'Thứ năm',
-                                                            5 => 'Thứ sáu',
-                                                            6 => 'Thứ bảy',
-                                                        ];
-                                                    @endphp
-                                                    {{-- <div class="small text-muted mt-1">
-                                                        Ngày đã chọn:
-                                                        <strong>{{ $dowMap[$d->dayOfWeek] }}, {{ $d->format('d/m/Y')
-                                                            }}</strong>
-                                                    </div> --}}
-                                                @endif
+                                                <input type="date" 
+                                                       wire:model.live="eventDate"
+                                                       class="form-control register-control">
                                             </div>
                                             <div class="col-6 col-sm-4">
-                                                <label class="form-label small fw-semibold text-dark mb-1">Giờ bắt
-                                                    đầu</label>
-                                                <input type="time" wire:model.live="startTime"
-                                                    class="form-control register-control">
+                                                <label class="form-label small fw-semibold text-dark mb-1">Giờ bắt đầu</label>
+                                                <input type="time" 
+                                                       wire:model.live="startTime"
+                                                       class="form-control register-control">
                                             </div>
                                             <div class="col-6 col-sm-4">
-                                                <label class="form-label small fw-semibold text-dark mb-1">Giờ kết
-                                                    thúc</label>
-                                                <input type="time" wire:model.live="endTime"
-                                                    class="form-control register-control">
+                                                <label class="form-label small fw-semibold text-dark mb-1">Giờ kết thúc</label>
+                                                <input type="time" 
+                                                       wire:model.live="endTime"
+                                                       class="form-control register-control">
                                             </div>
                                             <div class="col-12 text-end small text-muted">
                                                 <b>{{ $totalDuration }}</b>
@@ -207,10 +192,8 @@
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-12 col-sm-6">
-                                                <label class="form-label small fw-semibold text-dark mb-1">Tần
-                                                    suất</label>
-                                                <select wire:model.live="form.repeat_type"
-                                                    class="form-select register-control">
+                                                <label class="form-label small fw-semibold text-dark mb-1">Tần suất</label>
+                                                <select wire:model.live="form.repeat_type" class="form-select register-control">
                                                     <option value="">Không lặp</option>
                                                     <option value="daily">Hàng ngày</option>
                                                     <option value="weekly">Hàng tuần</option>
@@ -221,32 +204,13 @@
                                                 @enderror
                                             </div>
                                             <div class="col-12 col-sm-6">
-                                                <label class="form-label small fw-semibold text-dark mb-1">Lặp đến
-                                                    ngày</label>
-                                                <input type="date" wire:model.live="form.repeat_until"
-                                                    class="form-control register-control">
+                                                <label class="form-label small fw-semibold text-dark mb-1">Lặp đến ngày</label>
+                                                <input type="date" 
+                                                       wire:model.live="form.repeat_until"
+                                                       class="form-control register-control">
                                                 @error('form.repeat_until')
                                                     <div class="small text-danger mt-1">{{ $message }}</div>
                                                 @enderror
-                                                @if(!empty($form['repeat_until']))
-                                                    @php
-                                                        $ru = \Carbon\Carbon::parse($form['repeat_until']);
-                                                        $dowMap2 = [
-                                                            0 => 'Chủ nhật',
-                                                            1 => 'Thứ hai',
-                                                            2 => 'Thứ ba',
-                                                            3 => 'Thứ tư',
-                                                            4 => 'Thứ năm',
-                                                            5 => 'Thứ sáu',
-                                                            6 => 'Thứ bảy',
-                                                        ];
-                                                    @endphp
-                                                    {{-- <div class="small text-muted mt-1">
-                                                        Lặp đến:
-                                                        <strong>{{ $dowMap2[$ru->dayOfWeek] }}, {{ $ru->format('d/m/Y')
-                                                            }}</strong>
-                                                    </div> --}}
-                                                @endif
                                                 <div class="small text-muted mt-1">Để trống: chỉ tạo 1 lịch.</div>
                                             </div>
 
@@ -274,8 +238,9 @@
                                                         @endphp
                                                         @foreach($days as $val => $label)
                                                             <label class="weekday-btn">
-                                                                <input type="checkbox" value="{{ $val }}"
-                                                                    wire:model.live="repeatDays">
+                                                                <input type="checkbox" 
+                                                                       value="{{ $val }}"
+                                                                       wire:model.live="repeatDays">
                                                                 <span>{{ $label }}</span>
                                                             </label>
                                                         @endforeach
@@ -291,9 +256,11 @@
                                     {{-- Tệp đính kèm --}}
                                     <div>
                                         <label class="form-label small fw-semibold text-dark mb-1">Tệp đính kèm</label>
-                                        <input wire:model="uploads" type="file" multiple
-                                            class="form-control register-control"
-                                            wire:key="upload-input-{{ $uploadIteration }}">
+                                        <input wire:model="uploads" 
+                                               type="file" 
+                                               multiple
+                                               class="form-control register-control"
+                                               wire:key="upload-input-{{ $uploadIteration }}">
                                         @error('uploads')
                                             <div class="small text-danger mt-1">{{ $message }}</div>
                                         @enderror
@@ -310,13 +277,21 @@
 
                                     {{-- Nút lưu --}}
                                     <div class="d-flex justify-content-end">
-                                        <button wire:click="createEvent" type="button"
-                                            class="btn register-btn register-btn-success">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" class="me-2">
-                                                <path d="M5 12h14M12 5l7 7-7 7" />
-                                            </svg>
-                                            Lưu
+                                        <button wire:click="createEvent" 
+                                                type="button"
+                                                class="btn register-btn register-btn-success"
+                                                wire:loading.attr="disabled">
+                                            <span wire:loading.remove wire:target="createEvent">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" class="me-2">
+                                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                                </svg>
+                                                Lưu
+                                            </span>
+                                            <span wire:loading wire:target="createEvent">
+                                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                                Đang lưu...
+                                            </span>
                                         </button>
                                     </div>
 
@@ -330,33 +305,41 @@
         </div>
 
         {{-- MODAL xung đột --}}
-        <div wire:ignore.self class="modal fade" id="modalConflict" tabindex="-1" aria-hidden="true">
+        <div x-show="modals.conflict"
+             x-cloak
+             @open-conflict-modal.window="showModal('conflict')"
+             @close-conflict-modal.window="hideModal('conflict')"
+             class="modal fade"
+             :class="{ 'show d-block': modals.conflict }"
+             tabindex="-1"
+             style="background: rgba(0,0,0,0.5)">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 register-card">
                     <div class="modal-header border-0 pb-0">
                         <h5 class="modal-title fw-bold text-dark mb-1">⚠️ Cảnh báo trùng khung giờ</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" @click="hideModal('conflict')"></button>
                     </div>
                     <div class="modal-body pt-2">
                         <div class="alert alert-warning border-0 mb-3"
                             style="background:rgba(234,179,8,.1);border-radius:12px;">
                             <div class="small text-dark mb-2">
-                                Khung giờ bạn chọn <strong>bị trùng</strong> với một lịch <b>đã duyệt</b> trong cùng
-                                phòng lab.
+                                Khung giờ bạn chọn <strong>bị trùng</strong> với một lịch <b>đã duyệt</b> trong cùng phòng lab.
                             </div>
                         </div>
                         <ul class="small text-muted ps-3 mb-3">
-                            <li>Đổi phòng hoặc đổi khung giờ khác</li>
+                            <li>Đổi khung giờ khác</li>
                             <li>Chuyển trạng thái sang <b>"Chờ duyệt"</b> rồi tạo lại</li>
                             <li>Hoặc nhấn <b>"Vẫn Duyệt"</b> bên dưới để bỏ qua cảnh báo</li>
                         </ul>
                     </div>
                     <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn register-btn register-btn-ghost" data-bs-dismiss="modal">
+                        <button type="button" class="btn register-btn register-btn-ghost" @click="hideModal('conflict')">
                             Hủy
                         </button>
-                        <button type="button" class="btn register-btn register-btn-warning" wire:click="forceApprove"
-                            data-bs-dismiss="modal">
+                        <button type="button" 
+                                class="btn register-btn register-btn-warning" 
+                                wire:click="forceApprove"
+                                @click="hideModal('conflict')">
                             Vẫn Duyệt
                         </button>
                     </div>
@@ -366,6 +349,8 @@
     </div>
 
     <style>
+        [x-cloak] { display: none !important; }
+        
         .register-page {
             --r-border: #e6eaf2;
             --r-text: #0f172a;
@@ -373,14 +358,15 @@
             --r-primary: #2563eb;
         }
 
-        .register-card{
-        border-radius: 18px;
-        overflow: hidden;  
-        box-shadow: 0 14px 40px rgba(15,23,42,.08);
+        .register-card {
+            border-radius: 18px;
+            overflow: hidden;  
+            box-shadow: 0 14px 40px rgba(15,23,42,.08);
         }
-        .register-card .card-header{
-        border-top-left-radius: 18px !important;
-        border-top-right-radius: 18px !important;
+
+        .register-card .card-header {
+            border-top-left-radius: 18px !important;
+            border-top-right-radius: 18px !important;
         }
 
         .register-control {
@@ -502,13 +488,23 @@
         }
     </style>
 
-    @once
-        <script>
-            window.addEventListener('open-conflict-modal', () => {
-                const el = document.getElementById('modalConflict');
-                if (!el) return;
-                bootstrap.Modal.getOrCreateInstance(el).show();
-            });
-        </script>
-    @endonce
+    <script>
+        function registerComponent() {
+            return {
+                modals: {
+                    conflict: false
+                },
+                
+                showModal(type) {
+                    this.modals[type] = true;
+                    document.body.classList.add('modal-open');
+                },
+                
+                hideModal(type) {
+                    this.modals[type] = false;
+                    document.body.classList.remove('modal-open');
+                }
+            }
+        }
+    </script>
 </div>

@@ -183,6 +183,30 @@ body {
   color: var(--lab-text-main);
   letter-spacing: 0.2px;
 }
+/* Đường kẻ ngang màu đỏ/hồng đặc trưng */
+.fc-timegrid-now-indicator-line {
+    border-color: #ea4335 !important; /* Màu đỏ của Google */
+    border-width: 2px 0 0 !important;
+    z-index: 5;
+}
+
+/* Tạo hình tròn ở đầu đường kẻ (Marker) */
+.fc-timegrid-now-indicator-line::before {
+    content: "";
+    position: absolute;
+    left: -6px; /* Điều chỉnh để hình tròn nằm đè lên trục thời gian */
+    top: -6px;  /* Căn giữa hình tròn với đường kẻ 2px */
+    width: 12px;
+    height: 12px;
+    background-color: #ea4335;
+    border-radius: 50%;
+    z-index: 6;
+}
+
+/* Tùy chọn: Làm mờ nhẹ phần trục thời gian nơi đường kẻ đi qua để giống thật hơn */
+.fc-timegrid-now-indicator-arrow {
+    display: none !important; /* Ẩn mũi tên mặc định của FullCalendar nếu có */
+}
 /* 
 .fc .fc-button {
   background: #fff;
