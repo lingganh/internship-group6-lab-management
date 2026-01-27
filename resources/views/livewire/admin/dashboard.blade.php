@@ -512,7 +512,7 @@
     $wire.on('push_data_equip', ({
         data
     }) => {
-
+        console.log(data)
         const dat = data.map(d => d.count);
         const label = data.map(d => translate(d.status));
 
