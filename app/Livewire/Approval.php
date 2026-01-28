@@ -531,7 +531,7 @@ class Approval extends Component
 
                             if ($event->user && $event->user->email) {
                                 Mail::to($event->user->email)->queue(
-                                    new \App\Mail\ApprovalNotification($event, $roomCode)
+                                    new \App\Mail\ApprovalNotification($event, $this->roomCode)
                                 );
                             }
                             continue;
