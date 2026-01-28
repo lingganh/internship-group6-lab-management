@@ -8,9 +8,8 @@ use App\Enums\User\UserRoleEnum;
 
         <!-- Sidebar header -->
         <div class="sidebar-section">
-            <div class="sidebar-section-body d-flex justify-content-center">
+            <div class="sidebar-section-body d-flex justify-content-center pb-1">
                 <h5 class="sidebar-resize-hide flex-grow-1 my-auto">Hệ thống quản lý</h5>
-
                 <div>
                     <button type="button"
                         class="btn btn-flat-white btn-icon btn-sm rounded-pill border-transparent sidebar-control sidebar-main-resize d-none d-lg-inline-flex">
@@ -33,7 +32,7 @@ use App\Enums\User\UserRoleEnum;
             <ul class="nav nav-sidebar" data-nav-type="accordion">
                 <li class="nav-item">
                     <a href="{{route('admin.dashboard')}}"
-                        class="nav-link">
+                        class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <i class="ph-house"></i>
                         <span>Dashboard</span>
                     </a>
@@ -52,7 +51,7 @@ use App\Enums\User\UserRoleEnum;
 
 
                 <li class="nav-item">
-                    <a href="{{ route('admin.approval') }}" class="nav-link ">
+                    <a href="{{ route('admin.approval') }}" class="nav-link {{ request()->routeIs('admin.approval') ? 'active' : '' }}">
                         <i class="ph-calendar-check"></i>
                         <span>Danh sách lịch</span>
                     </a>
@@ -66,7 +65,7 @@ use App\Enums\User\UserRoleEnum;
                 </li> --}}
                 <li class="nav-item">
                     <a href="{{route('admin.lab-diary')}}"
-                        class="nav-link">
+                        class="nav-link {{ request()->routeIs('admin.lab-diary') ? 'active' : '' }}">
                         <i class="ph-note-blank"></i>
                         <span>Nhật ký sử dụng</span>
                     </a>
@@ -76,7 +75,7 @@ use App\Enums\User\UserRoleEnum;
                     <i class="ph-dots-three sidebar-resize-show"></i>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('admin.groups.index') }}" class="nav-link">
+                    <a href="{{ route('admin.groups.index') }}" class="nav-link {{ request()->routeIs('admin.groups.*') ? 'active' : '' }}">
                         <i class="ph-users-three"></i>
                         <span>Nhóm NCKH</span>
                     </a>
@@ -95,7 +94,7 @@ use App\Enums\User\UserRoleEnum;
                 </li>
                 <li class="nav-item">
                     <a href="{{route('admin.report')}}"
-                        class="nav-link">
+                        class="nav-link {{ request()->routeIs('admin.report') ? 'active' : '' }}">
                         <i class="ph-chart-bar"></i>
                         <span>Báo cáo - Thống kê</span>
                     </a>
@@ -107,7 +106,7 @@ use App\Enums\User\UserRoleEnum;
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.users.index') }}"
-                        class="nav-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
+                        class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                         <i class="ph-user"></i>
                         <span>Người dùng</span>
                     </a>
@@ -121,19 +120,19 @@ use App\Enums\User\UserRoleEnum;
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{route('equipment.index')}}"
-                        class="nav-link {{ request()->routeIs('equipment.index') ? 'active' : '' }}">
-                        <i class="ph-chart-bar"></i>
+                    <a href="{{route('admin.equipment.index')}}"
+                        class="nav-link {{ request()->routeIs('admin.equipment.*') ? 'active' : '' }}">
+                        <i class="ph-desktop-tower"></i>
                         <span>Thiết bị</span>
                     </a>
                 </li>
-                {{-- <li class="nav-item">
-                    <a href="{{route('admin.lab.index')}}"
-                        class="nav-link {{ request()->routeIs('admin.lab.index') ? 'active' : '' }}">
-                        <i class="ph-test-tube"></i>
-                        <span>Phòng Lab</span>
+                <li class="nav-item">
+                    <a href="{{route('admin.lab-setting')}}"
+                        class="nav-link {{ request()->routeIs('admin.lab-setting') ? 'active' : '' }}">
+                        <i class="ph-gear"></i>
+                        <span>Cấu hình phòng Lab</span>
                     </a>
-                </li> --}}
+                </li>
             </ul>
         </div>
         <!-- /main navigation -->

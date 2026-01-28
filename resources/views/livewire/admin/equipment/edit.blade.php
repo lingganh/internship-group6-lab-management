@@ -5,7 +5,7 @@
             <div class="page-header-content d-flex align-items-center justify-content-between py-2 px-3">
                 <div class="breadcrumb mb-0">
                     <a href="{{route('admin.dashboard')}}" class="breadcrumb-item"><i class="ph-house me-2"></i></a>
-                    <a class="breadcrumb-item" href="{{route('equipment.index')}}">Danh sách thiết bị</a>
+                    <a class="breadcrumb-item" href="{{route('admin.equipment.index')}}">Danh sách thiết bị</a>
                     <span class="breadcrumb-item active fw-semibold text-primary">{{ $name }} - {{ $code }}</span>
                     <span class="breadcrumb-item active fw-semibold text-warning">Chỉnh sửa</span>
                 </div>
@@ -136,7 +136,7 @@
                     <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                 </button>
 
-                <a href="{{ route('equipment.index') }}" class="btn btn-warning text-nowrap text-white">
+                <a href="{{ route('admin.equipment.index') }}" class="btn btn-warning text-nowrap text-white">
                     <i class="ph-arrow-counter-clockwise"></i> Trở lại
                 </a>
             </div>
@@ -145,8 +145,8 @@
 </div>
         </div>
     </div>
-    
-</div>  
+
+</div>
 <style>
      .input-group:has(.is-invalid) {
         border: 1px solid #d93025 !important;

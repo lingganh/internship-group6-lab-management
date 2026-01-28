@@ -98,7 +98,7 @@ Route::middleware('role:admin')->group(function () {
         });
         Route::get('/lab-diary', App\Livewire\LabDiary::class)->name('admin.lab-diary');
         Route::get('/approval', Approval::class)->name('admin.approval');
-        Route::get('/equipment', Index::class)->name('equipment.index');
+        Route::get('/equipment', Index::class)->name('admin.equipment.index');
         Route::get('/equipment/create', EquipmentCreate::class)->name('admin.equipment.create');
         Route::get('/equipment/edit/{id}', Edit::class)->name('admin.equipment.edit');
         Route::get('/lab-register', LabRegister::class)->name('lab.register');
@@ -125,8 +125,9 @@ Route::middleware('role:admin')->group(function () {
         Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllRead'])
             ->name('admin.notifications.mark-all-read');
         Route::get('/lab', LabIndex::class)->name('admin.lab.index');
-        Route::get('/lab/create', LabCreate::class)->name('admin.lab.create');
-        Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
+//        Route::get('/lab/create', LabCreate::class)->name('admin.lab.create');
+//        Route::get('/lab/edit/{id}', LabEdit::class)->name('admin.lab.edit');
+        Route::get('/lab-setting', LabEdit::class)->name('admin.lab-setting');
 
         Route::get('/export-lab-diary', function () {
             $temp = Cache::get('lab-diary-export-' . auth()->id());

@@ -11,7 +11,7 @@ use App\Models\LabEquipmentItem;
 class Create extends Component
 {
      // public $mode = 'existing';
-    
+
     // Bỏ equipment_id vì không cần nữa
     // public $equipment_id;
 
@@ -39,7 +39,7 @@ class Create extends Component
         if (in_array($field, ['quantity', 'broken_quantity'])) {
             $q = $this->quantity === "" ? 0 : (int)$this->quantity;
             $b = $this->broken_quantity === "" ? 0 : (int)$this->broken_quantity;
-            
+
             $this->actual_quantity = max(0, $q - $b);
             $this->validateOnly($field);
         }
@@ -73,11 +73,11 @@ class Create extends Component
             'code.required' => 'Mã thiết bị không được để trống.',
             'code.unique' => 'Mã thiết bị này đã tồn tại trong hệ thống.',
             'type.required' => 'Vui lòng nhập loại thiết bị.',
-            
+
             'quantity.required' => 'Số lượng tổng không được để trống.',
             'quantity.integer' => 'Số lượng phải là số nguyên.',
             'quantity.min' => 'Số lượng nhập vào phải ít nhất là 0.',
-            
+
             'broken_quantity.required' => 'Số lượng hỏng không được để trống.',
             'broken_quantity.integer' => 'Số lượng hỏng phải là số nguyên.',
             'broken_quantity.min' => 'Số lượng hỏng không được nhỏ hơn 0.',
@@ -103,7 +103,7 @@ class Create extends Component
                 'notes' => $this->notes,
                 'specifications' => json_encode($this->specifications),
             ]);
-            
+
             $equipmentId = (int) $equipment->id;
 
             // 2. Kiểm tra trùng lặp và cộng dồn (lab_id = 1)
@@ -133,18 +133,18 @@ class Create extends Component
         });
 
         if ($isMerged) {
-            $this->dispatch('alert', 
-                type: 'info', 
+            $this->dispatch('alert',
+                type: 'info',
                 message: 'Thiết bị đã tồn tại trong phòng này. Hệ thống đã tự động cộng dồn số lượng mới!'
             );
         } else {
-            $this->dispatch('alert', 
-                type: 'success', 
+            $this->dispatch('alert',
+                type: 'success',
                 message: 'Đã thêm thiết bị mới thành công!'
             );
         }
 
-        return redirect()->route('equipment.index');
+        return redirect()->route('admin.equipment.index');
     }
 
     public function render()

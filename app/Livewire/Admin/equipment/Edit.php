@@ -164,7 +164,7 @@ class Edit extends Component
             );
         }
 
-        return redirect()->route('equipment.index');
+        return redirect()->route('admin.equipment.index');
     }
 
     public function render()
