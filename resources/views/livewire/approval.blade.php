@@ -549,7 +549,7 @@
 </div>
 
             {{-- Modal Password --}}
-            <div x-show="modals.password"
+            {{-- <div x-show="modals.password"
                  x-cloak
                  @open-password-modal.window="showModal('password')"
                  @close-password-modal.window="hideModal('password')"
@@ -593,8 +593,75 @@
                         </div>
                     </div>
                 </div>
+            </div> --}}
+                {{-- Modal Password --}}
+<div x-show="modals.password"
+     x-cloak
+     @open-password-modal.window="showModal('password')"
+     @close-password-modal.window="hideModal('password')"
+     class="modal fade"
+     :class="{ 'show d-block': modals.password }"
+     tabindex="-1"
+     style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 approval-modal">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold text-dark">🔑 Nhập mã phòng</h5>
+                <button type="button" class="btn-close" @click="hideModal('password')"></button>
             </div>
-
+            <div class="modal-body">
+                <div class="approval-info border-0 p-0">
+                    <label class="form-label small fw-bold">Mã phòng lab <span class="text-danger">*</span></label>
+                    
+                    <input type="text"
+                           wire:model.defer="roomCode"
+                           wire:keydown.enter="approveSchedule"
+                           class="form-control approval-control"
+                           placeholder="Nhập mã phòng..."
+                           required
+                           x-ref="roomCodeInput"
+                           @open-password-modal.window="$nextTick(() => $refs.roomCodeInput?.focus())">
+                    
+                    @error('roomCode')
+                        <div class="small text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                    
+                    {{-- Debug (xóa sau khi fix xong) --}}
+                    <div class="small text-info mt-1">
+                        Debug: roomCode = "<strong>{{ $roomCode }}</strong>"
+                    </div>
+                    
+                    <div class="small text-muted mt-2">
+                        💡 Mã phòng sẽ được gửi qua email cho người dùng.
+                        @if($seriesApproveCount > 1)
+                            <br>Có {{ $seriesApproveCount }} lịch sẽ được phê duyệt.
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" 
+                        class="btn approval-btn approval-btn-ghost" 
+                        @click="hideModal('password')">
+                    Hủy
+                </button>
+                <button wire:click="approveSchedule"
+                        type="button"
+                        class="btn approval-btn approval-btn-success"
+                        wire:loading.attr="disabled"
+                        wire:target="approveSchedule">
+                    <span wire:loading.remove wire:target="approveSchedule">
+                        Xác nhận phê duyệt
+                    </span>
+                    <span wire:loading wire:target="approveSchedule">
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                        Đang xử lý...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
             {{-- Modal Conflict --}}
             <div x-show="modals.conflict"
                  x-cloak
