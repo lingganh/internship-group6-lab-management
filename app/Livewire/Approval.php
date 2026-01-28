@@ -128,6 +128,7 @@ class Approval extends Component
                 'id' => $event->id,
                 'title' => $event->title,
                 'lab_code' => $event->lab_code,
+                'lab_name' => $event->lab?->name,
                 'start' => $fmt($event->start),
                 'end' => $fmt($event->end),
                 'user' => $event->user?->full_name,
@@ -137,6 +138,7 @@ class Approval extends Component
                 'id' => $c->id,
                 'title' => $c->title,
                 'lab_code' => $c->lab_code,
+                'lab_name' => $c->lab?->name,
                 'start' => $fmt($c->start),
                 'end' => $fmt($c->end),
                 'status' => $c->status,
@@ -477,25 +479,109 @@ class Approval extends Component
                 $roomCode = $this->roomCode; // Capture roomCode trước khi vào closure
                 $count = 0;
 
+                // Thu thập thông tin để gửi thông báo gộp
+                $notificationsByUser = [];
+                $emailsByUser = [];
+
                 LabEvent::whereIn('id', $eventIds)
                     ->where('status', 'pending')
-                    ->chunk(50, function ($events) use (&$count, $roomCode) {
+                    ->chunk(50, function ($events) use (&$count, $roomCode, &$notificationsByUser, &$emailsByUser) {
                         foreach ($events as $event) {
                             $event->update(['status' => 'approved']);
                             $count++;
 
-                            // Queue notification và email
-                            dispatch(function () use ($event, $roomCode) {
-                                $this->notifyUserEventResult($event, 'approved');
+                            $userId = $event->user_id;
+                            if (!$userId) continue;
 
-                                if ($event->user && $event->user->email) {
-                                    Mail::to($event->user->email)->queue(
-                                        new \App\Mail\ApprovalNotification($event, $roomCode)
-                                    );
-                                }
-                            })->afterResponse();
+                            // Nhóm theo user_id và series_id
+                            $key = $userId;
+                            if (!isset($notificationsByUser[$key])) {
+                                $notificationsByUser[$key] = [];
+                            }
+
+                            // Nhóm theo series_id (nếu có) hoặc event đơn lẻ
+                            $seriesKey = $event->series_id ?: 'single_' . $event->id;
+                            
+                            if (!isset($notificationsByUser[$key][$seriesKey])) {
+                                $notificationsByUser[$key][$seriesKey] = [
+                                    'events' => [],
+                                    'user' => $event->user,
+                                    'series_id' => $event->series_id,
+                                ];
+                            }
+
+                            $notificationsByUser[$key][$seriesKey]['events'][] = $event;
                         }
                     });
+
+                // Gửi thông báo gộp sau khi duyệt xong
+                dispatch(function () use ($notificationsByUser, $roomCode) {
+                    foreach ($notificationsByUser as $userId => $seriesGroups) {
+                        // Đếm tổng số lịch của user
+                        $totalEvents = 0;
+                        foreach ($seriesGroups as $data) {
+                            $totalEvents += count($data['events']);
+                        }
+
+                        // Nếu user chỉ có 1 lịch duy nhất
+                        if ($totalEvents === 1) {
+                            $firstGroup = reset($seriesGroups);
+                            $event = $firstGroup['events'][0];
+                            $this->notifyUserEventResult($event, 'approved');
+
+                            if ($event->user && $event->user->email) {
+                                Mail::to($event->user->email)->queue(
+                                    new \App\Mail\ApprovalNotification($event, $roomCode)
+                                );
+                            }
+                            continue;
+                        }
+
+                        // User có nhiều lịch → gửi 1 thông báo gộp
+                        $allEvents = [];
+                        foreach ($seriesGroups as $data) {
+                            $allEvents = array_merge($allEvents, $data['events']);
+                        }
+
+                        $user = reset($seriesGroups)['user'];
+                        
+                        // Tạo 1 thông báo duy nhất
+                        \App\Models\Notification::create([
+                            'user_id' => $userId,
+                            'title' => "Đã phê duyệt {$totalEvents} lịch sử dụng phòng lab",
+                            'message' => "Tất cả {$totalEvents} lịch đăng ký của bạn đã được phê duyệt.",
+                            'data' => [
+                                'type' => 'batch_approved',
+                                'event_ids' => collect($allEvents)->pluck('id')->toArray(),
+                                'event_count' => $totalEvents,
+                                'url' => route('home'),
+                            ],
+                        ]);
+
+                        // Gửi email theo từng nhóm
+                        foreach ($seriesGroups as $seriesKey => $data) {
+                            $events = $data['events'];
+                            $seriesId = $data['series_id'];
+                            $eventCount = count($events);
+
+                            if ($user && $user->email) {
+                                if ($seriesId && $eventCount > 1) {
+                                    // Email cho lịch lặp
+                                    Mail::to($user->email)->queue(
+                                        new \App\Mail\SeriesApprovalNotification(collect($events), $roomCode)
+                                    );
+                                } else {
+                                    // Email cho từng lịch đơn
+                                    foreach ($events as $event) {
+                                        Mail::to($user->email)->queue(
+                                            new \App\Mail\ApprovalNotification($event, $roomCode)
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })->afterResponse();
 
                 $this->selectedIds = [];
                 $this->dispatch(
@@ -506,8 +592,6 @@ class Approval extends Component
                 );
             } else {
                 // Duyệt đơn lẻ
-                $event = LabEvent::findOrFail($this->passwordModalId);
-                // Duyệt đơn lẻ
                 $event = LabEvent::with(['lab', 'user'])->findOrFail($this->passwordModalId);
 
                 // CHECK TRÙNG
@@ -517,10 +601,9 @@ class Approval extends Component
                     $this->conflictDetails = $this->makeConflictPayload($event, $conflicts);
 
                     $this->dispatch('close-password-modal');
-                    $this->dispatch('open-conflict-modal'); // modal "lịch trùng" (ẩn/xổ)
+                    $this->dispatch('open-conflict-modal');
                     return;
                 }
-
 
                 $event->update(['status' => 'approved']);
 
