@@ -56,14 +56,14 @@
                             <input type="text" class="form-control" wire:model="code" readonly style="background:#f5f5f5; cursor:not-allowed;">
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label">Trạng thái</label>
                             <select class="form-select" wire:model="status">
                                 <option value="active">Hoạt động</option>
                                 <option value="maintenance">Bảo trì</option>
                                 <option value="locked">Tạm khóa</option>
                             </select>
-                        </div>
+                        </div> --}}
 
                         <div class="mb-3">
                             <label class="form-label">Mô tả</label>
