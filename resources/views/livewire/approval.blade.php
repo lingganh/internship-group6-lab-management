@@ -626,10 +626,9 @@
                         <div class="small text-danger mt-1">{{ $message }}</div>
                     @enderror
                     
-                    {{-- Debug (xóa sau khi fix xong) --}}
-                    <div class="small text-info mt-1">
+                     {{-- <div class="small text-info mt-1">
                         Debug: roomCode = "<strong>{{ $roomCode }}</strong>"
-                    </div>
+                    </div> --}}
                     
                     <div class="small text-muted mt-2">
                         💡 Mã phòng sẽ được gửi qua email cho người dùng.
