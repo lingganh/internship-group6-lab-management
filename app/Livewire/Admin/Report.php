@@ -84,8 +84,9 @@ class Report extends Component
         }
 
         // Fetch events
-        $events = $query->orderBy('start', 'desc')->limit(5)->get();
         $this->exportLab = $query->orderBy('start', 'desc')->get();
+        $events = $query->orderBy('start', 'desc')->limit(5)->get();
+       
 
 
 

@@ -84,7 +84,7 @@
                                 'approved' => ['success', 'Đã duyệt'],
                                 'pending' => ['warning', 'Chờ duyệt'],
                                 'completed' => ['primary', 'Hoàn thành'],
-                                'cancelled' => ['danger', 'Từ chối'], 
+                                'cancelled' => ['danger', 'Từ chối'],
                                 ];
 
                                 [$color, $text] = $statusMap[$event->status] ?? ['secondary', ucfirst($event->status)];
@@ -172,9 +172,10 @@
         }
 
         .dashboard-wrapper {
-            max-width: 1600px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
         }
+
 
         .h-52 {
             height: 52px;
