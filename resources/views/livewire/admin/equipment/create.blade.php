@@ -20,7 +20,7 @@
                 <div class="d-flex align-items-center flex-wrap gap-2">
                     <div class="breadcrumb py-2">
                         <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item"><i class="ph-house"></i></a>
-                        <a href="{{ route('equipment.index') }}" class="breadcrumb-item">Danh sách thiết bị</a>
+                        <a href="{{ route('admin.equipment.index') }}" class="breadcrumb-item">Danh sách thiết bị</a>
                         <span class="breadcrumb-item active">Thêm vào phòng</span>
                     </div>
 
@@ -180,7 +180,7 @@
                             <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                         </button>
 
-                        <a href="{{ route('equipment.index') }}" class="btn btn-warning flex-grow-1">
+                        <a href="{{ route('admin.equipment.index') }}" class="btn btn-warning flex-grow-1">
                             <i class="ph-arrow-counter-clockwise"></i> Trở lại
                         </a>
                     </div>

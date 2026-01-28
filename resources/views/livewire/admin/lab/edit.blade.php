@@ -5,12 +5,8 @@
                 <div class="page-header-content d-lg-flex">
                     <div class="d-flex">
                         <h4 class="page-title mb-0">
-                            Phòng lab - <span class="fw-normal">Danh sách Phòng lab</span>
+                            Chỉnh sửa thông tin phòng LAB
                         </h4>
-
-                        <a href="#page_header" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
-                            <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                        </a>
                     </div>
                 </div>
 
@@ -20,17 +16,13 @@
                             <a href="{{ route('admin.dashboard') }}" class="breadcrumb-item">
                                 <i class="ph-house"></i>
                             </a>
-                            <a href="{{ route('admin.lab.index') }}" class="breadcrumb-item">
-                                Danh sách phòng lab
-                            </a>
+{{--                            <a href="{{ route('admin.lab.index') }}" class="breadcrumb-item">--}}
+{{--                                Danh sách phòng lab--}}
+{{--                            </a>--}}
                             <span class="breadcrumb-item active">
                                 Chỉnh sửa thông tin phòng lab
                             </span>
                         </div>
-
-                        <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
-                            <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                        </a>
                     </div>
                 </div>
             </div>
@@ -91,13 +83,13 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Ảnh minh họa</label>
-                            <input type="file" wire:model="image" class="form-control">
-                            @if($oldImage)
-                                <img src="{{ asset('storage/'.$oldImage) }}" width="80" class="mt-2 rounded border">
-                            @endif
-                        </div>
+{{--                        <div class="mb-3">--}}
+{{--                            <label class="form-label">Ảnh minh họa</label>--}}
+{{--                            <input type="file" wire:model="image" class="form-control">--}}
+{{--                            @if($oldImage)--}}
+{{--                                <img src="{{ asset('storage/'.$oldImage) }}" width="80" class="mt-2 rounded border">--}}
+{{--                            @endif--}}
+{{--                        </div>--}}
                     </div>
                 </div>
             </div>
@@ -120,7 +112,7 @@
                             <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                         </button>
 
-                        <a href="{{ route('admin.lab.index') }}" class="btn btn-warning text-nowrap">
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-warning text-nowrap">
                             <i class="ph-arrow-counter-clockwise"></i> Trở lại
                         </a>
                     </div>

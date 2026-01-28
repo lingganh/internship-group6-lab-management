@@ -89,7 +89,7 @@
                             Danh sách nhóm NCKH
                         </a>
                         <a href="{{ route('client.info-user') }}" class="dropdown-item">
-                            <i class="ph-gear me-2"></i>
+                            <i class="ph-user me-2"></i>
                             Tài khoản
                         </a>
                         <a href="{{ route('client.change-password') }}" class="dropdown-item">

@@ -17,22 +17,22 @@ class Edit extends Component
     public $status;
     public $description;
     public $code;
-    public $image;
+//    public $image;
     public $location;
     public $capacity;
 
-    public $oldImage;
+//    public $oldImage;
 
-    public function mount($id)
+    public function mount()
     {
-        $this->lab = Lab::findOrFail($id);
+        $this->lab = Lab::firstOrFail();
         $this->code = $this->lab->code;
         $this->name = $this->lab->name;
         $this->status = $this->lab->status;
         $this->location = $this->lab->location;
         $this->capacity = $this->lab->capacity;
         $this->description = $this->lab->description;
-        $this->oldImage = $this->lab->image_url;
+//        $this->oldImage = $this->lab->image_url;
     }
 
     protected $rules = [
@@ -41,19 +41,19 @@ class Edit extends Component
         'description' => 'nullable',
         'location' => 'nullable|string|max:255',
         'capacity' => 'nullable',
-        'image' => 'nullable|image|max:2048'
+//        'image' => 'nullable|image|max:2048'
     ];
 
     public function update()
     {
         $this->validate();
-        $path = $this->oldImage;
-        if ($this->image) {
-            if ($this->oldImage && Storage::disk('public')->exists($this->oldImage)) {
-               Storage::disk('public')->delete($this->oldImage);
-            }
-            $path = $this->image->store('labs', 'public');
-        }
+//        $path = $this->oldImage;
+//        if ($this->image) {
+//            if ($this->oldImage && Storage::disk('public')->exists($this->oldImage)) {
+//               Storage::disk('public')->delete($this->oldImage);
+//            }
+//            $path = $this->image->store('labs', 'public');
+//        }
 
         $this->lab->update([
             'name' => $this->name,
@@ -61,12 +61,12 @@ class Edit extends Component
             'description' => $this->description,
             'location' => $this->location,
             'capacity' => $this->capacity,
-            'image_url' => $path
+//            'image_url' => $path
         ]);
 
         session()->flash('success','Cập nhật phòng Lab thành công');
 
-        return redirect()->route('admin.lab.index');
+        return redirect()->route('admin.dashboard');
     }
 
     public function render()
