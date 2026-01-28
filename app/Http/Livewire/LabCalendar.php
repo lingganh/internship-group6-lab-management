@@ -383,8 +383,9 @@ class LabCalendar extends Component
         ]);
     }
 
-    public function destroy($id)
-    {
+   public function destroy($id)
+{
+    try {
         $event = LabEvent::findOrFail($id);
         $user = auth()->user();
         $isAdmin = $user && $user->code === 'admin';
@@ -392,7 +393,7 @@ class LabCalendar extends Component
         // Kiểm tra quyền: Admin được xóa tất cả, user chỉ xóa event của mình
         if (!$isAdmin && $event->user_id !== $user->id) {
             return response()->json([
-                'type' => 'error',
+                'success' => false, // ← Thêm success flag
                 'message' => 'Bạn không có quyền xóa sự kiện này.'
             ], 403);
         }
@@ -400,31 +401,65 @@ class LabCalendar extends Component
         // Sự kiện đã duyệt và đã đến giờ thì không được xóa
         if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
             return response()->json([
-                'type' => 'error',
+                'success' => false,
                 'message' => 'Không thể xóa sự kiện đã duyệt và đã bắt đầu.'
             ], 403);
         }
 
-        $files = LabEventFile::where('lab_event_id', $id)->get();
-        foreach ($files as $file) {
-            $filePath = storage_path('app/public/' . $file->file_path);
-            if (file_exists($filePath)) {
-                unlink($filePath);
+        // ✅ Xóa files với try-catch để tránh lỗi
+        try {
+            $files = LabEventFile::where('lab_event_id', $id)->get();
+            foreach ($files as $file) {
+                try {
+                    // Dùng Storage facade thay vì unlink trực tiếp
+                    if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+                        Storage::disk('public')->delete($file->file_path);
+                    }
+                    $file->delete();
+                } catch (\Throwable $e) {
+                    \Log::warning("Could not delete file {$file->id}: " . $e->getMessage());
+                    // Không throw error, tiếp tục xóa
+                }
             }
-            $file->delete();
-        }
-        $event->delete();
-        if ($event->status === 'approved') {
-            $this->notifyAdminsDeletedEvent($event);
+        } catch (\Throwable $e) {
+            \Log::error("Error deleting files for event {$id}: " . $e->getMessage());
         }
 
+        // Lưu status để notify sau khi xóa
+        $wasApproved = $event->status === 'approved';
+        
+         $event->delete();
 
+         if ($wasApproved) {
+            try {
+                $this->notifyAdminsDeletedEvent($event);
+            } catch (\Throwable $e) {
+                \Log::error("Error notifying admins: " . $e->getMessage());
+                // Không throw error vì event đã xóa thành công
+            }
+        }
 
         return response()->json([
+            'success' => true, // ← Thêm success flag
             'message' => 'Đã xóa sự kiện thành công.'
         ], 200);
-    }
 
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Không tìm thấy sự kiện.'
+        ], 404);
+        
+    } catch (\Throwable $e) {
+        \Log::error("Delete event {$id} error: " . $e->getMessage());
+        \Log::error($e->getTraceAsString());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Có lỗi xảy ra khi xóa sự kiện.'
+        ], 500);
+    }
+}
     private function handleFileUploads($files, $eventId)
     {
         foreach ($files as $file) {
