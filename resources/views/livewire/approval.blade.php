@@ -488,13 +488,15 @@
                                     
                                     <button wire:click="confirmDelete" 
                                             type="button"
-                                            class="btn approval-btn approval-btn-danger">
+                                            class="btn"
+                                            style="background-color: #ef4444; color: white; border: none;">
                                         Xóa
                                     </button>
 
                                     <button wire:click="updateEvent" 
                                             type="button"
-                                            class="btn approval-btn approval-btn-success"
+                                            class="btn"
+                                            style="background-color: #10b981; color: white; border: none;"
                                             wire:loading.attr="disabled">
                                         <span wire:loading.remove wire:target="updateEvent">Lưu</span>
                                         <span wire:loading wire:target="updateEvent">Đang lưu...</span>

@@ -471,12 +471,12 @@ class Approval extends Component
         }
 
         $this->isApproving = true;
-
+        $roomCode = $this->roomCode; 
         try {
             if ($this->passwordModalId === 'batch') {
                 // Duyệt hàng loạt - sử dụng chunk
                 $eventIds = $this->selectedIds;
-                $roomCode = $this->roomCode; // Capture roomCode trước khi vào closure
+                // Capture roomCode trước khi vào closure
                 $count = 0;
 
                 // Thu thập thông tin để gửi thông báo gộp
@@ -608,12 +608,12 @@ class Approval extends Component
                 $event->update(['status' => 'approved']);
 
                 // Queue notification và email
-                dispatch(function () use ($event) {
+                dispatch(function () use ($event, $roomCode) {
                     $this->notifyUserEventResult($event, 'approved');
 
                     if ($event->user && $event->user->email) {
                         Mail::to($event->user->email)->queue(
-                            new \App\Mail\ApprovalNotification($event, $this->roomCode)
+                            new \App\Mail\ApprovalNotification($event, $roomCode)
                         );
                     }
                 })->afterResponse();
