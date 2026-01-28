@@ -37,7 +37,7 @@ class Dashboard extends Component
         $this->AllEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'approved')->count();
         $this->ALLPendingEvt = LabEvent::query()->where('status', '=', 'pending')->count();
         $this->FirstEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'pending')->orderBy('start', 'asc')->first();
-        $this->TopEvent = $this->TopEvent = LabEvent::where('status', 'approved')
+        $this->TopEvent = LabEvent::where('status', 'approved')
             ->orderBy('start', 'asc')
             ->limit(5)
             ->get();
@@ -72,9 +72,9 @@ class Dashboard extends Component
         ];
 
         //
-        $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek())->where('end', '<=', now('UTC')->endOfWeek())->get();
-        $Month = LabEvent::query()->where('start', '>=', now()->startOfMonth())->where('end', '<=', now('UTC')->endOfMonth())->get();
-        $Year = LabEvent::query()->where('start', '>=', now()->startOfYear())->where('end', '<=', now('UTC')->endOfYear())->get();
+        $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek())->where('end', '<=', now()->endOfWeek())->get();
+        $Month = LabEvent::query()->where('start', '>=', now()->startOfMonth())->where('end', '<=', now()->endOfMonth())->get();
+        $Year = LabEvent::query()->where('start', '>=', now()->startOfYear())->where('end', '<=', now()->endOfYear())->get();
         $All = LabEvent::query()->get();
 
         //chartData
@@ -84,8 +84,8 @@ class Dashboard extends Component
 
         //weekly data
         $days = collect();
-        $start = now('UTC')->startOfWeek();
-        $end   = now('UTC')->endOfWeek();
+        $start = now()->startOfWeek();
+        $end   = now()->endOfWeek();
 
         while ($start <= $end) {
             $days->put($start->toDateString(), 0);
@@ -95,7 +95,7 @@ class Dashboard extends Component
         //weekBarChart
         $this->WeekBCData = $days
             ->merge(
-                collect($Week)->groupBy(fn($e) => $e->start->timezone('Asia/Ho_Chi_Minh')->toDateString())
+                collect($Week)->groupBy(fn($e) => $e->start->toDateString())
                     ->map->count()
             )
             ->map(fn($count, $date) => [
@@ -114,8 +114,8 @@ class Dashboard extends Component
             ->values();
 
         //Month data
-        $monthStart = now('UTC')->startOfMonth();
-        $monthEnd   = now('UTC')->endOfMonth();
+        $monthStart = now()->startOfMonth();
+        $monthEnd   = now()->endOfMonth();
 
         //Month barchart
         
