@@ -1036,42 +1036,48 @@ window.deleteEvent = function() {
   }
 
   try {
-    const formData = new FormData()
+     const formData = new FormData()
     formData.append('_method', 'DELETE')
 
     const response = await fetch(`/bookings/${currentEventId}`, {
-      method: 'POST', // Đổi thành POST
+      method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'X-CSRF-TOKEN': csrfToken
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: formData
     })
 
-    const text = await response.text()
-    let result
-
-    try {
-      result = JSON.parse(text)
-    } catch (e) {
-      console.error('confirmDelete parse error:', response.status, text)
-      showToast('error', 'Không thể xóa sự kiện (response không phải JSON).')
+     let result
+    const contentType = response.headers.get('content-type')
+    
+    if (contentType && contentType.includes('application/json')) {
+      const text = await response.text()
+      result = text ? JSON.parse(text) : {}
+    } else {
+      // Nếu không phải JSON (HTML error page)
+      const text = await response.text()
+      console.error('Non-JSON response:', response.status, text)
+      
+      showToast('error', `Lỗi server (${response.status}). Vui lòng kiểm tra log.`)
       return
     }
 
-    if (!response.ok) {
+     if (!response.ok) {
       showToast('error', result.message || 'Không thể xóa sự kiện.')
       return
     }
 
-    showToast('success', result.message || 'Đã xóa sự kiện.')
+     showToast('success', result.message || 'Đã xóa sự kiện.')
     closeDetailModal()
-    await loadEvents()
+    
+     await loadEvents()
     currentEventId = null
     
   } catch (err) {
     console.error('confirmDelete error:', err)
-    showToast('error', 'Lỗi kết nối máy chủ.')
+    showToast('error', 'Lỗi kết nối: ' + err.message)
   }
 }
 
