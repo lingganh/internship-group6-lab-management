@@ -1025,7 +1025,7 @@ window.deleteEvent = function() {
   toggleModal('confirmDeleteModal', true)
 }
 
- window.confirmDelete = async function() {
+window.confirmDelete = async function() {
   closeConfirmDelete()
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
@@ -1036,7 +1036,7 @@ window.deleteEvent = function() {
   }
 
   try {
-     const formData = new FormData()
+    const formData = new FormData()
     formData.append('_method', 'DELETE')
 
     const response = await fetch(`/bookings/${currentEventId}`, {
@@ -1049,14 +1049,13 @@ window.deleteEvent = function() {
       body: formData
     })
 
-     let result
+    let result
     const contentType = response.headers.get('content-type')
     
     if (contentType && contentType.includes('application/json')) {
       const text = await response.text()
       result = text ? JSON.parse(text) : {}
     } else {
-      // Nếu không phải JSON (HTML error page)
       const text = await response.text()
       console.error('Non-JSON response:', response.status, text)
       
@@ -1064,15 +1063,22 @@ window.deleteEvent = function() {
       return
     }
 
-     if (!response.ok) {
+    if (!response.ok) {
       showToast('error', result.message || 'Không thể xóa sự kiện.')
       return
     }
 
-     showToast('success', result.message || 'Đã xóa sự kiện.')
+    // ✅ Hiển thị thông báo khác nhau dựa trên hành động
+    const action = result.action || 'deleted'
+    const successMessage = action === 'cancelled' 
+      ? 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.' 
+      : 'Đã xóa sự kiện thành công.'
+    
+    showToast('success', result.message || successMessage)
     closeDetailModal()
     
-     await loadEvents()
+    // ✅ Reload calendar
+    await loadEvents()
     currentEventId = null
     
   } catch (err) {

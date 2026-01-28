@@ -15,7 +15,7 @@ use App\Models\Notification;
 use App\Models\User;
 use App\Enums\Role as RoleEnum;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Storage;
 class LabCalendar extends Component
 {
     public function render()
@@ -383,65 +383,72 @@ class LabCalendar extends Component
         ]);
     }
 
-   public function destroy($id)
+ public function destroy($id)
 {
     try {
         $event = LabEvent::findOrFail($id);
         $user = auth()->user();
         $isAdmin = $user && $user->code === 'admin';
 
-        // Kiểm tra quyền: Admin được xóa tất cả, user chỉ xóa event của mình
-        if (!$isAdmin && $event->user_id !== $user->id) {
+         if (!$isAdmin && $event->user_id !== $user->id) {
             return response()->json([
-                'success' => false, // ← Thêm success flag
+                'success' => false,
                 'message' => 'Bạn không có quyền xóa sự kiện này.'
             ], 403);
         }
 
-        // Sự kiện đã duyệt và đã đến giờ thì không được xóa
-        if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
+         if ($event->status === 'approved' && Carbon::parse($event->start)->isPast()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể xóa sự kiện đã duyệt và đã bắt đầu.'
             ], 403);
         }
 
-        // ✅ Xóa files với try-catch để tránh lỗi
-        try {
+         try {
             $files = LabEventFile::where('lab_event_id', $id)->get();
             foreach ($files as $file) {
                 try {
-                    // Dùng Storage facade thay vì unlink trực tiếp
                     if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
                         Storage::disk('public')->delete($file->file_path);
                     }
                     $file->delete();
                 } catch (\Throwable $e) {
-                    \Log::warning("Could not delete file {$file->id}: " . $e->getMessage());
-                    // Không throw error, tiếp tục xóa
+                    \Log::warning("Không thể xóa file {$file->id}: " . $e->getMessage());
                 }
             }
         } catch (\Throwable $e) {
-            \Log::error("Error deleting files for event {$id}: " . $e->getMessage());
+            \Log::error("Lỗi khi xóa files cho event {$id}: " . $e->getMessage());
         }
 
-        // Lưu status để notify sau khi xóa
         $wasApproved = $event->status === 'approved';
         
-         $event->delete();
+         if ($wasApproved) {
+            $event->update([
+                'status' => 'cancelled',
+                'updated_at' => now(),
+            ]);
+            
+            $message = 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.';
+            $action = 'cancelled';
+        } else {
+             $event->delete();
+            
+            $message = 'Đã xóa sự kiện thành công.';
+            $action = 'deleted';
+        }
 
          if ($wasApproved) {
             try {
                 $this->notifyAdminsDeletedEvent($event);
             } catch (\Throwable $e) {
-                \Log::error("Error notifying admins: " . $e->getMessage());
-                // Không throw error vì event đã xóa thành công
+                \Log::error("Lỗi khi thông báo admin: " . $e->getMessage());
             }
         }
 
         return response()->json([
-            'success' => true, // ← Thêm success flag
-            'message' => 'Đã xóa sự kiện thành công.'
+            'success' => true,
+            'message' => $message,
+            'action' => $action // ← Cho frontend biết đã làm gì
         ], 200);
 
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -451,7 +458,7 @@ class LabCalendar extends Component
         ], 404);
         
     } catch (\Throwable $e) {
-        \Log::error("Delete event {$id} error: " . $e->getMessage());
+        \Log::error("Lỗi xóa event {$id}: " . $e->getMessage());
         \Log::error($e->getTraceAsString());
         
         return response()->json([
@@ -514,35 +521,43 @@ class LabCalendar extends Component
         }
     }
     private function notifyAdminsDeletedEvent(LabEvent $event): void
-    {
-        $user = Auth::user();
-        $admins = User::where('role_id', 1)->get();
+{
+    $user = Auth::user();
+    $admins = User::where('role_id', 1)->get();
 
-        if ($admins->isEmpty()) {
-            return;
-        }
+    if ($admins->isEmpty()) {
+        return;
+    }
 
-        $senderName = $user->full_name ?? $user->name ?? 'Người dùng';
+    $senderName = $user->full_name ?? $user->name ?? 'Người dùng';
+    
+     $title = $event->status === 'cancelled' 
+        ? 'Lịch đã duyệt bị hủy' 
+        : 'Lịch đặt phòng đã bị xóa';
+        
+    $message = $event->status === 'cancelled'
+        ? "{$senderName} đã hủy lịch đã duyệt: {$event->title} tại phòng {$event->lab_code}"
+        : "{$senderName} đã xóa lịch: {$event->title} tại phòng {$event->lab_code}";
 
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Lịch đặt phòng đã bị hủy',
-                'message' => "{$senderName} đã hủy lịch: {$event->title} tại phòng {$event->lab_code}",
-                'data' => [
-                    'event_id' => $event->id,
-                    'type' => 'deleted_event',
-                    'sender_name' => $senderName,
-                    'url' => route('admin.approval'),
-                ],
-            ]);
+    foreach ($admins as $admin) {
+        Notification::create([
+            'user_id' => $admin->id,
+            'title' => $title,
+            'message' => $message,
+            'data' => [
+                'event_id' => $event->id,
+                'type' => $event->status === 'cancelled' ? 'event_cancelled' : 'event_deleted',
+                'sender_name' => $senderName,
+                'url' => route('admin.approval'),
+            ],
+        ]);
 
-            if ($admin->email) {
-                \Illuminate\Support\Facades\Mail::to($admin->email)->queue(
-                    new \App\Mail\AdminDeletedEventNotification($event, $senderName)
-                );
-            }
+        if ($admin->email) {
+            \Illuminate\Support\Facades\Mail::to($admin->email)->queue(
+                new \App\Mail\AdminDeletedEventNotification($event, $senderName)
+            );
         }
     }
+}
 
 }
