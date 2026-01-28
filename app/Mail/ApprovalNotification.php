@@ -10,38 +10,30 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\LabEvent;
 
-
-class ApprovalNotification extends Mailable
+class ApprovalNotification extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
-
-    /**
-     * Create a new message instance.
-     */
-     use Queueable, SerializesModels;
 
     public $schedule;
     public $password;
 
+    /**
+     * Khởi tạo class. 
+     * Laravel sẽ tự động "đóng gói" (serialize) $schedule và $password vào hàng đợi.
+     */
     public function __construct(LabEvent $schedule, $password)
     {
         $this->schedule = $schedule;
         $this->password = $password;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Thông báo lịch phòng Lab',
+            subject: 'Thông báo lịch phòng Lab: ' . $this->schedule->title,
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
@@ -49,11 +41,6 @@ class ApprovalNotification extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];
