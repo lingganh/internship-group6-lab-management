@@ -76,7 +76,7 @@
                                     <select wire:model.live="filterStatus" class="form-select approval-control">
                                         <option value="pending">Chờ phê duyệt</option>
                                         <option value="approved">Đã phê duyệt</option>
-                                        <option value="cancelled">Đã từ chối</option>
+                                        <option value="cancelled">Đã từ chối / hủy</option>
                                         <option value="completed">Đã hoàn thành</option>
                                         <option value="">Tất cả</option>
                                     </select>
@@ -171,7 +171,7 @@
                                                 @elseif($item->status === 'completed')
                                                     <span class="badge approval-pill approval-pill-approved">Đã hoàn thành</span>
                                                 @else
-                                                    <span class="badge approval-pill approval-pill-cancelled">Từ chối</span>
+                                                    <span class="badge approval-pill approval-pill-cancelled">Từ chối / hủy </span>
                                                 @endif
                                             </td>
 
