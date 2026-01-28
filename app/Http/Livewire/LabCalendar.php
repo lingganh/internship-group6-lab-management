@@ -420,7 +420,7 @@ class LabCalendar extends Component
             \Log::error("Lỗi khi xóa files cho event {$id}: " . $e->getMessage());
         }
 
-        $wasApproved = $event->status === 'approved';
+        $wasApproved = $event->status === 'approved' ;
         
          if ($wasApproved) {
             $event->update([
@@ -430,7 +430,14 @@ class LabCalendar extends Component
             
             $message = 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.';
             $action = 'cancelled';
-        } else {
+        } else if($event->status === 'completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa sự kiện đã hoàn thành.'
+            ], 403);
+
+        }
+         else {
              $event->delete();
             
             $message = 'Đã xóa sự kiện thành công.';

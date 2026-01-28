@@ -902,7 +902,7 @@ window.saveEvent = async function() {
 }
 
 // ======================= EVENT DETAILS =======================
-function showEventDetails(eventData) {
+ function showEventDetails(eventData) {
   currentEventId = eventData.id
 
   document.getElementById('detailTitle').textContent = eventData.title
@@ -942,16 +942,27 @@ function showEventDetails(eventData) {
     if (icon) icon.style.display = status === s ? 'inline' : 'none'
   })
 
-  const canEdit = checkPermission(eventData)
+   const canEdit = checkPermission(eventData)
   const editBtn = document.getElementById('editEventBtn')
   const deleteBtn = document.getElementById('deleteEventBtn')
 
-  if (editBtn) editBtn.style.display = canEdit ? 'inline-flex' : 'none'
-  if (deleteBtn) deleteBtn.style.display = canEdit ? 'inline-flex' : 'none'
+   const now = new Date()
+  const eventStart = new Date(eventData.start)
+  const eventEnd = eventData.end ? new Date(eventData.end) : eventStart
+  
+  const isCompleted = status === 'completed'
+  const isOngoing = now >= eventStart && now <= eventEnd && status === 'approved'
+  
+   // - Không có quyền chỉnh sửa
+  // - Hoặc sự kiện đã hoàn thành
+  // - Hoặc sự kiện đang diễn ra
+  const shouldHideButtons = !canEdit || isCompleted || isOngoing
+
+  if (editBtn) editBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
+  if (deleteBtn) deleteBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
 
   toggleModal('detailModal', true)
 }
-
 window.editEvent = function() {
   const eventData = calendar.getEventById(currentEventId)
   if (!eventData) {
