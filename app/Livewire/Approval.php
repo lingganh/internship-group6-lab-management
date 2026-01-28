@@ -322,7 +322,7 @@ class Approval extends Component
             return;
         }
 
-        $events = LabEvent::with(['user:id,full_name'])
+        $events = LabEvent::with(['user:id,full_name', 'lab:id,code,name'])
             ->whereIn('id', $this->selectedIds)
             ->where('status', 'pending')
             ->orderBy('start')
@@ -340,13 +340,39 @@ class Approval extends Component
         $this->batchConflictDetails = [];
         $this->batchForceApproveConflicts = false;
 
-        foreach ($events as $event) {
-            $conflicts = $this->getConflictEvents($event);
+        // Nhóm các lịch theo lab_code để kiểm tra nhanh hơn
+        $eventsByLab = $events->groupBy('lab_code');
 
-            if ($conflicts->isNotEmpty()) {
+        foreach ($events as $event) {
+            $hasConflict = false;
+            
+            // 1. Kiểm tra trùng với lịch đã approved/completed
+            $externalConflicts = $this->getConflictEvents($event);
+            
+            if ($externalConflicts->isNotEmpty()) {
+                $hasConflict = true;
                 $this->batchConflictIds[] = $event->id;
-                $this->batchConflictDetails[] = $this->makeConflictPayload($event, $conflicts);
-            } else {
+                $this->batchConflictDetails[] = $this->makeConflictPayload($event, $externalConflicts);
+                continue;
+            }
+
+            // 2. Kiểm tra trùng với các lịch khác trong batch (cùng lab)
+            $sameLab = $eventsByLab[$event->lab_code] ?? collect();
+            $internalConflicts = $sameLab->filter(function($other) use ($event) {
+                return $other->id !== $event->id 
+                    && $other->start < $event->end 
+                    && $other->end > $event->start;
+            });
+
+            if ($internalConflicts->isNotEmpty()) {
+                $hasConflict = true;
+                $this->batchConflictIds[] = $event->id;
+                $this->batchConflictDetails[] = $this->makeConflictPayload($event, $internalConflicts);
+                continue;
+            }
+
+            // Không có conflict
+            if (!$hasConflict) {
                 $this->batchOkIds[] = $event->id;
             }
         }
@@ -354,17 +380,18 @@ class Approval extends Component
         $this->batchOkCount = count($this->batchOkIds);
         $this->batchConflictCount = count($this->batchConflictIds);
 
-        // có trùng => mở modal (ẩn/xổ)
+        // có trùng => mở modal
         if ($this->batchConflictCount > 0) {
             $this->dispatch('open-batch-conflict-modal');
             return;
         }
 
-        // không trùng => mở password modal như cũ
+        // không trùng => mở password modal
         $this->passwordModalId = 'batch';
         $this->seriesApproveCount = count($this->batchCandidateIds);
         $this->dispatch('open-password-modal');
     }
+    
     public function continueBatchAfterConflict()
     {
         $idsToApprove = $this->batchForceApproveConflicts
@@ -447,22 +474,23 @@ class Approval extends Component
             if ($this->passwordModalId === 'batch') {
                 // Duyệt hàng loạt - sử dụng chunk
                 $eventIds = $this->selectedIds;
+                $roomCode = $this->roomCode; // Capture roomCode trước khi vào closure
                 $count = 0;
 
                 LabEvent::whereIn('id', $eventIds)
                     ->where('status', 'pending')
-                    ->chunk(50, function ($events) use (&$count) {
+                    ->chunk(50, function ($events) use (&$count, $roomCode) {
                         foreach ($events as $event) {
                             $event->update(['status' => 'approved']);
                             $count++;
 
                             // Queue notification và email
-                            dispatch(function () use ($event) {
+                            dispatch(function () use ($event, $roomCode) {
                                 $this->notifyUserEventResult($event, 'approved');
 
                                 if ($event->user && $event->user->email) {
                                     Mail::to($event->user->email)->queue(
-                                        new \App\Mail\ApprovalNotification($event, $this->roomCode)
+                                        new \App\Mail\ApprovalNotification($event, $roomCode)
                                     );
                                 }
                             })->afterResponse();
