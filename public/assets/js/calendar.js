@@ -902,7 +902,7 @@ window.saveEvent = async function() {
 }
 
 // ======================= EVENT DETAILS =======================
-function showEventDetails(eventData) {
+ function showEventDetails(eventData) {
   currentEventId = eventData.id
 
   document.getElementById('detailTitle').textContent = eventData.title
@@ -942,16 +942,27 @@ function showEventDetails(eventData) {
     if (icon) icon.style.display = status === s ? 'inline' : 'none'
   })
 
-  const canEdit = checkPermission(eventData)
+   const canEdit = checkPermission(eventData)
   const editBtn = document.getElementById('editEventBtn')
   const deleteBtn = document.getElementById('deleteEventBtn')
 
-  if (editBtn) editBtn.style.display = canEdit ? 'inline-flex' : 'none'
-  if (deleteBtn) deleteBtn.style.display = canEdit ? 'inline-flex' : 'none'
+   const now = new Date()
+  const eventStart = new Date(eventData.start)
+  const eventEnd = eventData.end ? new Date(eventData.end) : eventStart
+  
+  const isCompleted = status === 'completed'
+  const isOngoing = now >= eventStart && now <= eventEnd && status === 'approved'
+  
+   // - Không có quyền chỉnh sửa
+  // - Hoặc sự kiện đã hoàn thành
+  // - Hoặc sự kiện đang diễn ra
+  const shouldHideButtons = !canEdit || isCompleted || isOngoing
+
+  if (editBtn) editBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
+  if (deleteBtn) deleteBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
 
   toggleModal('detailModal', true)
 }
-
 window.editEvent = function() {
   const eventData = calendar.getEventById(currentEventId)
   if (!eventData) {
@@ -1025,7 +1036,7 @@ window.deleteEvent = function() {
   toggleModal('confirmDeleteModal', true)
 }
 
- window.confirmDelete = async function() {
+window.confirmDelete = async function() {
   closeConfirmDelete()
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
@@ -1040,22 +1051,26 @@ window.deleteEvent = function() {
     formData.append('_method', 'DELETE')
 
     const response = await fetch(`/bookings/${currentEventId}`, {
-      method: 'POST', // Đổi thành POST
+      method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'X-CSRF-TOKEN': csrfToken
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: formData
     })
 
-    const text = await response.text()
     let result
-
-    try {
-      result = JSON.parse(text)
-    } catch (e) {
-      console.error('confirmDelete parse error:', response.status, text)
-      showToast('error', 'Không thể xóa sự kiện (response không phải JSON).')
+    const contentType = response.headers.get('content-type')
+    
+    if (contentType && contentType.includes('application/json')) {
+      const text = await response.text()
+      result = text ? JSON.parse(text) : {}
+    } else {
+      const text = await response.text()
+      console.error('Non-JSON response:', response.status, text)
+      
+      showToast('error', `Lỗi server (${response.status}). Vui lòng kiểm tra log.`)
       return
     }
 
@@ -1064,14 +1079,22 @@ window.deleteEvent = function() {
       return
     }
 
-    showToast('success', result.message || 'Đã xóa sự kiện.')
+    // ✅ Hiển thị thông báo khác nhau dựa trên hành động
+    const action = result.action || 'deleted'
+    const successMessage = action === 'cancelled' 
+      ? 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.' 
+      : 'Đã xóa sự kiện thành công.'
+    
+    showToast('success', result.message || successMessage)
     closeDetailModal()
+    
+    // ✅ Reload calendar
     await loadEvents()
     currentEventId = null
     
   } catch (err) {
     console.error('confirmDelete error:', err)
-    showToast('error', 'Lỗi kết nối máy chủ.')
+    showToast('error', 'Lỗi kết nối: ' + err.message)
   }
 }
 
