@@ -528,7 +528,7 @@ class Approval extends Component
                             $firstGroup = reset($seriesGroups);
                             $event = $firstGroup['events'][0];
                             $this->notifyUserEventResult($event, 'approved');
-
+                
                             if ($event->user && $event->user->email) {
                                 Mail::to($event->user->email)->queue(
                                     new \App\Mail\ApprovalNotification($event, $roomCode)
