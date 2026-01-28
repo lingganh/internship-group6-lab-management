@@ -1025,16 +1025,27 @@ window.deleteEvent = function() {
   toggleModal('confirmDeleteModal', true)
 }
 
-window.confirmDelete = async function() {
+ window.confirmDelete = async function() {
   closeConfirmDelete()
 
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+  
+  if (!csrfToken) {
+    showToast('error', 'Không tìm thấy CSRF token.')
+    return
+  }
+
   try {
+    const formData = new FormData()
+    formData.append('_method', 'DELETE')
+
     const response = await fetch(`/bookings/${currentEventId}`, {
-      method: 'DELETE',
+      method: 'POST', // Đổi thành POST
       headers: {
-        Accept: 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      }
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: formData
     })
 
     const text = await response.text()
@@ -1054,8 +1065,10 @@ window.confirmDelete = async function() {
     }
 
     showToast('success', result.message || 'Đã xóa sự kiện.')
-    await loadEvents()
     closeDetailModal()
+    await loadEvents()
+    currentEventId = null
+    
   } catch (err) {
     console.error('confirmDelete error:', err)
     showToast('error', 'Lỗi kết nối máy chủ.')
