@@ -305,7 +305,7 @@
 
         <div class="modal-footer border-0 pt-0">
             @auth
-                <button type="button" class="btn btn-danger" id="deleteEventBtn" onclick="deleteEvent()">
+                 <button type="button" class="btn btn-danger" id="deleteEventBtn" onclick="deleteEvent()">
                     <i class="fa-regular fa-trash-can"></i>
                     <span>Xóa</span>
                 </button>
@@ -313,7 +313,7 @@
                     <i class="fa-regular fa-pen-to-square"></i>
                     <span>Sửa</span>
                 </button>
-            @endauth
+             @endauth
             <button type="button" class="btn btn-secondary" onclick="closeDetailModal()">Đóng</button>
         </div>
     </div>

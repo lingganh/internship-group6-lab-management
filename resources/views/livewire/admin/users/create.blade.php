@@ -162,8 +162,8 @@
                 Hành động
             </div>
             <div class="card-body d-flex align-items-center gap-1 flex-wrap">
-                <button wire:loading.remove wire:target="save" class="btn btn-primary" @click="$wire.save"><i class="ph-floppy-disk"></i> Cập nhật</button>
-                <button wire:loading wire:target="save" class="btn btn-primary" @click="$wire.save"><i class="ph-spinner-gap animate-spin"></i> Cập nhật</button>
+                <button wire:loading.remove wire:target="save" class="btn btn-primary" @click="$wire.save"><i class="ph-floppy-disk"></i> Lưu</button>
+                <button wire:loading wire:target="save" class="btn btn-primary" @click="$wire.save"><i class="ph-spinner-gap animate-spin"></i> Lưu</button>
 
                 <a href="{{route('admin.users.index')}}" type="button" class="btn btn-warning"><i class="ph-arrow-counter-clockwise"></i> Trở lại</a>
             </div>
