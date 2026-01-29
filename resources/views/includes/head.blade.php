@@ -2,9 +2,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script>if(typeof globalThis==='undefined'){window.globalThis=window;}</script>
-    <script src="https://cdn.jsdelivr.net/npm/resize-observer-polyfill@1.5.1/dist/ResizeObserver.global.js"></script>
-    <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?version=4.8.0&features=default,Promise,fetch"></script>
     <script>
         window.LM = {
             userId: @json(auth()->id()),
@@ -22,7 +19,7 @@
 
     <title>{{ config('app.name', 'Hệ thống quản lý lịch phòng lab') }}</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/login.png') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+{{--    @vite(['resources/css/app.css', 'resources/js/app.js'])--}}
     @include('includes.style')
     {{ $custom_css ?? '' }}
     @include('includes.script')

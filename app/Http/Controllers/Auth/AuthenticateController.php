@@ -46,12 +46,12 @@ class AuthenticateController extends Controller
 
             if($user->status === UserStatus::Pending->value){
                 session()->flash('warning', 'Tài khoản của bạn đang chờ phê duyệt. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
-                return 0;
+                return redirect()->route('login');
             }
 
             if($user->status === UserStatus::Archived->value){
                 session()->flash('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
-                return 0;
+                return redirect()->route('login');
             }
 
             Auth::login($user);

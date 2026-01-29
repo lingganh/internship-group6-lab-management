@@ -79,10 +79,10 @@ class InfoUser extends Component
         try {
             $user = auth()->user()->update([
                 'full_name' => $this->fullName,
-                'phone' => $this->phone,
-                'department_id' => $this->department,
+                'phone' => $this->phone?: null,
+                'department_id' => $this->department?: null,
                 'date_of_birth' => $this->dateOfBirdth?:null,
-                'gender' => $this->gender,
+                'gender' => $this->gender?: null,
             ]);
             $this->dispatch('alert', message: 'Cập nhật người dùng thành công!', type: 'success');
         }
