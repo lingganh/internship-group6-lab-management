@@ -88,7 +88,7 @@
     <!-- Main content section -->
     <div class="content">
         <h4>Xin chào {{ $student->full_name }},</h4>
-        <p>Bạn đã gửi ye vui lòng nhấn vào nút dưới đây để thiết mật khẩu: </p>
+        <p>Bạn đã đăng nhập vào "Hệ thống quản lý phòng Lab" qua Tài khoản Microsoft, bạn lòng nhấn vào nút dưới đây để thiết mật khẩu: </p>
         <a href="{{ route('setPassword', ['token' => $token]) }}" class="button">Thiết lập mật khẩu</a>
         <p><strong>Lưu ý:</strong></p>
         <ul>

@@ -43,7 +43,7 @@
                 <tr class="table-light">
                     <th>STT</th>
                     <th>TÊN TÀI KHOẢN</th>
-                    <th>MÃ GV</th>
+                    <th>MÃ GIẢNG VIÊN</th>
                     <th>EMAIL</th>
                     <th>VAI TRÒ</th>
                     <th>TRẠNG THÁI</th>
