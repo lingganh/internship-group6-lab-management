@@ -11,7 +11,7 @@
         .tv-header {
             background: white;
             border-bottom: 1px solid #e5e7eb;
-            padding: 1.5rem 2rem;
+            padding: 1rem 1.5rem;
             position: sticky;
             top: 0;
             z-index: 10;
@@ -19,7 +19,7 @@
         }
 
         .tv-header-content {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -27,21 +27,21 @@
         }
 
         .tv-title {
-            font-size: 1.875rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #111827;
             margin: 0;
         }
 
         .tv-clock {
-            font-size: 1.125rem;
+            font-size: 0.95rem;
             color: #6b7280;
             font-weight: 500;
         }
 
         .tv-legend {
             display: flex;
-            gap: 1.5rem;
+            gap: 1.25rem;
             align-items: center;
         }
 
@@ -49,25 +49,26 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: #4b5563;
         }
 
         .legend-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
 
         .tv-calendar-container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1.5rem;
         }
 
         /* FullCalendar custom styles */
         .fc {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem;
         }
 
         .fc-theme-standard td,
@@ -79,16 +80,16 @@
             background: #f9fafb;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             letter-spacing: 0.05em;
             color: #6b7280;
-            padding: 1rem 0;
+            padding: 0.75rem 0;
         }
 
         .fc-daygrid-day-number {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            padding: 8px;
+            padding: 6px;
             color: #374151;
         }
 
@@ -100,8 +101,8 @@
             background: #3b82f6;
             color: white;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -109,10 +110,10 @@
 
         .fc-event {
             border: none !important;
-            padding: 6px 10px;
-            margin: 2px 4px;
-            border-radius: 6px;
-            font-size: 0.875rem;
+            padding: 4px 8px;
+            margin: 1px 2px;
+            border-radius: 4px;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -130,12 +131,22 @@
         .fc-event-time {
             font-weight: 500;
             opacity: 0.95;
+            font-size: 0.75rem;
+        }
+
+        /* Event ngắn chỉ hiện thời gian */
+        .fc-event-short .fc-event-title {
+            display: none;
+        }
+
+        .fc-event-short .fc-event-time {
+            font-weight: 600;
         }
 
         /* Event is currently happening - pulse animation */
         .event-current {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2) !important;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
         }
 
         @keyframes pulse {
@@ -195,8 +206,8 @@
 
         .tv-modal-content {
             background: white;
-            border-radius: 16px;
-            max-width: 600px;
+            border-radius: 12px;
+            max-width: 550px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -204,7 +215,7 @@
         }
 
         .modal-header {
-            padding: 1.5rem;
+            padding: 1.25rem;
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             justify-content: space-between;
@@ -212,7 +223,7 @@
         }
 
         .modal-title {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: #111827;
             margin: 0;
@@ -220,25 +231,19 @@
 
         .fc-timegrid-now-indicator-line {
             border-color: #ea4335 !important;
-            /* Màu đỏ của Google */
             border-width: 2px 0 0 !important;
             z-index: 5;
         }
 
         .fc .fc-timegrid-slot {
-            height: 3.0em;
-            /* chỉnh 2.6em ~ 3.6em tùy thích */
+            height: 2.5em;
         }
 
-
-        /* Tạo hình tròn ở đầu đường kẻ (Marker) */
         .fc-timegrid-now-indicator-line::before {
             content: "";
             position: absolute;
             left: -6px;
-            /* Điều chỉnh để hình tròn nằm đè lên trục thời gian */
             top: -6px;
-            /* Căn giữa hình tròn với đường kẻ 2px */
             width: 12px;
             height: 12px;
             background-color: #ea4335;
@@ -260,13 +265,13 @@
         }
 
         .modal-body {
-            padding: 1.5rem;
+            padding: 1.25rem;
         }
 
         .detail-item {
             display: flex;
-            gap: 1rem;
-            padding: 1rem 0;
+            gap: 0.85rem;
+            padding: 0.85rem 0;
             border-bottom: 1px solid #f3f4f6;
         }
 
@@ -284,13 +289,13 @@
         }
 
         .detail-label {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: #6b7280;
             margin-bottom: 0.25rem;
         }
 
         .detail-value {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #111827;
             font-weight: 500;
         }
@@ -299,9 +304,9 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 0.85rem;
             border-radius: 9999px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
@@ -322,8 +327,8 @@
         <div class="tv-header">
             <div class="tv-header-content">
                 <div>
-                    <h3 class="tv-title">📅 LAB Phát triển phần mềm và hệ thống thông minh</h3>
-                    <div class="tv-clock" id="current-time"></div>
+                    <h3>📅 LAB Phát triển phần mềm và hệ thống thông minh</h3>
+                    <div id="current-time"></div>
                 </div>
 
                 <div class="tv-legend">
@@ -525,6 +530,15 @@
                         }
                     };
                 }),
+                eventDidMount: function(info) {
+                    // Tính thời lượng event (phút)
+                    const duration = (info.event.end - info.event.start) / 1000 / 60;
+                    
+                    // Nếu event < 45 phút, chỉ hiện thời gian
+                    if (duration < 45) {
+                        info.el.classList.add('fc-event-short');
+                    }
+                },
                 eventClick: function (info) {
                     showEventDetails(info.event);
                 }
