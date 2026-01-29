@@ -500,8 +500,8 @@
 <script>
     // Global variables for calendar
     window.LAB_USER = @json([
-        'logged_in' => auth()->check() && in_array((int) auth()->user()->role_id, [1, 2], true),
-        'is_admin' => auth()->check() && auth()->user()->role_id === 1,
+        'logged_in' => auth()->check()&& auth()->user()->role_id!==4,
+        'is_admin' => auth()->check() && auth()->user()->role_id===1,
         'user_id' => auth()->check() ? auth()->user()->id : null
     ]);
 
