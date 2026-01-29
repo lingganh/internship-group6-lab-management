@@ -57,7 +57,7 @@
             <div class="kpi-card">
                 <div class="kpi-icon bg-warning"><i class="fa fa-clock"></i></div>
                 <div>
-                    <small>chờ duyệt</small>
+                    <small>Chờ duyệt</small>
                     <h3>{{ $ALLPendingEvt }}</h3>
                 </div>
             </div>
