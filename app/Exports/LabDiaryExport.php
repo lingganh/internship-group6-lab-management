@@ -52,8 +52,8 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         $this->counter++;
         $categoryMap = [
-            'work' => "Làm việc-Nghiên cứu",
-            'seminar' => "Hội thảo-Seminar",
+            'work' => "Làm việc-Nghiên cứu - ",
+            'seminar' => "Hội thảo-Seminar - ",
             'other' => ""
         ];
         return [
