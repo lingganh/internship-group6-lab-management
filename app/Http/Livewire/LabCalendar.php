@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Enums\Role as RoleEnum;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use function in_array;
 class LabCalendar extends Component
 {
     public function render()
@@ -115,7 +116,18 @@ class LabCalendar extends Component
     if (!auth()->check()) {
         return response()->json(['type' => 'error', 'message' => 'Bạn cần đăng nhập.'], 401);
     }
+    $user = Auth::user();
 
+    if (!in_array($user->role?->name, [
+        RoleEnum::Admin->value,
+        RoleEnum::Officer->value,
+        RoleEnum::Teacher->value,
+    ], true)) {
+        return response()->json([
+            'type' => 'error',
+            'message' => 'Bạn không có quyền đăng ký lịch phòng lab.'
+        ], 403);
+    }
     $request->validate([
         'title' => 'required|string|max:255',
         'category' => 'required|string|in:work,seminar,other',
