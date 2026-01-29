@@ -5,7 +5,7 @@
                 <div class="d-flex">
                     <div class="breadcrumb py-2">
                         <a href="{{route('home')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
-                        <span class="breadcrumb-item active">Lịch trình cá nhân </span>
+                        <span class="breadcrumb-item active">Lịch đã đăng ký </span>
                     </div>
                     <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
@@ -18,7 +18,7 @@
     <div class="container py-4">
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-            <h5 class="fw-semibold text-dark m-0">Lịch trình cá nhân</h5>
+            <h5 class="fw-semibold text-dark m-0">Lịch đã đăng ký</h5>
 
             <div class="d-flex gap-2">
                 <select wire:model.live="filterStatus" class="form-select form-select-sm filter-control">

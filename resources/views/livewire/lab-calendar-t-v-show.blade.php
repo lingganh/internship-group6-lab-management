@@ -345,8 +345,9 @@
 
         {{-- Calendar --}}
         <div class="tv-calendar-container">
-            <div id="calendar"></div>
+            <div id="calendar" wire:ignore></div>
         </div>
+
     </div>
 
     {{-- Modal Chi tiết --}}
@@ -446,6 +447,12 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
     <script>
+     
+         document.addEventListener('livewire:initialized', () => {
+              setInterval(() => {
+                @this.call('loadData')
+                }, 100000)
+        })
         let calendar = null;
         const events = @json($events);
 
