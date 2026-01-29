@@ -172,8 +172,7 @@
         }
 
         .dashboard-wrapper {
-            max-width: 1600px;
-            margin: 0 auto;
+            max-width: 100%;
         }
 
         .h-52 {
