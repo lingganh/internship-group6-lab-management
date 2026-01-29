@@ -136,7 +136,7 @@
             @foreach($categories as $c)
               <option value="{{ $c }}" {{ request('category') == $c ? 'selected' : '' }}>
                 @php
-                  $catMap = ['work' => 'Làm việc', 'seminar' => 'Hội thảo', 'other' => 'Khác'];
+                  $catMap = ['work' => 'Làm việc / Nghiên cứu', 'seminar' => 'Hội thảo / Seminar', 'other' => 'Khác'];
                   echo $catMap[$c] ?? ucfirst($c);
                 @endphp
               </option>
@@ -156,7 +156,7 @@
           $labName = $event->lab->name ?? ($event->lab->code ?? ($event->lab_code ?? 'Chưa rõ'));
           $labCode = $event->lab->code ?? ($event->lab_code ?? null);
 
-          $categoryMap = ['work' => 'Làm việc', 'seminar' => 'Hội thảo', 'other' => 'Khác'];
+          $categoryMap = ['work' => 'Làm việc / Nghiên cứu', 'seminar' => 'Hội thảo / Seminar', 'other' => 'Khác'];
           $categoryText = $categoryMap[$event->category] ?? ucfirst($event->category ?? 'Chưa phân loại');
 
           $userName = $event->user?->full_name ?? $event->user?->name ?? 'Chưa rõ';
