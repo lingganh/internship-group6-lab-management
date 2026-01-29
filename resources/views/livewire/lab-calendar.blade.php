@@ -337,6 +337,27 @@
         </div>
     </div>
 </div>
+<div id="confirmConflictModal" class="lab-modal">
+    <div class="lab-modal-content" style="max-width:520px;">
+        <div class="modal-header border-0 pb-0">
+            <h4 class="lab-modal-title">Lịch bị trùng</h4>
+        </div>
+
+        <div class="modal-body pt-2">
+            <p class="mb-2">
+                Một số lịch bị trùng với <b>lịch đã duyệt</b>.
+                Bạn có muốn tiếp tục đăng ký <b>các lịch còn lại</b> không?
+            </p>
+
+            <ul id="conflictList" class="small text-muted ps-3 mb-0"></ul>
+        </div>
+
+        <div class="modal-footer border-0 pt-0">
+            <button class="btn btn-secondary" onclick="closeConflictModal()">Hủy</button>
+            <button class="btn btn-danger" onclick="confirmContinue()">Vẫn đăng ký</button>
+        </div>
+    </div>
+</div>
 
 {{-- STYLES --}}
 <style>
