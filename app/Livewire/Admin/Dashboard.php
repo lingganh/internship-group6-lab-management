@@ -140,7 +140,7 @@ class Dashboard extends Component
                 $weekEnd = $monthEnd->copy();
             }
 
-            $count = $Month->filt   er(function ($e) use ($weekStart, $weekEnd, $tz) {
+            $count = $Month->filter(function ($e) use ($weekStart, $weekEnd, $tz) {
                 $start = Carbon::parse($e->start)->setTimezone($tz);
                 $end   = Carbon::parse($e->end)->setTimezone($tz);
 
