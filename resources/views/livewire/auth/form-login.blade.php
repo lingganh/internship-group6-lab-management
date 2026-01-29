@@ -56,8 +56,8 @@
             <span class="px-2">Hoặc đăng nhập với</span>
         </div>
         <div class="text-center mb-3">
-            <a href="{{route('sso.redirect')}}" class="btn btn-outline-primary btn-icon border-width-2 w-100 disabled">
-                Hệ thống ST Single Sign-On
+            <a href="{{route('sso.redirect')}}" class="btn btn-outline-primary btn-icon border-width-2 w-100">
+                <i class="ph-windows-logo"></i> Tài khoản Microsoft
             </a>
         </div>
         <div class="text-center text-muted content-divider mb-3">
