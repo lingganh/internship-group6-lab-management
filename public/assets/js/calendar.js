@@ -6,7 +6,6 @@ let currentEventId = null
 let hiddenCategories = new Set()
 let hiddenStatuses = new Set()
 let selectedRoomFilter = ''
-let pendingFormData = null
 
 // ======================= CONSTANTS =======================
 const STATUS_COLORS = {
@@ -151,11 +150,6 @@ window.closeDetailModal = function() {
 
 window.closeConfirmDelete = function() {
   toggleModal('confirmDeleteModal', false)
-}
-
-window.closeConflictModal = function() {
-  toggleModal('confirmConflictModal', false)
-  pendingFormData = null
 }
 
 function openCreateModal(start = null, end = null) {
@@ -410,25 +404,6 @@ function initCalendar() {
       if (!checkPermission(draggedEvent)) return false
       const now = new Date()
       if (dropInfo.start && dropInfo.start < now) return false
-      
-      // ✅ NGĂN KÉO TRÙNG: Kiểm tra xem có event nào khác trùng thời gian không
-      const hasOverlap = calendar.getEvents().some(event => {
-        if (event.id === draggedEvent.id) return false // Bỏ qua chính nó
-        if (event.extendedProps.status === 'cancelled') return false // Bỏ qua lịch đã hủy
-        
-        const eventStart = event.start
-        const eventEnd = event.end || new Date(eventStart.getTime() + 60 * 60 * 1000)
-        const dropEnd = dropInfo.end || new Date(dropInfo.start.getTime() + 60 * 60 * 1000)
-        
-        // Kiểm tra overlap: start1 < end2 && end1 > start2
-        return dropInfo.start < eventEnd && dropEnd > eventStart
-      })
-      
-      if (hasOverlap) {
-        showToast('warning', 'Không thể kéo vào thời gian đã có lịch khác')
-        return false
-      }
-      
       return true
     },
 
@@ -888,9 +863,6 @@ window.saveEvent = async function() {
       if (!res.ok) return
 
       if (res.data?.message) showToast('success', res.data.message)
-      
-      closeModal()
-      await loadEvents()
     } else {
       const fd = new FormData()
       fd.append('title', title)
@@ -918,22 +890,11 @@ window.saveEvent = async function() {
       const res = await sendBookingRequest('/bookings', fd)
       if (!res.ok) return
 
-      if (res.data?.type === 'confirm') {
-        // Lưu formData để dùng lại khi user confirm
-        pendingFormData = fd
-        showConflictModal(res.data.data.conflicts)
-        return
-      }
-
-      if (res.data?.type === 'error') {
-        showToast('error', res.data.message)
-        return
-      }
-
       showToast('success', res.data?.message || 'Đã gửi yêu cầu đăng ký lịch.')
-      closeModal()
-      await loadEvents()
     }
+
+    closeModal()
+    await loadEvents()
   } catch (error) {
     console.error('saveEvent error:', error)
     showToast('error', 'Có lỗi xảy ra khi lưu sự kiện.')
@@ -941,7 +902,7 @@ window.saveEvent = async function() {
 }
 
 // ======================= EVENT DETAILS =======================
-function showEventDetails(eventData) {
+ function showEventDetails(eventData) {
   currentEventId = eventData.id
 
   document.getElementById('detailTitle').textContent = eventData.title
@@ -981,17 +942,20 @@ function showEventDetails(eventData) {
     if (icon) icon.style.display = status === s ? 'inline' : 'none'
   })
 
-  const canEdit = checkPermission(eventData)
+   const canEdit = checkPermission(eventData)
   const editBtn = document.getElementById('editEventBtn')
   const deleteBtn = document.getElementById('deleteEventBtn')
 
-  const now = new Date()
+   const now = new Date()
   const eventStart = new Date(eventData.start)
   const eventEnd = eventData.end ? new Date(eventData.end) : eventStart
   
   const isCompleted = status === 'completed'
   const isOngoing = now >= eventStart && now <= eventEnd && status === 'approved'
   
+   // - Không có quyền chỉnh sửa
+  // - Hoặc sự kiện đã hoàn thành
+  // - Hoặc sự kiện đang diễn ra
   const shouldHideButtons = !canEdit || isCompleted || isOngoing
 
   if (editBtn) editBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
@@ -999,7 +963,6 @@ function showEventDetails(eventData) {
 
   toggleModal('detailModal', true)
 }
-
 window.editEvent = function() {
   const eventData = calendar.getEventById(currentEventId)
   if (!eventData) {
@@ -1012,12 +975,16 @@ window.editEvent = function() {
     return
   }
 
+  // Đóng detail modal trước
   closeDetailModal()
 
+  // Delay nhỏ để transition mượt
   setTimeout(() => {
+    // Reset form trước
     const form = document.getElementById('eventForm')
     if (form) form.reset()
 
+    // Điền thông tin
     document.getElementById('modalTitle').textContent = 'Chỉnh sửa sự kiện'
     document.getElementById('eventId').value = currentEventId
     document.getElementById('eventTitle').value = eventData.title
@@ -1032,6 +999,7 @@ window.editEvent = function() {
     document.getElementById('eventStartTime').value = startDate.toTimeString().slice(0, 5)
     document.getElementById('eventEndTime').value = endDate.toTimeString().slice(0, 5)
 
+    // Reset repeat controls
     document.getElementById('eventRepeatType').value = ''
     document.getElementById('eventRepeatUntil').value = ''
     
@@ -1046,7 +1014,10 @@ window.editEvent = function() {
     const weekSummary = document.getElementById('weekSummary')
     if (weekSummary) weekSummary.textContent = ''
 
+    // Mở modal edit
     toggleModal('eventModal', true)
+    
+    // Build occurrences preview
     buildOccurrencesFromForm({ preview: true })
   }, 100)
 }
@@ -1108,6 +1079,7 @@ window.confirmDelete = async function() {
       return
     }
 
+    // ✅ Hiển thị thông báo khác nhau dựa trên hành động
     const action = result.action || 'deleted'
     const successMessage = action === 'cancelled' 
       ? 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.' 
@@ -1116,6 +1088,7 @@ window.confirmDelete = async function() {
     showToast('success', result.message || successMessage)
     closeDetailModal()
     
+    // ✅ Reload calendar
     await loadEvents()
     currentEventId = null
     
@@ -1190,68 +1163,6 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
     showToast('error', 'Lỗi kết nối khi cập nhật.')
     if (infoCtx?.revert) infoCtx.revert()
   }
-}
-
-// ======================= CONFLICT MODAL =======================
-function showConflictModal(conflicts) {
-  const list = document.getElementById('conflictList')
-  if (!list) {
-    console.error('Missing #conflictList')
-    return
-  }
-
-  list.innerHTML = ''
-
-  conflicts.forEach(c => {
-    const li = document.createElement('li')
-    li.innerHTML = `
-      <b>${c.requested_start} → ${c.requested_end}</b><br>
-      <span class="text-danger">
-        Trùng với: ${c.conflict_with.title}
-        (${c.conflict_with.start} → ${c.conflict_with.end})
-      </span>
-    `
-    list.appendChild(li)
-  })
-
-  toggleModal('confirmConflictModal', true)
-}
-
-window.confirmContinue = async function () {
-  if (!pendingFormData) {
-    console.error('pendingFormData is null')
-    closeConflictModal()
-    return
-  }
-
-  // Thêm flag force để backend biết là user đã confirm
-  pendingFormData.append('force', 'true')
-
-  const res = await sendBookingRequest('/bookings', pendingFormData)
-  
-  if (!res.ok) {
-    closeConflictModal()
-    return
-  }
-
-  if (res.data?.type === 'confirm') {
-    // Nếu vẫn còn conflicts (trường hợp hiếm), hiển thị lại modal
-    showConflictModal(res.data.data.conflicts)
-    return
-  }
-
-  if (res.data?.type === 'error') {
-    showToast('error', res.data.message)
-    closeConflictModal()
-    return
-  }
-
-  // ✅ SUCCESS: Đóng modal conflict + modal đăng ký + hiện toast + reload
-  showToast('success', res.data?.message || 'Đã gửi yêu cầu đăng ký lịch.')
-  closeConflictModal()
-  closeModal()
-  await loadEvents()
-  pendingFormData = null
 }
 
 // ======================= INITIALIZATION =======================
