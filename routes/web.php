@@ -4,6 +4,7 @@ use App\Http\Controllers\admin\GroupController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\client\UserController as ClientController;
 use App\Http\Livewire\LabCalendar;
+use App\Http\Livewire\LabCalendarTVShow;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
@@ -157,3 +158,5 @@ Route::middleware('auth')->get('/notifications/{notification}/open', [Notificati
     ->name('notifications.open');
 
 Route::get('coming-soon', fn() => view('coming-soon'))->name('admin.coming-soon');
+//TV 
+Route::get('/lab-calendar-tv', \App\Livewire\LabCalendarTVShow::class)->name('lab.calendar.tv');
