@@ -54,7 +54,7 @@
                 <div class="row">
                     <div class="col-6">
                         <label for="code" class="col-form-label" wire:ignore>
-                            Mã GV: <span class="required">*</span>
+                            Mã Giảng viên: <span class="required">*</span>
                         </label>
                         <input wire:model.live="code" type="text" id="code" class="form-control">
                         @error('code')

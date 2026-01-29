@@ -33,7 +33,7 @@ class Edit extends Component
     #[validate(as: 'Email')]
     public string $email='';
 
-    #[validate(as: 'Mã SV/GV')]
+    #[validate(as: 'Mã Giảng viên')]
     public string $code='';
 
     #[validate(as:'Vai trò')]
