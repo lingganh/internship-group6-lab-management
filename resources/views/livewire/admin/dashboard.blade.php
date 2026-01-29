@@ -504,6 +504,10 @@
             return 'Có thể sử dụng'
         else if (status == 'In_use')
             return 'Đang trong sử dụng'
+        else if (status=='Work')
+            return 'Làm việc'
+        else if (status=='Seminar')
+            return 'Hội Thảo'
         else
             return status
 
@@ -600,7 +604,7 @@
         if (!pieChart) return;
 
 
-        pieChart.data.labels = Newdata.map(d => d.category);
+        pieChart.data.labels = Newdata.map(d =>translate(d.category));
         pieChart.data.datasets[0].data = Newdata.map(d => d.count);
 
         pieChart.update({

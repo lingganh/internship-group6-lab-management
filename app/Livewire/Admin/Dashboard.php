@@ -7,7 +7,8 @@ use App\Models\Lab;
 use App\Models\LabEquipmentItem;
 use App\Models\LabEvent;
 use Livewire\Component;
-
+use Carbon\Carbon;
+use DateTimeZone;
 
 
 class Dashboard extends Component
@@ -33,6 +34,7 @@ class Dashboard extends Component
 
     public function mount()
     {
+
         //aboveData
         $this->AllEvent = LabEvent::query()->where('start', '>=', now())->where('status', '=', 'approved')->count();
         $this->ALLPendingEvt = LabEvent::query()->where('status', '=', 'pending')->count();
@@ -48,7 +50,7 @@ class Dashboard extends Component
             $q->where('status', 'maintenance');
         })
             ->sum('quantity');
-        $temp=LabEquipmentItem::whereHas('equipment', function ($q) {
+        $temp = LabEquipmentItem::whereHas('equipment', function ($q) {
             $q->where('status', 'in_use');
         })
             ->sum('quantity');
@@ -63,40 +65,47 @@ class Dashboard extends Component
             ],
             [
                 'status' => 'Broken',
-                'count'  => $this->FaultyEquip ,
+                'count'  => $this->FaultyEquip,
             ],
             [
-                'status'=>'In_use',
-                'count'=>$temp,
+                'status' => 'In_use',
+                'count' => $temp,
             ]
         ];
 
         //
-        $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek())->where('end', '<=', now()->endOfWeek())->get();
-        $Month = LabEvent::query()->where('start', '>=', now()->startOfMonth())->where('end', '<=', now()->endOfMonth())->get();
-        $Year = LabEvent::query()->where('start', '>=', now()->startOfYear())->where('end', '<=', now()->endOfYear())->get();
+        $Week = LabEvent::query()->where('start', '>=', now()->startOfWeek()->timezone('UTC'))->where('end', '<=', now()->endOfWeek()->timezone('UTC'))->get();
+        $Month = LabEvent::query()->where('start', '>=', now()->startOfMonth()->timezone('UTC'))->where('end', '<=', now()->endOfMonth()->timezone('UTC'))->get();
+        $Year = LabEvent::query()->where('start', '>=', now()->startOfYear()->timezone('UTC'))->where('end', '<=', now()->endOfYear()->timezone('UTC'))->get();
         $All = LabEvent::query()->get();
 
         //chartData
         $BarData = [12, 19, 3, 5, 2, 3, 12];
+        $tz = new DateTimeZone('Asia/Ho_Chi_Minh');
 
 
 
         //weekly data
         $days = collect();
-        $start = now()->startOfWeek();
-        $end   = now()->endOfWeek();
 
-        while ($start <= $end) {
-            $days->put($start->toDateString(), 0);
-            $start->addDay();
+        $cursor = Carbon::now($tz)->startOfWeek();
+        $weekEnd = Carbon::now($tz)->endOfWeek();
+
+
+        while ($cursor <= $weekEnd) {
+            $days->put($cursor->toDateString(), 0);
+            $cursor->addDay();
         }
 
         //weekBarChart
         $this->WeekBCData = $days
             ->merge(
-                collect($Week)->groupBy(fn($e) => $e->start->toDateString())
-                    ->map->count()
+                $Week->groupBy(
+                    fn($e) =>
+                    Carbon::parse($e->start)
+                        ->setTimezone($tz)
+                        ->toDateString()
+                )->map->count()
             )
             ->map(fn($count, $date) => [
                 'date' => $date,
@@ -118,7 +127,7 @@ class Dashboard extends Component
         $monthEnd   = now()->endOfMonth();
 
         //Month barchart
-        
+
         $this->MonthBCData = collect();
         $cursor = $monthStart->copy();
         $weekIndex = 1;
@@ -131,8 +140,11 @@ class Dashboard extends Component
                 $weekEnd = $monthEnd->copy();
             }
 
-            $count = $Month->filter(function ($e) use ($weekStart, $weekEnd) {
-                return $e->start <= $weekEnd && $e->end >= $weekStart;
+            $count = $Month->filter(function ($e) use ($weekStart, $weekEnd, $tz) {
+                $start = Carbon::parse($e->start)->setTimezone($tz);
+                $end   = Carbon::parse($e->end)->setTimezone($tz);
+
+                return $start <= $weekEnd && $end >= $weekStart;
             })->count();
 
             $this->MonthBCData->push([
@@ -195,8 +207,4 @@ class Dashboard extends Component
     {
         return view('livewire.admin.dashboard');
     }
-
-   
-
-    
 }
