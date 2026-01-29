@@ -111,102 +111,94 @@ class LabCalendar extends Component
             ->exists();
     }
     public function store(Request $request)
-    {
-        if (!auth()->check()) {
-            return response()->json([
-                'type' => 'error',
-                'message' => 'Bạn cần đăng nhập.'
-            ], 401);
-        }
+{
+    if (!auth()->check()) {
+        return response()->json(['type' => 'error', 'message' => 'Bạn cần đăng nhập.'], 401);
+    }
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string|in:work,seminar,other',
-            'lab_code' => 'required|string|exists:labs,code',
-            'description' => 'nullable|string|max:1000',
-            'registered_for' => 'nullable|string|max:255',
-            'occurrences' => 'nullable|array',
-            'occurrences.*.start' => 'required_with:occurrences|date',
-            'occurrences.*.end' => 'required_with:occurrences|date|after:occurrences.*.start',
-        ]);
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category' => 'required|string|in:work,seminar,other',
+        'lab_code' => 'required|string',
+        'occurrences' => 'required|array',
+        'force' => 'nullable'
+    ]);
 
-        $user = Auth::user();
-        $isAdmin = (int) $user->role_id === 1;
+    $user = Auth::user();
+    $force = $request->input('force') === 'true' || $request->has('force'); // ✅ Sửa đây
+    $seriesId = Str::uuid()->toString();
+    $createdEvents = [];
+    $conflicts = [];
+    $occurrences = $request->input('occurrences');
 
-        $seriesId = Str::uuid()->toString();
-        $createdEvents = [];
+    foreach ($occurrences as $occ) {
+        $conflictedEvent = LabEvent::where('lab_code', $request->lab_code)
+            ->where('status', 'approved')
+            ->where('start', '<', $occ['end'])
+            ->where('end', '>', $occ['start'])
+            ->first();
 
-        // nếu không có occurrences → tạo 1 lịch
-        $occurrences = $request->input('occurrences');
-
-        if (empty($occurrences)) {
-            $occurrences = [
-                [
-                    'start' => $request->start,
-                    'end' => $request->end,
+        if ($conflictedEvent) {
+            $conflicts[] = [
+                'requested_start' => Carbon::parse($occ['start'])->format('d/m/Y H:i'),
+                'requested_end' => Carbon::parse($occ['end'])->format('d/m/Y H:i'),
+                'conflict_with' => [
+                    'title' => $conflictedEvent->title,
+                    'start' => Carbon::parse($conflictedEvent->start)->format('d/m/Y H:i'),
+                    'end' => Carbon::parse($conflictedEvent->end)->format('d/m/Y H:i')
                 ]
             ];
+            if (!$force) continue;
+            continue; 
         }
 
-        foreach ($occurrences as $index => $occ) {
-            // check trùng CHỈ với approved
-            $conflict = LabEvent::where('lab_code', $request->lab_code)
-                ->where('status', 'approved')
-                ->where('start', '<', $occ['end'])
-                ->where('end', '>', $occ['start'])
-                ->exists();
-
-            if ($conflict) {
-                continue; // bỏ occurrence bị trùng
-            }
-
-            $event = LabEvent::create([
-                'series_id' => count($occurrences) > 1 ? $seriesId : null,
-                'title' => $request->title,
-                'category' => $request->category,
-                'color' => $request->color,
-                'lab_code' => $request->lab_code,
-                'start' => $occ['start'],
-                'end' => $occ['end'],
-                'description' => $request->description,
-                'registered_for' => $request->registered_for,
-                'status' => 'pending',
-                'user_id' => $user->id,
-                'updated_by' => $user->id,
-            ]);
-
-            // chỉ upload file cho event đầu
-            if ($index === 0 && $request->hasFile('files')) {
-                $this->handleFileUploads($request->file('files'), $event->id);
-            }
-
-            $createdEvents[] = $event;
-        }
-
-        if (empty($createdEvents)) {
-            return response()->json([
-                'type' => 'error',
-                'message' => 'Lịch bị trùng với lịch đã duyệt.'
-            ], 409);
-        }
-
-        // notify admin 1 lần
-        if (!$isAdmin) {
-            $this->notifyAdminsPendingEvent(
-                $createdEvents[0],
-                'created',
-                count($createdEvents)
-            );
-        }
-
-        return response()->json([
-            'messages' => 'Đã gửi yêu cầu đăng ký lịch.',
-            'data' => [
-                'created' => count($createdEvents),
-                'series_id' => count($createdEvents) > 1 ? $seriesId : null,
-            ]
-        ], 201);
+        $event = LabEvent::create([
+            'series_id' => count($occurrences) > 1 ? $seriesId : null,
+            'title' => $request->title,
+            'category' => $request->category,
+            'lab_code' => $request->lab_code,
+            'start' => $occ['start'],
+            'end' => $occ['end'],
+            'description' => $request->description,
+            'registered_for' => $request->registered_for,
+            'status' => 'pending',
+            'user_id' => $user->id,
+        ]);
+        $createdEvents[] = $event;
     }
+
+    if (!$force && !empty($conflicts)) {
+        return response()->json([
+            'type' => 'confirm',
+            'message' => 'Phát hiện trùng lịch.',
+            'data' => ['conflicts' => $conflicts]
+        ]);
+    }
+
+    if (empty($createdEvents)) {
+        return response()->json([
+            'type' => 'error', 
+            'message' => 'Không có lịch nào hợp lệ để tạo.'
+        ], 409);
+    }
+
+    // ✅ Thêm phần upload files và notify
+    if ($request->hasFile('files')) {
+        foreach ($createdEvents as $event) {
+            $this->handleFileUploads($request->file('files'), $event->id);
+        }
+    }
+
+    if ($user->role_id != 1) {
+        $this->notifyAdminsPendingEvent($createdEvents[0], 'created', count($createdEvents));
+    }
+
+    return response()->json([
+        'type' => 'success',
+        'message' => 'Đã gửi yêu cầu đăng ký thành công (' . count($createdEvents) . ' lịch).',
+    ], 201);
+}
+
 
     // public function store(Request $request)
     // {
