@@ -238,6 +238,77 @@ function checkPermission(eventData) {
 }
 
 // ======================= EVENT RENDERING =======================
+// function getEventContent(arg) {
+//   const event = arg.event
+//   const props = event.extendedProps || {}
+//   const status = props.status || 'pending'
+//   const category = props.category || 'work'
+
+//   const durationMinutes = (event.end - event.start) / (1000 * 60)
+
+//   const isTiny = durationMinutes <= 30
+//   const isShort = durationMinutes <= 60
+//   const isMedium = durationMinutes <= 90
+
+//   const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
+//   const categoryIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.work
+//   const categoryText = CATEGORY_NAMES[category] || 'Làm việc / Nghiên cứu'
+
+//   const color = props._color || event.backgroundColor || '#3788d8'
+//   const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
+//   const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
+
+//   let html = ''
+
+//   if (isTiny) {
+//     html = `
+//       <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;">
+//         <div style="font-weight:800;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
+//         <div style="font-weight:700;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
+//       </div>
+//     `
+//   } else if (isShort) {
+//     html = `
+//       <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;">
+//         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+//           <div style="font-weight:800;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
+//           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;">${statusIcon}</span>
+//         </div>
+//         <div style="font-weight:700;line-height:1.2;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${event.title || ''}</div>
+//       </div>
+//     `
+//   } else if (isMedium) {
+//     html = `
+//       <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;">
+//         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+//           <div style="font-weight:800;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
+//           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;">${statusIcon}</span>
+//         </div>
+//         <div style="font-weight:800;line-height:1.2;margin-bottom:3px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${event.title || ''}</div>
+//         <div style="display:flex;align-items:center;gap:5px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+//           ${categoryIcon}
+//           <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${categoryText}</span>
+//         </div>
+//       </div>
+//     `
+//   } else {
+//     html = `
+//       <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;">
+//         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+//           <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
+//           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;">${statusIcon}</span>
+//         </div>
+//         <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${event.title || ''}</div>
+//         <div style="display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:3px;white-space:nowrap;">
+//           ${categoryIcon}
+//           <span style="white-space:nowrap;">${categoryText}</span>
+//         </div>
+//       </div>
+//     `
+//   }
+
+//   return { html }
+// }
 function getEventContent(arg) {
   const event = arg.event
   const props = event.extendedProps || {}
@@ -250,10 +321,13 @@ function getEventContent(arg) {
   const isShort = durationMinutes <= 60
   const isMedium = durationMinutes <= 90
 
-  const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
-  const categoryIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.work
-  const categoryText = CATEGORY_NAMES[category] || 'Làm việc / Nghiên cứu'
+   const categoryIcon = props.categoryIcon 
+    ? `<i class="${props.categoryIcon}"></i>` 
+    : (CATEGORY_ICONS[category] || CATEGORY_ICONS.work)
+  
+   const categoryText = props.categoryName || CATEGORY_NAMES[category] || 'Làm việc / Nghiên cứu'
 
+  const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
   const color = props._color || event.backgroundColor || '#3788d8'
   const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
   const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
@@ -309,7 +383,6 @@ function getEventContent(arg) {
 
   return { html }
 }
-
 function onEventDidMount(info) {
   const el = info.el
   const props = info.event.extendedProps || {}
@@ -681,6 +754,65 @@ function buildOccurrencesFromForm(options = {}) {
 }
 
 // ======================= LOAD & UPDATE EVENTS =======================
+// async function loadEvents() {
+//   try {
+//     const response = await fetch('/bookings', { headers: { Accept: 'application/json' } })
+//     const text = await response.text()
+
+//     let data
+//     try {
+//       data = JSON.parse(text)
+//     } catch (e) {
+//       console.error('loadEvents parse error:', response.status, text)
+//       showToast('error', 'Không tải được dữ liệu lịch (response không phải JSON).')
+//       return
+//     }
+
+//     if (!response.ok) {
+//       console.error('loadEvents not ok:', response.status, data)
+//       showToast('error', data?.message || 'Không tải được dữ liệu lịch.')
+//       return
+//     }
+
+//     const raw = Array.isArray(data) ? data : data.data || []
+
+//     events = raw.map((item) => {
+//       const category = item.category || 'work'
+//       const status = item.status || 'pending'
+//       const safeCategory = CATEGORY_COLORS[category] ? category : 'work'
+
+//       const roomCode = item.lab_code != null ? String(item.lab_code) : null
+//       const roomName = roomCode ? roomMap[roomCode] || roomCode : null
+
+//       const bgColor = STATUS_COLORS[status] || CATEGORY_COLORS[safeCategory] || '#3788d8'
+
+//       const registeredFor = item.registered_for != null ? String(item.registered_for) : ''
+//       const registeredForName = registeredFor ? groupMap[registeredFor] || registeredFor : ''
+
+//       return {
+//         id: item.id,
+//         title: item.title,
+//         start: normalizeDateString(item.start),
+//         end: normalizeDateString(item.end),
+//         category: safeCategory,
+//         description: item.description,
+//         status,
+//         roomCode,
+//         roomName,
+//         color: bgColor,
+//         lab_code: roomCode,
+//         user_id: item.user_id || item.userId || null,
+//         registered_for: registeredFor,
+//         registeredForName
+//       }
+//     })
+
+//     updateCalendar()
+//   } catch (err) {
+//     console.error('loadEvents error:', err)
+//     showToast('error', 'Không tải được dữ liệu lịch.')
+//   }
+// }
 async function loadEvents() {
   try {
     const response = await fetch('/bookings', { headers: { Accept: 'application/json' } })
@@ -704,14 +836,10 @@ async function loadEvents() {
     const raw = Array.isArray(data) ? data : data.data || []
 
     events = raw.map((item) => {
-      const category = item.category || 'work'
-      const status = item.status || 'pending'
-      const safeCategory = CATEGORY_COLORS[category] ? category : 'work'
-
       const roomCode = item.lab_code != null ? String(item.lab_code) : null
       const roomName = roomCode ? roomMap[roomCode] || roomCode : null
 
-      const bgColor = STATUS_COLORS[status] || CATEGORY_COLORS[safeCategory] || '#3788d8'
+       const bgColor = item.color || '#3788d8'
 
       const registeredFor = item.registered_for != null ? String(item.registered_for) : ''
       const registeredForName = registeredFor ? groupMap[registeredFor] || registeredFor : ''
@@ -721,12 +849,15 @@ async function loadEvents() {
         title: item.title,
         start: normalizeDateString(item.start),
         end: normalizeDateString(item.end),
-        category: safeCategory,
+        category: item.category,
+        categoryIcon: item.category_icon,  
+        categoryName: item.category_name, 
+        statusName: item.status_name, 
         description: item.description,
-        status,
+        status: item.status,
         roomCode,
         roomName,
-        color: bgColor,
+        color: bgColor, 
         lab_code: roomCode,
         user_id: item.user_id || item.userId || null,
         registered_for: registeredFor,
@@ -740,7 +871,6 @@ async function loadEvents() {
     showToast('error', 'Không tải được dữ liệu lịch.')
   }
 }
-
 function updateCalendar() {
   if (!calendar) return
 
@@ -760,7 +890,7 @@ function updateCalendar() {
         ? (e.end instanceof Date ? e.end : new Date(e.end))
         : new Date(startDate.getTime() + 60 * 60 * 1000)
 
-      const bg = STATUS_COLORS[e.status] || e.color || CATEGORY_COLORS[e.category] || '#3788d8'
+      const bg = e.color || '#3788d8' // ✅ Màu từ EventStatus
       const tx = readableTextColor(bg)
 
       calendar.addEvent({
@@ -773,6 +903,9 @@ function updateCalendar() {
         textColor: tx,
         extendedProps: {
           category: e.category,
+          categoryIcon: e.categoryIcon,  
+          categoryName: e.categoryName, 
+          statusName: e.statusName, 
           description: e.description,
           status: e.status,
           roomCode: e.roomCode,
@@ -787,6 +920,52 @@ function updateCalendar() {
     })
   })
 }
+// function updateCalendar() {
+//   if (!calendar) return
+
+//   calendar.batchRendering(() => {
+//     calendar.removeAllEvents()
+
+//     const visibleEvents = events.filter(
+//       (e) =>
+//         !hiddenCategories.has(e.category) &&
+//         !hiddenStatuses.has(e.status) &&
+//         (!selectedRoomFilter || e.roomCode === selectedRoomFilter)
+//     )
+
+//     visibleEvents.forEach((e) => {
+//       const startDate = e.start instanceof Date ? e.start : new Date(e.start)
+//       const endDate = e.end
+//         ? (e.end instanceof Date ? e.end : new Date(e.end))
+//         : new Date(startDate.getTime() + 60 * 60 * 1000)
+
+//       const bg = STATUS_COLORS[e.status] || e.color || CATEGORY_COLORS[e.category] || '#3788d8'
+//       const tx = readableTextColor(bg)
+
+//       calendar.addEvent({
+//         id: e.id,
+//         title: e.title,
+//         start: startDate,
+//         end: endDate,
+//         backgroundColor: bg,
+//         borderColor: bg,
+//         textColor: tx,
+//         extendedProps: {
+//           category: e.category,
+//           description: e.description,
+//           status: e.status,
+//           roomCode: e.roomCode,
+//           roomName: e.roomName,
+//           user_id: e.user_id,
+//           registered_for: e.registered_for,
+//           registeredForName: e.registeredForName,
+//           _color: bg,
+//           _textColor: tx
+//         }
+//       })
+//     })
+//   })
+// }
 
 // ======================= SAVE EVENT =======================
 async function sendBookingRequest(url, formData) {
@@ -941,6 +1120,64 @@ window.saveEvent = async function() {
 }
 
 // ======================= EVENT DETAILS =======================
+// function showEventDetails(eventData) {
+//   currentEventId = eventData.id
+
+//   document.getElementById('detailTitle').textContent = eventData.title
+//   document.getElementById('detailTime').textContent =
+//     `${formatDateTime(eventData.start)} - ${formatDateTime(eventData.end)}`
+//   document.getElementById('detailRoom').textContent = eventData.extendedProps.roomName || ''
+
+//   const registeredForRow = document.getElementById('detailRegisteredForRow')
+//   const registeredForSpan = document.getElementById('detailRegisteredFor')
+//   const rfName = eventData.extendedProps.registeredForName || ''
+
+//   if (rfName) {
+//     registeredForSpan.textContent = rfName
+//     registeredForRow.style.display = 'flex'
+//   } else {
+//     registeredForRow.style.display = 'none'
+//   }
+
+//   const descRow = document.getElementById('detailDescriptionRow')
+//   const descSpan = document.getElementById('detailDescription')
+
+//   if (eventData.extendedProps.description) {
+//     descSpan.textContent = eventData.extendedProps.description
+//     descRow.style.display = 'flex'
+//   } else {
+//     descRow.style.display = 'none'
+//   }
+
+//   document.getElementById('detailCategory').textContent =
+//     CATEGORY_NAMES[eventData.extendedProps.category] || eventData.extendedProps.category
+
+//   const status = eventData.extendedProps.status || 'pending'
+//   document.getElementById('detailStatus').textContent = STATUS_LABELS[status] || status
+
+//   ;['pending', 'approved', 'completed', 'cancelled'].forEach(s => {
+//     const icon = document.getElementById(`status${s.charAt(0).toUpperCase() + s.slice(1)}Icon`)
+//     if (icon) icon.style.display = status === s ? 'inline' : 'none'
+//   })
+
+//   const canEdit = checkPermission(eventData)
+//   const editBtn = document.getElementById('editEventBtn')
+//   const deleteBtn = document.getElementById('deleteEventBtn')
+
+//   const now = new Date()
+//   const eventStart = new Date(eventData.start)
+//   const eventEnd = eventData.end ? new Date(eventData.end) : eventStart
+  
+//   const isCompleted = status === 'completed'
+//   const isOngoing = now >= eventStart && now <= eventEnd && status === 'approved'
+  
+//   const shouldHideButtons = !canEdit || isCompleted || isOngoing
+
+//   if (editBtn) editBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
+//   if (deleteBtn) deleteBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
+
+//   toggleModal('detailModal', true)
+// }
 function showEventDetails(eventData) {
   currentEventId = eventData.id
 
@@ -970,11 +1207,12 @@ function showEventDetails(eventData) {
     descRow.style.display = 'none'
   }
 
-  document.getElementById('detailCategory').textContent =
-    CATEGORY_NAMES[eventData.extendedProps.category] || eventData.extendedProps.category
+   document.getElementById('detailCategory').textContent =
+    eventData.extendedProps.categoryName || CATEGORY_NAMES[eventData.extendedProps.category] || eventData.extendedProps.category
 
   const status = eventData.extendedProps.status || 'pending'
-  document.getElementById('detailStatus').textContent = STATUS_LABELS[status] || status
+   document.getElementById('detailStatus').textContent = 
+    eventData.extendedProps.statusName || STATUS_LABELS[status] || status
 
   ;['pending', 'approved', 'completed', 'cancelled'].forEach(s => {
     const icon = document.getElementById(`status${s.charAt(0).toUpperCase() + s.slice(1)}Icon`)
@@ -999,7 +1237,6 @@ function showEventDetails(eventData) {
 
   toggleModal('detailModal', true)
 }
-
 window.editEvent = function() {
   const eventData = calendar.getEventById(currentEventId)
   if (!eventData) {

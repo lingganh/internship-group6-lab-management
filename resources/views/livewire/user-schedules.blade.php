@@ -25,8 +25,8 @@
                 <input type="text" 
                     wire:model.live.debounce.300ms="searchTerm" 
                     class="form-control form-control-sm filter-control" 
-                    placeholder="Tìm kiếm theo tên hoặc phòng..."
-                    style="min-width: 200px;">
+                    placeholder="Tìm kiếm theo tên "
+                    style="min-width: 100px;">
 
                 {{-- Filter trạng thái --}}
                 <select wire:model.live="filterStatus" class="form-select  filter-control">

@@ -67,31 +67,34 @@ class LabCalendar extends Component
         }
     }
 
-    public function getAllBookings()
-    {
-        $this->autoUpdateStatuses();
+     public function getAllBookings()
+{
+    $this->autoUpdateStatuses();
 
-        $events = LabEvent::with('lab:code,name')
-            ->where('status', '!=', 'cancelled')
-            ->orderBy('start')
-            ->get()
-            ->map(function ($event) {
-                return [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'category' => $event->category,
-                    'color' => $event->color,
-                    'lab_code' => $event->lab_code,
-                    'start' => $event->start,
-                    'end' => $event->end,
-                    'description' => $event->description,
-                    'registered_for' => $event->registered_for,
-                    'status' => $event->status,
-                    'user_id' => $event->user_id,
-                ];
-            });
+    $events = LabEvent::with(['lab:code,name', 'eventStatus', 'eventCategory'])
+        ->where('status', '!=', 'cancelled')
+        ->orderBy('start')
+        ->get()
+        ->map(function ($event) {
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'category' => $event->category,
+                'color' => $event->status_color, // Lấy màu từ EventStatus
+                'category_icon' => $event->category_icon, // Lấy icon từ EventCategory
+                'category_name' => $event->category_name, // Lấy tên category
+                'status_name' => $event->status_name, // Lấy tên status
+                'lab_code' => $event->lab_code,
+                'start' => $event->start,
+                'end' => $event->end,
+                'description' => $event->description,
+                'registered_for' => $event->registered_for,
+                'status' => $event->status,
+                'user_id' => $event->user_id,
+            ];
+        });
 
-        return response()->json($events);
+    return response()->json($events);
     }
 
     /**
