@@ -456,7 +456,7 @@
         // })
         setTimeout(() => {
         window.location.href = window.location.href ;
-            }, 1000);
+            }, 100000);
         let calendar = null;
         const events = @json($events);
 
