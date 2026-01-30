@@ -150,7 +150,7 @@
                                     ['day' => 1, 'time' => '13:30 - 15:00', 'title' => 'Event test #1', 'category' => 'work', 'status' => 'pending'],
                                     ['day' => 2, 'time' => '15:00 - 16:30', 'title' => 'Event test #2', 'category' => 'seminar', 'status' => 'approved'],
                                     ['day' => 3, 'time' => '13:30 - 15:00', 'title' => 'Event test #3', 'category' => 'other', 'status' => 'cancelled'],
-                                    ['day' => 4, 'time' => '13:30 - 15:00', 'title' => 'Event test #4', 'category' => 'work', 'status' => 'rejected'],
+                                    ['day' => 4, 'time' => '13:30 - 15:00', 'title' => 'Event test #4', 'category' => 'work', 'status' => 'completed'],
                                     ['day' => 5, 'time' => '13:30 - 15:00', 'title' => 'Event test #5', 'category' => 'seminar', 'status' => 'pending'],
                                     ['day' => 6, 'time' => '9:00 - 10:30', 'title' => 'Event test #6', 'category' => 'work', 'status' => 'approved'],
                                 ];
