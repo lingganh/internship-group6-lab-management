@@ -7,7 +7,9 @@
                         <a href="{{route('home')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
                         <span class="breadcrumb-item active">Lịch đã đăng ký </span>
                     </div>
-                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
+                    <a href="#breadcrumb_elements"
+                        class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
+                        data-bs-toggle="collapse">
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
@@ -20,15 +22,23 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <h5 class="fw-semibold text-dark m-0">Lịch đã đăng ký</h5>
 
-            <div class="d-flex gap-2">
-                <select wire:model.live="filterStatus" class="form-select form-select-sm filter-control">
+            <div class="d-flex gap-2 ">
+                {{-- Ô tìm kiếm --}}
+                <input type="text" wire:model.live.debounce.300ms="searchTerm"
+                    class="form-control form-control-sm filter-control" placeholder="Tìm kiếm theo tên hoặc phòng..."
+                    style="min-width: 200px;">
+
+                {{-- Filter trạng thái --}}
+                <select wire:model.live="filterStatus" class="form-select  filter-control">
                     <option value="">Tất cả trạng thái</option>
                     <option value="pending">Chờ duyệt</option>
                     <option value="approved">Đã duyệt</option>
                     <option value="completed">Hoàn thành</option>
+                    <option value="cancelled">Đã hủy</option>
                 </select>
 
-                <input type="date" wire:model.live="filterDate" class="form-control form-control-sm filter-control">
+                {{-- Filter ngày --}}
+                <input type="date" wire:model.live="filterDate" class="form-control  filter-control">
             </div>
         </div>
 
@@ -71,6 +81,9 @@
                             <tr>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $item->title }}</div>
+                                    @if($item->lab_code)
+                                        <div class="text-muted small">{{ $item->lab_code }}</div>
+                                    @endif
                                 </td>
 
                                 <td>
@@ -94,11 +107,9 @@
                                             <i class="bi bi-eye-fill"></i>
                                         </button>
 
-                                       <button type="button" 
-                                            wire:click="confirmCancel({{ $item->id }})"
+                                        <button type="button" wire:click="confirmCancel({{ $item->id }})"
                                             class="icon-pill icon-cancel {{ $canCancel ? 'active-icon' : 'disabled-icon' }}"
-                                            @disabled(!$canCancel) 
-                                            data-bs-toggle="tooltip"
+                                            @disabled(!$canCancel) data-bs-toggle="tooltip"
                                             title="{{ $canCancel ? 'Hủy lịch' : 'Không thể hủy' }}">
                                             <i class="bi bi-x-circle-fill"></i>
                                         </button>
@@ -117,8 +128,7 @@
 
                                         <button type="button" wire:click="openFeedback({{ $item->id }})"
                                             class="icon-pill icon-feedback {{ $canOpenFeedback ? 'active-icon' : 'disabled-icon' }}"
-                                            @disabled(!$canOpenFeedback) data-bs-toggle="tooltip"
-                                            title="{{ $tooltip }}">
+                                            @disabled(!$canOpenFeedback) data-bs-toggle="tooltip" title="{{ $tooltip }}">
                                             <i class="bi bi-chat-dots-fill"></i>
                                         </button>
 
@@ -128,7 +138,11 @@
                         @empty
                             <tr>
                                 <td colspan="4" class="text-center py-5 text-muted small">
-                                    Chưa có lịch trình nào.
+                                    @if($searchTerm || $filterStatus || $filterDate)
+                                        Không tìm thấy lịch trình nào phù hợp.
+                                    @else
+                                        Chưa có lịch trình nào.
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
@@ -141,33 +155,37 @@
             {{ $schedules->links() }}
         </div>
 
+        {{-- Modal xác nhận hủy lịch --}}
         <div wire:ignore.self class="modal fade" id="modalConfirmCancel" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content modal-clean shadow-lg border-0">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="fw-bold text-warning m-0">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy lịch
-                </h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-3">
-                <p class="text-muted small mb-0">
-                    Bạn có chắc chắn muốn hủy lịch trình này không? Lịch đã hủy sẽ không thể khôi phục.
-                </p>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
-                    Không
-                </button>
-                <button type="button" wire:click="cancelSchedule" class="btn btn-sm btn-warning rounded-pill px-3">
-                    <span wire:loading.remove wire:target="cancelSchedule">Đồng ý hủy</span>
-                    <span wire:loading wire:target="cancelSchedule" class="spinner-border spinner-border-sm"></span>
-                </button>
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content modal-clean shadow-lg border-0">
+                    <div class="modal-header border-0 pb-0">
+                        <h6 class="fw-bold text-warning m-0">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy lịch
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-3">
+                        <p class="text-muted small mb-0">
+                            Bạn có chắc chắn muốn hủy lịch trình này không? Lịch đã hủy sẽ không thể khôi phục.
+                        </p>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                            Không
+                        </button>
+                        <button type="button" wire:click="cancelSchedule"
+                            class="btn btn-sm btn-warning rounded-pill px-3">
+                            <span wire:loading.remove wire:target="cancelSchedule">Đồng ý hủy</span>
+                            <span wire:loading wire:target="cancelSchedule"
+                                class="spinner-border spinner-border-sm"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
+        {{-- Modal phản hồi --}}
         <div wire:ignore.self class="modal fade" id="feedbackModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content modal-clean">
@@ -177,11 +195,10 @@
                     </div>
 
                     <div class="modal-body">
-
-
-                        {{--  Nhúng form báo hỏng nhiều thiết bị theo event --}}
+                        {{-- Nhúng form báo hỏng nhiều thiết bị theo event --}}
                         @if ($selectedEventId)
-                            <livewire:client.equipment-issues.create-from-event :labEventId="$selectedEventId" :key="'issue-from-event-' . $selectedEventId" />
+                            <livewire:client.equipment-issues.create-from-event :labEventId="$selectedEventId"
+                                :key="'issue-from-event-' . $selectedEventId" />
                         @endif
                     </div>
 
@@ -199,27 +216,13 @@
                             <button type="button" class="btn btn-primary"
                                 wire:click="$dispatch('submitIssueRequest')">Gửi</button>
                         @endif
-
-
-
                     </div>
-
-
                 </div>
             </div>
         </div>
 
-    </div>
-
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1085;">
-        <div id="appToast" class="toast align-items-center text-white bg-dark border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body" id="toastMessage"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
-    <div wire:ignore.self class="modal fade" id="detailModal" tabindex="-1">
+        {{-- Modal chi tiết --}}
+        <div wire:ignore.self class="modal fade" id="detailModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content modal-clean">
                     <div class="modal-header border-0">
@@ -233,6 +236,13 @@
                                 <label>Tên sự kiện</label>
                                 <div>{{ $selectedSchedule->title }}</div>
                             </div>
+
+                            @if($selectedSchedule->lab_code)
+                                <div class="info-box">
+                                    <label>Mã phòng</label>
+                                    <div>{{ $selectedSchedule->lab_code }}</div>
+                                </div>
+                            @endif
 
                             <div class="row g-3 mb-3">
                                 <div class="col-6">
@@ -250,6 +260,23 @@
                             </div>
 
                             <div class="info-box">
+                                <label>Trạng thái</label>
+                                <div>
+                                    @php
+                                        $statusLabel = [
+                                            'pending' => 'Chờ duyệt',
+                                            'approved' => 'Đã duyệt',
+                                            'completed' => 'Hoàn thành',
+                                            'cancelled' => 'Đã hủy',
+                                        ][$selectedSchedule->status] ?? $selectedSchedule->status;
+                                    @endphp
+                                    <span class="status-chip status-{{ $selectedSchedule->status }}">
+                                        {{ $statusLabel }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
                                 <label>Ghi chú</label>
                                 <div class="small">
                                     {{ $selectedSchedule->description ?? 'Không có ghi chú.' }}
@@ -257,36 +284,65 @@
                             </div>
                         @endif
                     </div>
-
                 </div>
             </div>
         </div>
 
-    <div wire:ignore.self class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content modal-clean shadow-lg border-0">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="fw-bold text-danger m-0">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy
-                </h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body py-3">
-                <p class="text-muted small mb-0">
-                    Bạn có chắc chắn muốn hủy lịch trình này không? Hành động này không thể hoàn tác.
-                </p>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">Bỏ qua</button>
-                <button type="button" wire:click="deleteSchedule" class="btn btn-sm btn-danger rounded-pill px-3">
-                    <span wire:loading.remove wire:target="deleteSchedule">Đồng ý xóa</span>
-                    <span wire:loading wire:target="deleteSchedule" class="spinner-border spinner-border-sm"></span>
-                </button>
+    </div>
+
+    {{-- Toast notification --}}
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1085;">
+        <div id="appToast" class="toast align-items-center text-white bg-dark border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
-</div>
+
     <style>
+        .alert-success {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            padding: 14px 18px;
+            margin: 16px 0;
+
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-left: 5px solid #10b981;
+
+            color: #065f46;
+            font-size: 0.95rem;
+            font-weight: 600;
+
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+
+            animation: slideFadeIn 0.4s ease-out;
+        }
+
+        .alert-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .alert-text {
+            flex: 1;
+        }
+
+        @keyframes slideFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .clean-card {
             border: 1px solid #ececec;
             border-radius: 16px;
@@ -314,7 +370,14 @@
         .filter-control {
             background: #f7f7f7;
             border-radius: 10px;
-            border: 1px solid #e6e6e6
+            border: 1px solid #e6e6e6;
+            font-size: .875rem;
+        }
+
+        .filter-control:focus {
+            background: #fff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .status-chip {
@@ -430,7 +493,9 @@
             font-size: .7rem;
             text-transform: uppercase;
             color: #6c757d;
-            font-weight: 600
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
         }
 
         .feedback-input {
@@ -438,13 +503,6 @@
             border: 1px solid #e5e7eb;
             background: #f9fafb
         }
-
-        /* #feedbackModal.is-dimmed .modal-content {
-            opacity: .25;
-            filter: blur(1.2px);
-            pointer-events: none;
-
-        } */
     </style>
 
     <script>
