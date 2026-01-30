@@ -33,26 +33,30 @@
                     <div class="row g-3">
                         @foreach($statusColors as $code => $status)
                             <div class="col-md-3" wire:key="status-{{ $code }}">
-                                <div class="color-card p-4 rounded-4 h-100" style="background: linear-gradient(135deg, {{ $status['color'] }}15 0%, {{ $status['color'] }}05 100%); border: 2px solid {{ $status['color'] }}30;">
+                                <div class="color-card p-4 rounded-4 h-100 justify-content-center" style="background: linear-gradient(135deg, {{ $status['color'] }}15 0%, {{ $status['color'] }}05 100%); border: 2px solid {{ $status['color'] }}30;">
                                     <h6 class="fw-semibold mb-3 text-center">{{ $status['name'] }}</h6>
                                     
-                                    <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex flex-row align-items-center justify-content-center gap-2 p-2 bg-white rounded-4 border shadow-sm" style="width: fit-content;">
+                                    <div style="width: 50px; height: 25px; overflow: hidden; border-radius: 8px;" class="border">
                                         <input 
                                             type="color" 
                                             wire:model.live="statusColors.{{ $code }}.color"
-                                            class="form-control form-control-color border-0 shadow-sm mx-auto"
-                                            style="width: 60px; height: 60px; border-radius: 12px;"
-                                        />
-                                        <input 
-                                            type="text" 
-                                            wire:model.blur="statusColors.{{ $code }}.color"
-                                            class="form-control rounded-3 text-center"
-                                            placeholder="#000000"
-                                            maxlength="7"
-                                            style="font-family: 'Courier New', monospace; text-transform: uppercase; font-size: 13px;"
+                                            class="form-control form-control-color border-0 p-0"
+                                           
                                         />
                                     </div>
 
+                                    <input 
+                                        type="text" 
+                                        wire:model.blur="statusColors.{{ $code }}.color"
+                                        class="form-control border-0 bg-light text-center fw-bold"
+                                        placeholder="#000000"
+                                        maxlength="7"
+                                        style="width: 95px; height: 38px; font-family: 'Inter', monospace; font-size: 12px; border-radius: 8px; color: #4b5563;"
+                                    />
+                                </div>
+                                
+ 
                                     @error("statusColors.{$code}.color")
                                         <div class="text-danger small mt-2 text-center">{{ $message }}</div>
                                     @enderror
@@ -106,7 +110,7 @@
                             <h5 class="card-title fw-bold mb-1"> Xem trước trên lịch</h5>
                             <p class="text-muted small mb-0">Hiển thị tất cả kết hợp loại sự kiện + trạng thái</p>
                         </div>
-                        <div class="d-flex gap-2">
+                        {{-- <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-light rounded-pill">
                                 <i class="ph ph-caret-left"></i>
                             </button>
@@ -116,18 +120,18 @@
                             <button type="button" class="btn btn-sm btn-light rounded-pill">
                                 <i class="ph ph-caret-right"></i>
                             </button>
-                        </div>
+                        </div> --}}
                     </div>
 
                     {{-- Calendar Header --}}
                     <div class="calendar-preview">
                         <div class="calendar-header text-center mb-3">
                             <h4 class="fw-bold mb-1">Tháng 1 năm 2026</h4>
-                            <div class="btn-group btn-group-sm" role="group">
+                            {{-- <div class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-outline-secondary">Tháng</button>
                                 <button type="button" class="btn btn-primary">Tuần</button>
                                 <button type="button" class="btn btn-outline-secondary">Ngày</button>
-                            </div>
+                            </div> --}}
                         </div>
 
                         {{-- Week Header --}}
@@ -173,9 +177,9 @@
                                                             <small class="text-white fw-bold" style="font-size: 11px;">
                                                                 {{ $event['time'] }}
                                                             </small>
-                                                            <div class="bg-white bg-opacity-25 rounded-circle" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
+                                                            {{-- <div class="bg-white bg-opacity-25 rounded-circle" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
                                                                 <i class="ph ph-check text-white" style="font-size: 12px;"></i>
-                                                            </div>
+                                                            </div> --}}
                                                         </div>
 
                                                         {{-- Title + Icon --}}
@@ -201,40 +205,16 @@
             </div>
 
             {{-- Buttons --}}
-            <div class="d-flex gap-3 flex-wrap">
-                <button 
-                    type="submit" 
-                    class="btn btn-primary btn-lg px-4 rounded-pill shadow-sm"
-                    wire:loading.attr="disabled"
-                >
-                    <span wire:loading.remove wire:target="saveSettings">
-                        <i class="ph ph-floppy-disk me-2"></i>
-                        Lưu cấu hình
-                    </span>
-                    <span wire:loading wire:target="saveSettings">
-                        <span class="spinner-border spinner-border-sm me-2"></span>
-                        Đang lưu...
-                    </span>
+             <div class="d-flex align-items-center gap-2 flex-nowrap">
+                <button wire:loading.remove wire:target="saveSettings" wire:click="saveSettings" class="btn btn-primary text-nowrap">
+                    <i class="ph-floppy-disk"></i> Lưu
                 </button>
 
-                <button 
-                    type="button" 
-                    class="btn btn-outline-secondary btn-lg px-4 rounded-pill"
-                    wire:click="resetToDefault"
-                    wire:loading.attr="disabled"
-                >
-                    <i class="ph ph-arrow-clockwise me-2"></i>
-                    Reset mặc định
+                <button wire:loading wire:target="saveSettings" class="btn btn-primary text-nowrap" disabled>
+                    <i class="ph-spinner-gap animate-spin"></i> Đang lưu...
                 </button>
 
-                <button 
-                    type="button" 
-                    class="btn btn-outline-dark btn-lg px-4 rounded-pill"
-                    onclick="history.back()"
-                >
-                    <i class="ph ph-arrow-left me-2"></i>
-                    Quay lại
-                </button>
+                 
             </div>
         </form>
     </div>
@@ -278,21 +258,8 @@
     box-shadow: 0 6px 15px rgba(0,0,0,0.25) !important;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-}
 
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3) !important;
-}
-
-.btn-outline-secondary:hover,
-.btn-outline-dark:hover {
-    transform: translateY(-2px);
-}
-
+ 
 /* Responsive */
 @media (max-width: 768px) {
     .calendar-grid .col {
