@@ -1,4 +1,5 @@
-<div wire:poll.300s="loadData">
+<div  >
+    <meta http-equiv="refresh" content="1800">
     {{-- CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
 
@@ -448,11 +449,14 @@
 
     <script>
      
-         document.addEventListener('livewire:initialized', () => {
-              setInterval(() => {
-               location.reload();
-                }, 1000)
-        })
+        //  document.addEventListener('livewire:initialized', () => {
+        //       setInterval(() => {
+        //        location.reload();
+        //         }, 10000)
+        // })
+        setTimeout(() => {
+        window.location.href = window.location.href ;
+            }, 1000);
         let calendar = null;
         const events = @json($events);
 
