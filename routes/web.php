@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\client\UserController as ClientController;
 use App\Http\Livewire\LabCalendar;
 use App\Http\Livewire\LabCalendarTVShow;
+use App\Livewire\CalendarConfig;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeControler;
 use App\Http\Controllers\Auth\AuthenticateController;
@@ -85,7 +86,7 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/report', function () {
             return view('pages.admin.report');
         })->name('admin.report');
-
+        
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
             Route::get('/create', [UserController::class, 'create'])->name('admin.users.create');
@@ -103,6 +104,7 @@ Route::middleware('role:admin')->group(function () {
         Route::get('/equipment/create', EquipmentCreate::class)->name('admin.equipment.create');
         Route::get('/equipment/edit/{id}', Edit::class)->name('admin.equipment.edit');
         Route::get('/lab-register', LabRegister::class)->name('lab.register');
+        Route::get('/event-config', CalendarConfig::class)->name('admin.event-config');
 
         Route::prefix('equipment-issue-requests')->group(function () {
             // Danh sách phiếu báo hỏng

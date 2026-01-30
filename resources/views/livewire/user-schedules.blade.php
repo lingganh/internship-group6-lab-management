@@ -7,9 +7,7 @@
                         <a href="{{route('home')}}" class="breadcrumb-item"><i class="ph-house"></i></a>
                         <span class="breadcrumb-item active">Lịch đã đăng ký </span>
                     </div>
-                    <a href="#breadcrumb_elements"
-                        class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto"
-                        data-bs-toggle="collapse">
+                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
                         <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
                     </a>
                 </div>
@@ -22,10 +20,12 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <h5 class="fw-semibold text-dark m-0">Lịch đã đăng ký</h5>
 
-            <div class="d-flex gap-2 ">
+            <div class="d-flex gap-2 flex-wrap">
                 {{-- Ô tìm kiếm --}}
-                <input type="text" wire:model.live.debounce.300ms="searchTerm"
-                    class="form-control form-control-sm filter-control" placeholder="Tìm kiếm theo tên hoặc phòng..."
+                <input type="text" 
+                    wire:model.live.debounce.300ms="searchTerm" 
+                    class="form-control form-control-sm filter-control" 
+                    placeholder="Tìm kiếm theo tên hoặc phòng..."
                     style="min-width: 200px;">
 
                 {{-- Filter trạng thái --}}
@@ -107,9 +107,11 @@
                                             <i class="bi bi-eye-fill"></i>
                                         </button>
 
-                                        <button type="button" wire:click="confirmCancel({{ $item->id }})"
+                                       <button type="button" 
+                                            wire:click="confirmCancel({{ $item->id }})"
                                             class="icon-pill icon-cancel {{ $canCancel ? 'active-icon' : 'disabled-icon' }}"
-                                            @disabled(!$canCancel) data-bs-toggle="tooltip"
+                                            @disabled(!$canCancel) 
+                                            data-bs-toggle="tooltip"
                                             title="{{ $canCancel ? 'Hủy lịch' : 'Không thể hủy' }}">
                                             <i class="bi bi-x-circle-fill"></i>
                                         </button>
@@ -128,7 +130,8 @@
 
                                         <button type="button" wire:click="openFeedback({{ $item->id }})"
                                             class="icon-pill icon-feedback {{ $canOpenFeedback ? 'active-icon' : 'disabled-icon' }}"
-                                            @disabled(!$canOpenFeedback) data-bs-toggle="tooltip" title="{{ $tooltip }}">
+                                            @disabled(!$canOpenFeedback) data-bs-toggle="tooltip"
+                                            title="{{ $tooltip }}">
                                             <i class="bi bi-chat-dots-fill"></i>
                                         </button>
 
@@ -174,11 +177,9 @@
                         <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
                             Không
                         </button>
-                        <button type="button" wire:click="cancelSchedule"
-                            class="btn btn-sm btn-warning rounded-pill px-3">
+                        <button type="button" wire:click="cancelSchedule" class="btn btn-sm btn-warning rounded-pill px-3">
                             <span wire:loading.remove wire:target="cancelSchedule">Đồng ý hủy</span>
-                            <span wire:loading wire:target="cancelSchedule"
-                                class="spinner-border spinner-border-sm"></span>
+                            <span wire:loading wire:target="cancelSchedule" class="spinner-border spinner-border-sm"></span>
                         </button>
                     </div>
                 </div>
@@ -195,10 +196,9 @@
                     </div>
 
                     <div class="modal-body">
-                        {{-- Nhúng form báo hỏng nhiều thiết bị theo event --}}
+                        {{--  Nhúng form báo hỏng nhiều thiết bị theo event --}}
                         @if ($selectedEventId)
-                            <livewire:client.equipment-issues.create-from-event :labEventId="$selectedEventId"
-                                :key="'issue-from-event-' . $selectedEventId" />
+                            <livewire:client.equipment-issues.create-from-event :labEventId="$selectedEventId" :key="'issue-from-event-' . $selectedEventId" />
                         @endif
                     </div>
 
@@ -301,48 +301,6 @@
     </div>
 
     <style>
-        .alert-success {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            padding: 14px 18px;
-            margin: 16px 0;
-
-            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-            border-left: 5px solid #10b981;
-
-            color: #065f46;
-            font-size: 0.95rem;
-            font-weight: 600;
-
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
-
-            animation: slideFadeIn 0.4s ease-out;
-        }
-
-        .alert-icon {
-            font-size: 1.4rem;
-            line-height: 1;
-        }
-
-        .alert-text {
-            flex: 1;
-        }
-
-        @keyframes slideFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-6px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .clean-card {
             border: 1px solid #ececec;
             border-radius: 16px;

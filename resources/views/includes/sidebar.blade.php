@@ -48,7 +48,7 @@ use App\Enums\User\UserRoleEnum;
                         <span>Đăng ký lịch</span>
                     </a>
                 </li>
-
+               
 
                 <li class="nav-item">
                     <a href="{{ route('admin.approval') }}" class="nav-link {{ request()->routeIs('admin.approval') ? 'active' : '' }}">
@@ -68,6 +68,13 @@ use App\Enums\User\UserRoleEnum;
                         class="nav-link {{ request()->routeIs('admin.lab-diary') ? 'active' : '' }}">
                         <i class="ph-note-blank"></i>
                         <span>Nhật ký sử dụng</span>
+                    </a>
+                </li>
+                  <li class="nav-item">
+                    <a href="{{route('admin.event-config')}}"
+                        class="nav-link {{ request()->routeIs('admin.event-config') ? 'active' : '' }}">
+                        <i class="ph-sliders-horizontal"></i>
+                       <span>Cấu hình lịch</span>
                     </a>
                 </li>
                 <li class="nav-item-header pt-0">
