@@ -1,5 +1,5 @@
 <div  >
-    <meta http-equiv="refresh" content="1800">
+    <meta http-equiv="refresh" content="600">
     {{-- CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
 
@@ -456,7 +456,7 @@
         // })
         setTimeout(() => {
         window.location.href = window.location.href ;
-            }, 100000);
+            }, 600000);  
         let calendar = null;
         const events = @json($events);
 
