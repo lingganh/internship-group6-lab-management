@@ -30,8 +30,8 @@ return new class extends Migration
 
         // Insert data mẫu
         DB::table('event_categories')->insert([
-            ['code' => 'work', 'name' => 'Công việc', 'icon' => 'briefcase', 'created_at' => now(), 'updated_at' => now()],
-            ['code' => 'seminar', 'name' => 'Hội thảo', 'icon' => 'clock', 'created_at' => now(), 'updated_at' => now()],
+            ['code' => 'work', 'name' => 'Làm việc / Nghiên cứu', 'icon' => 'briefcase', 'created_at' => now(), 'updated_at' => now()],
+            ['code' => 'seminar', 'name' => 'Hội thảo / Seminar', 'icon' => 'clock', 'created_at' => now(), 'updated_at' => now()],
             ['code' => 'other', 'name' => 'Khác', 'icon' => 'question-circle', 'created_at' => now(), 'updated_at' => now()],
  
         ]);
