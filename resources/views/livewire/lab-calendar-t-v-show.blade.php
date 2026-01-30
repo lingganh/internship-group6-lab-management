@@ -63,7 +63,7 @@
         .tv-calendar-container {
             max-width: 1600px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 2rem 2rem 5px 2rem;
         }
 
         /* FullCalendar custom styles */
@@ -448,7 +448,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
     <script>
-     
+
         //  document.addEventListener('livewire:initialized', () => {
         //       setInterval(() => {
         //        location.reload();
@@ -456,7 +456,7 @@
         // })
         setTimeout(() => {
         window.location.href = window.location.href ;
-            }, 600000);  
+            }, 600000);
         let calendar = null;
         const events = @json($events);
 
