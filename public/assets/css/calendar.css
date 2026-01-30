@@ -14,7 +14,65 @@
 body {
   background: var(--lab-bg);
 }
+/* --- Tùy chỉnh Checkbox Sidebar --- */
+.lab-check-item input[type="checkbox"] {
+    display: none; /* Ẩn checkbox gốc */
+}
 
+.custom-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    /* Mặc định khi CHƯA chọn: Chỉ có viền màu */
+    border: 2px solid var(--cb-color); 
+    background-color: transparent;
+}
+
+/* Dấu tích trắng */
+.custom-checkbox::after {
+    content: "";
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+    margin-bottom: 2px;
+}
+
+/* Khi ĐÃ chọn: Đổ đầy màu và hiện dấu tích */
+.lab-check-item input:checked + .custom-checkbox {
+    background-color: var(--cb-color);
+}
+
+.lab-check-item input:checked + .custom-checkbox::after {
+    opacity: 1;
+}
+
+/* --- Tùy chỉnh Nút chọn thứ (Weekday Selector) --- */
+.weekday-btn {
+    border: 2px solid var(--r-border) !important; /* Viền mặc định */
+    background: #fff !important;
+    color: #64748b !important;
+    transition: all 0.2s ease;
+}
+
+/* Hiệu ứng khi Hover nhẹ */
+.weekday-btn:hover {
+    border-color: var(--r-primary) !important;
+}
+
+/* Khi ĐÃ chọn thứ: Đổi màu nền, mất viền, chữ trắng */
+.weekday-btn:has(input:checked) {
+    background: var(--r-primary) !important;
+    border-color: var(--r-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
 .lab-calendar-page {
   min-height: calc(100vh - 65px);
   padding: 20px 24px;
