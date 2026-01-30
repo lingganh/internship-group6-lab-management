@@ -450,8 +450,8 @@
      
          document.addEventListener('livewire:initialized', () => {
               setInterval(() => {
-                @this.call('loadData')
-                }, 100000)
+               location.reload();
+                }, 1000)
         })
         let calendar = null;
         const events = @json($events);
