@@ -11,7 +11,7 @@ class HomeControler extends Controller
     {
         $query = LabEvent::query()
             ->with(['user:id,full_name', 'lab:code,name', 'files'])
-            ->where('status', '!=', 'cancelled');
+            ->where('status', 'approved');
 
         if ($request->filled('keyword')) {
             $query->where('title', 'LIKE', '%' . $request->keyword . '%');
