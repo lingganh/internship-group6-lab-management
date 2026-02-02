@@ -24,49 +24,51 @@
 
                     <div class="lab-mini-calendar" id="miniCalendar"></div>
 
-                    <div class="lab-checklist">
-                        <label class="lab-check-item">
-                            <input type="checkbox" checked data-filter-status="pending">
-                            <span class="custom-checkbox" style="--cb-color: #f59e0b;"></span>
-                            <span class="lab-check-label">Chờ duyệt</span>
-                        </label>
+{{--                    <div class="lab-checklist">--}}
+{{--                        <label class="lab-check-item">--}}
+{{--                            <input type="checkbox" checked data-filter-status="pending">--}}
+{{--                            <span class="custom-checkbox" style="--cb-color: #f59e0b;"></span>--}}
+{{--                            <span class="lab-check-label">Chờ duyệt</span>--}}
+{{--                        </label>--}}
 
-                        <label class="lab-check-item">
-                            <input type="checkbox" checked data-filter-status="approved">
-                            <span class="custom-checkbox" style="--cb-color: #10b981;"></span>
-                            <span class="lab-check-label">Đã duyệt</span>
-                        </label>
+{{--                        <label class="lab-check-item">--}}
+{{--                            <input type="checkbox" checked data-filter-status="approved">--}}
+{{--                            <span class="custom-checkbox" style="--cb-color: #10b981;"></span>--}}
+{{--                            <span class="lab-check-label">Đã duyệt</span>--}}
+{{--                        </label>--}}
 
-                        <label class="lab-check-item">
-                            <input type="checkbox" checked data-filter-status="completed">
-                            <span class="custom-checkbox" style="--cb-color: #6366f1;"></span>
-                            <span class="lab-check-label">Đã hoàn thành</span>
-                        </label>
-                    </div>
-
-                    <div class="lab-sidebar-section">
-                        <div class="lab-sidebar-section-title">Loại sự kiện</div>
+{{--                        <label class="lab-check-item">--}}
+{{--                            <input type="checkbox" checked data-filter-status="completed">--}}
+{{--                            <span class="custom-checkbox" style="--cb-color: #6366f1;"></span>--}}
+{{--                            <span class="lab-check-label">Đã hoàn thành</span>--}}
+{{--                        </label>--}}
+{{--                    </div>--}}
                         <div class="lab-checklist">
-                            <label class="lab-check-item">
-                                <input type="checkbox" checked data-filter-category="work">
-                                <span class="custom-checkbox" style="--cb-color: #8a81ac;"></span>
-
-                                <span class="lab-check-label">Làm việc / nghiên cứu</span>
-                            </label>
-                            <label class="lab-check-item">
-                                <input type="checkbox" checked data-filter-category="seminar">
-                                <span class="custom-checkbox" style="--cb-color: #4a6a49;"></span>
-
-                                <span class="lab-check-label">Hội thảo / seminar</span>
-                            </label>
-                            <label class="lab-check-item">
-                                <input type="checkbox" checked data-filter-category="other">
-                                <span class="custom-checkbox" style="--cb-color: #c576bd;"></span>
-
-                                <span class="lab-check-label">Khác</span>
-                            </label>
+                            @foreach($statuses as $status)
+                                <label class="lab-check-item">
+                                    <input type="checkbox" checked data-filter-status="{{ $status->code }}">
+                                    <span class="custom-checkbox" style="--cb-color: {{ $status->color }};"></span>
+                                    <span class="lab-check-label">{{ $status->name }}</span>
+                                </label>
+                            @endforeach
                         </div>
-                    </div>
+                        <div class="lab-sidebar-section">
+                            <div class="lab-sidebar-section-title">Loại sự kiện</div>
+                            <div class="lab-checklist">
+                                @foreach($categories as $category)
+                                    <label class="lab-check-item">
+                                        <input type="checkbox" checked data-filter-category="{{ $category->code }}">
+                                        <span class="custom-checkbox" style="--cb-color:blue;"></span>
+
+                                         <span class="lab-check-label">
+                                            {{ $category->name }}
+                                             <i class="fa-solid fa-{{ $category->icon }}" style="margin-right: 6px;"></i>
+
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
                 </aside>
 
                 {{-- MAIN CALENDAR --}}

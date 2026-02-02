@@ -28,7 +28,7 @@ body {
     justify-content: center;
     transition: all 0.2s ease;
     /* Mặc định khi CHƯA chọn: Chỉ có viền màu */
-    border: 2px solid var(--cb-color); 
+    border: 2px solid var(--cb-color);
     background-color: transparent;
 }
 
@@ -265,7 +265,7 @@ body {
 .fc-timegrid-now-indicator-arrow {
     display: none !important; /* Ẩn mũi tên mặc định của FullCalendar nếu có */
 }
-/* 
+/*
 .fc .fc-button {
   background: #fff;
   color: #3c4043;
@@ -1096,7 +1096,7 @@ body {
   padding: 0 !important;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18) !important;
   overflow: hidden !important;
-  
+
   /* REMOVE HEIGHT CONSTRAINTS */
   min-height: unset !important;
   max-height: unset !important;
