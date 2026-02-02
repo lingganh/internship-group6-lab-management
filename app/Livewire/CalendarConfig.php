@@ -1,5 +1,5 @@
 <?php
- 
+
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -15,16 +15,98 @@ class CalendarConfig extends Component
     public $previewEvents = []; // Thêm preview
 
     public $iconOptions = [
-        'briefcase' => 'Briefcase',
-        'clock' => 'Clock',
-        'users' => 'Users',
-        'calendar' => 'Calendar',
-        'star' => 'Star',
-        'bell' => 'Bell',
-        'coffee' => 'Coffee',
-        'home' => 'Home',
-        'graduation-cap' => 'Graduation',
-        'question-circle' => 'Question',
+         'briefcase' => 'Cặp công việc',
+        'building' => 'Tòa nhà',
+        'clipboard' => 'Clipboard',
+        'file-text' => 'Tài liệu',
+        'folder' => 'Thư mục',
+        'pen' => 'Bút viết',
+        'paperclip' => 'Kẹp giấy',
+        'archive' => 'Lưu trữ',
+
+         'graduation-cap' => 'Tốt nghiệp',
+        'book' => 'Sách',
+        'book-open' => 'Sách mở',
+        'chalkboard' => 'Bảng đen',
+        'user-graduate' => 'Sinh viên',
+        'pencil' => 'Bút chì',
+        'highlighter' => 'Bút dạ quang',
+
+         'users' => 'Nhóm người',
+        'user-group' => 'Nhóm',
+        'people' => 'Mọi người',
+        'handshake' => 'Bắt tay',
+        'comments' => 'Thảo luận',
+        'video' => 'Video call',
+
+         'calendar' => 'Lịch',
+        'calendar-days' => 'Lịch ngày',
+        'clock' => 'Đồng hồ',
+        'hourglass' => 'Đồng hồ cát',
+        'stopwatch' => 'Bấm giờ',
+        'alarm-clock' => 'Báo thức',
+
+         'flask' => 'Bình thí nghiệm',
+        'microscope' => 'Kính hiển vi',
+        'atom' => 'Nguyên tử',
+        'laptop' => 'Laptop',
+        'desktop' => 'Máy tính',
+        'code' => 'Lập trình',
+        'wifi' => 'Wifi',
+        'server' => 'Máy chủ',
+
+         'star' => 'Ngôi sao',
+        'trophy' => 'Cúp',
+        'medal' => 'Huy chương',
+        'award' => 'Giải thưởng',
+        'target' => 'Mục tiêu',
+        'flag' => 'Cờ',
+
+         'bell' => 'Chuông',
+        'bell-ring' => 'Chuông rung',
+        'megaphone' => 'Loa phát thanh',
+        'bullhorn' => 'Loa',
+        'envelope' => 'Thư',
+        'message' => 'Tin nhắn',
+
+         'home' => 'Nhà',
+        'door-open' => 'Cửa mở',
+        'landmark' => 'Địa điểm',
+        'map-pin' => 'Vị trí',
+        'map' => 'Bản đồ',
+
+         'coffee' => 'Cà phê',
+        'mug-hot' => 'Cốc nóng',
+        'pizza-slice' => 'Pizza',
+        'utensils' => 'Dao nĩa',
+        'cake' => 'Bánh',
+
+         'palette' => 'Bảng màu',
+        'paint-brush' => 'Cọ vẽ',
+        'camera' => 'Máy ảnh',
+        'image' => 'Hình ảnh',
+        'music' => 'Âm nhạc',
+
+         'check' => 'Đúng',
+        'check-circle' => 'Hoàn thành',
+        'x-circle' => 'Hủy',
+        'question-circle' => 'Câu hỏi',
+        'exclamation-triangle' => 'Cảnh báo',
+        'info-circle' => 'Thông tin',
+
+         'wrench' => 'Cờ lê',
+        'screwdriver' => 'Tua vít',
+        'hammer' => 'Búa',
+        'tools' => 'Công cụ',
+        'cog' => 'Bánh răng',
+        'sliders' => 'Điều chỉnh',
+
+         'rocket' => 'Tên lửa',
+        'lightbulb' => 'Bóng đèn',
+        'puzzle-piece' => 'Mảnh ghép',
+        'chart-line' => 'Biểu đồ',
+        'chart-bar' => 'Cột biểu đồ',
+        'database' => 'Cơ sở dữ liệu',
     ];
 
     public function mount()
@@ -55,7 +137,7 @@ class CalendarConfig extends Component
     public function generatePreviewEvents()
     {
         $this->previewEvents = [];
-        
+
         foreach ($this->categoryIcons as $catCode => $category) {
             foreach ($this->statusColors as $statusCode => $status) {
                 $this->previewEvents[] = [
@@ -109,18 +191,18 @@ class CalendarConfig extends Component
 
             DB::commit();
 
-            $this->dispatch('toast', 
-                type: 'success', 
-                message: 'Cập nhật thành công', 
+            $this->dispatch('alert',
+                type: 'success',
+                message: 'Cập nhật thành công',
                 description: "Đã cập nhật {$updatedCount} sự kiện"
             );
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            $this->dispatch('toast', 
-                type: 'error', 
-                message: 'Cập nhật thất bại', 
+
+            $this->dispatch('alert',
+                type: 'error',
+                message: 'Cập nhật thất bại',
                 description: $e->getMessage()
             );
         }
@@ -138,10 +220,10 @@ class CalendarConfig extends Component
 
         $this->loadSettings();
         $this->generatePreviewEvents();
-        
-        $this->dispatch('toast', 
-            type: 'info', 
-            message: 'Đã reset về mặc định', 
+
+        $this->dispatch('alert',
+            type: 'info',
+            message: 'Đã reset về mặc định',
             description: 'Nhấn "Lưu cấu hình" để áp dụng'
         );
     }
