@@ -139,18 +139,23 @@ class LabCalendar extends Component
         'force' => 'nullable'
     ]);
 
+ 
     $occurrences = $request->input('occurrences');
     $isSingleEvent = count($occurrences) === 1;
     $force = $request->input('force') === 'true' || $request->has('force');
+    
+    \Log::info('=== STORE START ===', [
+        'force' => $force,
+        'occurrences_count' => count($occurrences)
+    ]);
     
     $seriesId = !$isSingleEvent ? Str::uuid()->toString() : null;
     $createdEvents = [];
     $conflicts = [];
 
-    // 2. Logic Kiểm tra trùng
-    foreach ($occurrences as $occ) {
+     foreach ($occurrences as $index => $occ) {
         $conflictedEvent = LabEvent::where('lab_code', $request->lab_code)
-            ->where('status', 'approved') // Chỉ check trùng với lịch đã duyệt
+            ->where('status', 'approved')
             ->where('start', '<', $occ['end'])
             ->where('end', '>', $occ['start'])
             ->first();
@@ -169,35 +174,22 @@ class LabCalendar extends Component
              if ($isSingleEvent) {
                 return response()->json([
                     'type' => 'error',
-                    'message' => "Không thể đăng ký lịch . Lịch đăng ký trùng với: {$conflictedEvent->title} ({$formattedConflict['conflict_with']['start']} - {$formattedConflict['conflict_with']['end']})",
+                    'message' => "Không thể đăng ký lịch. Lịch đăng ký trùng với: {$conflictedEvent->title}",
                     'data' => ['conflict' => $formattedConflict]
                 ], 409);
             }
 
             $conflicts[] = $formattedConflict;
-            if (!$force) continue; // Nếu là series và chưa force thì bỏ qua để gom lỗi
-        }
-
-        // Tạo bản ghi nếu không trùng hoặc đã nhấn force (cho series)
-        if (!$conflictedEvent || $force) {
-            $event = LabEvent::create([
-                'series_id' => $seriesId,
-                'title' => $request->title,
-                'category' => $request->category,
-                'lab_code' => $request->lab_code,
-                'start' => $occ['start'],
-                'end' => $occ['end'],
-                'description' => $request->description,
-                'registered_for' => $request->registered_for,
-                'status' => 'pending',
-                'user_id' => $user->id,
-            ]);
-            $createdEvents[] = $event;
         }
     }
 
-    // 3. Phản hồi cho Series (Lịch lặp)
-    if (!$isSingleEvent && !$force && !empty($conflicts)) {
+    \Log::info('Check conflicts done', [
+        'conflicts_count' => count($conflicts),
+        'force' => $force
+    ]);
+
+     if (!empty($conflicts) && !$force) {
+        \Log::info('Has conflicts and no force → return confirm dialog (NOT creating anything)');
         return response()->json([
             'type' => 'confirm',
             'message' => 'Một số buổi trong chuỗi bị trùng lịch. Bạn có muốn tiếp tục đăng ký các buổi còn lại không?',
@@ -205,21 +197,55 @@ class LabCalendar extends Component
         ]);
     }
 
-    if (empty($createdEvents)) {
+     \Log::info('Creating events...');
+    
+    foreach ($occurrences as $index => $occ) {
+         $hasConflict = LabEvent::where('lab_code', $request->lab_code)
+            ->where('status', 'approved')
+            ->where('start', '<', $occ['end'])
+            ->where('end', '>', $occ['start'])
+            ->exists();
+
+        if ($hasConflict) {
+            \Log::info("Skip occurrence #{$index} (has conflict)");
+            continue;  
+        }
+
+        \Log::info("Creating occurrence #{$index}");
+        
+        $event = LabEvent::create([
+            'series_id' => $seriesId,
+            'title' => $request->title,
+            'category' => $request->category,
+            'lab_code' => $request->lab_code,
+            'start' => $occ['start'],
+            'end' => $occ['end'],
+            'description' => $request->description,
+            'registered_for' => $request->registered_for,
+            'status' => 'pending',
+            'user_id' => auth()->id(),
+        ]);
+        
+        $createdEvents[] = $event;
+    }
+
+    \Log::info('Events created', ['count' => count($createdEvents)]);
+
+   if (empty($createdEvents)) {
         return response()->json([
             'type' => 'error', 
-            'message' => 'Tất cả các lịch đăng ký đều bị trùng hoặc không hợp lệ.'
+            'message' => 'Tất cả các lịch đăng ký đều bị trùng.'
         ], 409);
     }
 
-    // 4. File Upload & Thông báo (Giữ nguyên)
+    // File upload & notification...
     if ($request->hasFile('files')) {
         foreach ($createdEvents as $event) {
             $this->handleFileUploads($request->file('files'), $event->id);
         }
     }
 
-    if ($user->role_id != 1) {
+    if (auth()->user()->role_id != 1) {
         $this->notifyAdminsPendingEvent($createdEvents[0], 'created', count($createdEvents));
     }
 
@@ -228,55 +254,6 @@ class LabCalendar extends Component
         'message' => 'Đã gửi yêu cầu đăng ký thành công (' . count($createdEvents) . ' lịch).',
     ], 201);
 }
-//     public function store(Request $request)
-// {
-//     if (!auth()->check()) {
-//         return response()->json(['type' => 'error', 'message' => 'Bạn cần đăng nhập.'], 401);
-//     }
-//     $user = Auth::user();
-
-//     if (!in_array($user->role?->name, [
-//         RoleEnum::Admin->value,
-//         RoleEnum::Officer->value,
-//         RoleEnum::Teacher->value,
-//     ], true)) {
-//         return response()->json([
-//             'type' => 'error',
-//             'message' => 'Bạn không có quyền đăng ký lịch phòng lab.'
-//         ], 403);
-//     }
-//     $request->validate([
-//         'title' => 'required|string|max:255',
-//         'category' => 'required|string|in:work,seminar,other',
-//         'lab_code' => 'required|string',
-//         'occurrences' => 'required|array',
-//         'force' => 'nullable'
-//     ]);
-
-//     $user = Auth::user();
-//     $force = $request->input('force') === 'true' || $request->has('force');  
-//     $seriesId = Str::uuid()->toString();
-//     $createdEvents = [];
-//     $conflicts = [];
-//     $occurrences = $request->input('occurrences');
-
-//     foreach ($occurrences as $occ) {
-//         $conflictedEvent = LabEvent::where('lab_code', $request->lab_code)
-//             ->where('status', 'approved')
-//             ->where('start', '<', $occ['end'])
-//             ->where('end', '>', $occ['start'])
-//             ->first();
-
-//         if ($conflictedEvent) {
-//             $conflicts[] = [
-//                 'requested_start' => Carbon::parse($occ['start'])->format('d/m/Y H:i'),
-//                 'requested_end' => Carbon::parse($occ['end'])->format('d/m/Y H:i'),
-//                 'conflict_with' => [
-//                     'title' => $conflictedEvent->title,
-//                     'start' => Carbon::parse($conflictedEvent->start)->format('d/m/Y H:i'),
-//                     'end' => Carbon::parse($conflictedEvent->end)->format('d/m/Y H:i')
-//                 ]
-//             ];
 //             if (!$force) continue;
 //             continue; 
 //         }

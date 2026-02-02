@@ -1430,13 +1430,11 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
 }
 
 // ======================= CONFLICT MODAL =======================
-function showConflictModal(conflicts) {
+ function showConflictModal(conflicts) {
   const list = document.getElementById('conflictList')
-  if (!list) {
-    console.error('Missing #conflictList')
-    return
-  }
+  if (!list) return
 
+   list.dataset.conflicts = JSON.stringify(conflicts)
   list.innerHTML = ''
 
   conflicts.forEach(c => {
@@ -1454,43 +1452,36 @@ function showConflictModal(conflicts) {
   toggleModal('confirmConflictModal', true)
 }
 
-window.confirmContinue = async function () {
+ window.confirmContinue = async function () {
   if (!pendingFormData) {
-    console.error('pendingFormData is null')
     closeConflictModal()
     return
   }
 
-  // Thêm flag force để backend biết là user đã confirm
-  pendingFormData.append('force', 'true')
+  const newFormData = new FormData()
+  
+  // Copy tất cả fields từ pendingFormData
+  for (let [key, value] of pendingFormData.entries()) {
+    newFormData.append(key, value)
+  }
+  
+  // Thêm flag force
+  newFormData.append('force', 'true')
 
-  const res = await sendBookingRequest('/bookings', pendingFormData)
+  // Gửi lại request
+  const res = await sendBookingRequest('/bookings', newFormData)
   
   if (!res.ok) {
     closeConflictModal()
     return
   }
 
-  if (res.data?.type === 'confirm') {
-    // Nếu vẫn còn conflicts (trường hợp hiếm), hiển thị lại modal
-    showConflictModal(res.data.data.conflicts)
-    return
-  }
-
-  if (res.data?.type === 'error') {
-    showToast('error', res.data.message)
-    closeConflictModal()
-    return
-  }
-
-  // ✅ SUCCESS: Đóng modal conflict + modal đăng ký + hiện toast + reload
   showToast('success', res.data?.message || 'Đã gửi yêu cầu đăng ký lịch.')
   closeConflictModal()
   closeModal()
   await loadEvents()
   pendingFormData = null
 }
-
 // ======================= INITIALIZATION =======================
 document.addEventListener('DOMContentLoaded', function () {
   initDataMaps()
