@@ -82,11 +82,11 @@ function hexToRgb(color) {
   if (c.length === 3) c = c.split('').map((x) => x + x).join('')
   if (c.length === 8) c = c.slice(0, 6)
   if (c.length !== 6) return null
-  
+
   const r = parseInt(c.slice(0, 2), 16)
   const g = parseInt(c.slice(2, 4), 16)
   const b = parseInt(c.slice(4, 6), 16)
-  
+
   if ([r, g, b].some((n) => Number.isNaN(n))) return null
   return { r, g, b }
 }
@@ -133,7 +133,7 @@ function showToast(type, message) {
 function toggleModal(modalId, show) {
   const modal = document.getElementById(modalId)
   if (!modal) return
-  
+
   if (show) {
     modal.classList.add('active')
   } else {
@@ -310,79 +310,81 @@ function checkPermission(eventData) {
 //   return { html }
 // }
 function getEventContent(arg) {
-  const event = arg.event
-  const props = event.extendedProps || {}
-  const status = props.status || 'pending'
-  const category = props.category || 'work'
+    const event = arg.event
+    const props = event.extendedProps || {}
+    const status = props.status || 'pending'
+    const category = props.category || 'work'
 
-  const durationMinutes = (event.end - event.start) / (1000 * 60)
+    const durationMinutes = (event.end - event.start) / (1000 * 60)
 
-  const isTiny = durationMinutes <= 30
-  const isShort = durationMinutes <= 60
-  const isMedium = durationMinutes <= 90
+    const isTiny = durationMinutes <= 30
+    const isShort = durationMinutes <= 60
+    const isMedium = durationMinutes <= 90
 
-   const categoryIcon = props.categoryIcon 
-    ? `<i class="${props.categoryIcon}"></i>` 
-    : (CATEGORY_ICONS[category] || CATEGORY_ICONS.work)
-  
-   const categoryText = props.categoryName || CATEGORY_NAMES[category] || 'Làm việc / Nghiên cứu'
+    // ✅ Icon category (thêm prefix fa-solid fa-)
+    const categoryIcon = props.categoryIcon
+        ? `<i class="fa-solid fa-${props.categoryIcon}"></i>`
+        : '<i class="fa-solid fa-briefcase"></i>' // fallback
 
-  const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
-  const color = props._color || event.backgroundColor || '#3788d8'
-  const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
-  const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
+    const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
+    const color = props._color || event.backgroundColor || '#3788d8'
+    const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
+    const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
 
-  let html = ''
+    let html = ''
 
-  if (isTiny) {
-    html = `
-      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;">
-        <div style="font-weight:800;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
-        <div style="font-weight:700;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
+    if (isTiny) {
+        html = `
+      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;color:rgba(0,0,0,0.5);">
+        <div style="font-weight:300;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
+        ${categoryIcon}
+        <div style="font-weight:300;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
       </div>
     `
-  } else if (isShort) {
-    html = `
-      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;">
+    } else if (isShort) {
+        html = `
+      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;color:rgba(0,0,0,0.5);">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-          <div style="font-weight:800;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
-          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;">${statusIcon}</span>
+          <div style="font-weight:300;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;opacity:0.7;">${statusIcon}</span>
         </div>
-        <div style="font-weight:700;line-height:1.2;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${event.title || ''}</div>
-      </div>
-    `
-  } else if (isMedium) {
-    html = `
-      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-          <div style="font-weight:800;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
-          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;">${statusIcon}</span>
-        </div>
-        <div style="font-weight:800;line-height:1.2;margin-bottom:3px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${event.title || ''}</div>
-        <div style="display:flex;align-items:center;gap:5px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        <div style="display:flex;align-items:center;gap:5px;">
           ${categoryIcon}
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${categoryText}</span>
+          <div style="font-weight:400;line-height:1.2;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
         </div>
       </div>
     `
-  } else {
-    html = `
-      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;">
+    } else if (isMedium) {
+        html = `
+      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(0,0,0,0.5);">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <div style="font-weight:300;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;opacity:0.7;">${statusIcon}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;">
+          ${categoryIcon}
+          <div style="font-weight:400;line-height:1.2;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
+        </div>
+      </div>
+    `
+    } else {
+        html = `
+      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(0,0,0,0.5);">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-          <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
-          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;">${statusIcon}</span>
+          <div class="fc-event-time" style="font-weight:300;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;opacity:0.7;">${statusIcon}</span>
         </div>
-        <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${event.title || ''}</div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:3px;white-space:nowrap;">
+        <div style="display:flex;align-items:center;gap:6px;">
           ${categoryIcon}
-          <span style="white-space:nowrap;">${categoryText}</span>
+          <div class="fc-event-title" style="font-weight:400;line-height:1.2;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:1;">${event.title || ''}</div>
         </div>
       </div>
     `
-  }
+    }
 
-  return { html }
+    return { html }
 }
+
 function onEventDidMount(info) {
   const el = info.el
   const props = info.event.extendedProps || {}
@@ -483,25 +485,25 @@ function initCalendar() {
       if (!checkPermission(draggedEvent)) return false
       const now = new Date()
       if (dropInfo.start && dropInfo.start < now) return false
-      
+
       // ✅ NGĂN KÉO TRÙNG: Kiểm tra xem có event nào khác trùng thời gian không
       const hasOverlap = calendar.getEvents().some(event => {
         if (event.id === draggedEvent.id) return false // Bỏ qua chính nó
         if (event.extendedProps.status === 'cancelled') return false // Bỏ qua lịch đã hủy
-        
+
         const eventStart = event.start
         const eventEnd = event.end || new Date(eventStart.getTime() + 60 * 60 * 1000)
         const dropEnd = dropInfo.end || new Date(dropInfo.start.getTime() + 60 * 60 * 1000)
-        
+
         // Kiểm tra overlap: start1 < end2 && end1 > start2
         return dropInfo.start < eventEnd && dropEnd > eventStart
       })
-      
+
       if (hasOverlap) {
         showToast('warning', 'Không thể kéo vào thời gian đã có lịch khác')
         return false
       }
-      
+
       return true
     },
 
@@ -850,14 +852,14 @@ async function loadEvents() {
         start: normalizeDateString(item.start),
         end: normalizeDateString(item.end),
         category: item.category,
-        categoryIcon: item.category_icon,  
-        categoryName: item.category_name, 
-        statusName: item.status_name, 
+        categoryIcon: item.category_icon,
+        categoryName: item.category_name,
+        statusName: item.status_name,
         description: item.description,
         status: item.status,
         roomCode,
         roomName,
-        color: bgColor, 
+        color: bgColor,
         lab_code: roomCode,
         user_id: item.user_id || item.userId || null,
         registered_for: registeredFor,
@@ -903,9 +905,9 @@ function updateCalendar() {
         textColor: tx,
         extendedProps: {
           category: e.category,
-          categoryIcon: e.categoryIcon,  
-          categoryName: e.categoryName, 
-          statusName: e.statusName, 
+          categoryIcon: e.categoryIcon,
+          categoryName: e.categoryName,
+          statusName: e.statusName,
           description: e.description,
           status: e.status,
           roomCode: e.roomCode,
@@ -1067,7 +1069,7 @@ window.saveEvent = async function() {
       if (!res.ok) return
 
       if (res.data?.message) showToast('success', res.data.message)
-      
+
       closeModal()
       await loadEvents()
     } else {
@@ -1167,10 +1169,10 @@ window.saveEvent = async function() {
 //   const now = new Date()
 //   const eventStart = new Date(eventData.start)
 //   const eventEnd = eventData.end ? new Date(eventData.end) : eventStart
-  
+
 //   const isCompleted = status === 'completed'
 //   const isOngoing = now >= eventStart && now <= eventEnd && status === 'approved'
-  
+
 //   const shouldHideButtons = !canEdit || isCompleted || isOngoing
 
 //   if (editBtn) editBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
@@ -1211,7 +1213,7 @@ function showEventDetails(eventData) {
     eventData.extendedProps.categoryName || CATEGORY_NAMES[eventData.extendedProps.category] || eventData.extendedProps.category
 
   const status = eventData.extendedProps.status || 'pending'
-   document.getElementById('detailStatus').textContent = 
+   document.getElementById('detailStatus').textContent =
     eventData.extendedProps.statusName || STATUS_LABELS[status] || status
 
   ;['pending', 'approved', 'completed', 'cancelled'].forEach(s => {
@@ -1226,10 +1228,10 @@ function showEventDetails(eventData) {
   const now = new Date()
   const eventStart = new Date(eventData.start)
   const eventEnd = eventData.end ? new Date(eventData.end) : eventStart
-  
+
   const isCompleted = status === 'completed'
   const isOngoing = now >= eventStart && now <= eventEnd && status === 'approved'
-  
+
   const shouldHideButtons = !canEdit || isCompleted || isOngoing
 
   if (editBtn) editBtn.style.display = shouldHideButtons ? 'none' : 'inline-flex'
@@ -1271,7 +1273,7 @@ window.editEvent = function() {
 
     document.getElementById('eventRepeatType').value = ''
     document.getElementById('eventRepeatUntil').value = ''
-    
+
     const weekdaySection = document.getElementById('weekdaySection')
     if (weekdaySection) {
       weekdaySection.style.display = 'none'
@@ -1306,7 +1308,7 @@ window.confirmDelete = async function() {
   closeConfirmDelete()
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-  
+
   if (!csrfToken) {
     showToast('error', 'Không tìm thấy CSRF token.')
     return
@@ -1328,14 +1330,14 @@ window.confirmDelete = async function() {
 
     let result
     const contentType = response.headers.get('content-type')
-    
+
     if (contentType && contentType.includes('application/json')) {
       const text = await response.text()
       result = text ? JSON.parse(text) : {}
     } else {
       const text = await response.text()
       console.error('Non-JSON response:', response.status, text)
-      
+
       showToast('error', `Lỗi server (${response.status}). Vui lòng kiểm tra log.`)
       return
     }
@@ -1346,16 +1348,16 @@ window.confirmDelete = async function() {
     }
 
     const action = result.action || 'deleted'
-    const successMessage = action === 'cancelled' 
-      ? 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.' 
+    const successMessage = action === 'cancelled'
+      ? 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.'
       : 'Đã xóa sự kiện thành công.'
-    
+
     showToast('success', result.message || successMessage)
     closeDetailModal()
-    
+
     await loadEvents()
     currentEventId = null
-    
+
   } catch (err) {
     console.error('confirmDelete error:', err)
     showToast('error', 'Lỗi kết nối: ' + err.message)

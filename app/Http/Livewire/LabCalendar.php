@@ -2,6 +2,8 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\EventCategory;
+use App\Models\EventStatus;
 use Livewire\Component;
 use App\Models\LabEvent;
 use App\Models\Lab;
@@ -34,6 +36,12 @@ class LabCalendar extends Component
             })
             ->orderBy('name')
             ->get();
+        $statuses = EventStatus::select('id', 'code', 'name', 'color')
+            ->where('code', '!=' ,'cancelled')
+             ->get();
+
+        $categories = EventCategory::select('id', 'code', 'name', 'icon')
+             ->get();
 
         $rooms = Lab::select('code', 'name')
             ->orderBy('name')
@@ -41,7 +49,9 @@ class LabCalendar extends Component
 
         return view('livewire.lab-calendar', [
             'rooms' => $rooms,
-            'groups' => $groups
+            'groups' => $groups,
+            'statuses' => $statuses,
+            'categories' => $categories
         ])->layout('components.layouts.client-layout');
     }
 
@@ -119,7 +129,7 @@ class LabCalendar extends Component
     if (!auth()->check()) {
         return response()->json(['type' => 'error', 'message' => 'Bạn cần đăng nhập.'], 401);
     }
-    
+
     $user = Auth::user();
 
     // 1. Kiểm tra quyền (Giữ nguyên)
@@ -254,8 +264,57 @@ class LabCalendar extends Component
         'message' => 'Đã gửi yêu cầu đăng ký thành công (' . count($createdEvents) . ' lịch).',
     ], 201);
 }
+//     public function store(Request $request)
+// {
+//     if (!auth()->check()) {
+//         return response()->json(['type' => 'error', 'message' => 'Bạn cần đăng nhập.'], 401);
+//     }
+//     $user = Auth::user();
+
+//     if (!in_array($user->role?->name, [
+//         RoleEnum::Admin->value,
+//         RoleEnum::Officer->value,
+//         RoleEnum::Teacher->value,
+//     ], true)) {
+//         return response()->json([
+//             'type' => 'error',
+//             'message' => 'Bạn không có quyền đăng ký lịch phòng lab.'
+//         ], 403);
+//     }
+//     $request->validate([
+//         'title' => 'required|string|max:255',
+//         'category' => 'required|string|in:work,seminar,other',
+//         'lab_code' => 'required|string',
+//         'occurrences' => 'required|array',
+//         'force' => 'nullable'
+//     ]);
+
+//     $user = Auth::user();
+//     $force = $request->input('force') === 'true' || $request->has('force');
+//     $seriesId = Str::uuid()->toString();
+//     $createdEvents = [];
+//     $conflicts = [];
+//     $occurrences = $request->input('occurrences');
+
+//     foreach ($occurrences as $occ) {
+//         $conflictedEvent = LabEvent::where('lab_code', $request->lab_code)
+//             ->where('status', 'approved')
+//             ->where('start', '<', $occ['end'])
+//             ->where('end', '>', $occ['start'])
+//             ->first();
+
+//         if ($conflictedEvent) {
+//             $conflicts[] = [
+//                 'requested_start' => Carbon::parse($occ['start'])->format('d/m/Y H:i'),
+//                 'requested_end' => Carbon::parse($occ['end'])->format('d/m/Y H:i'),
+//                 'conflict_with' => [
+//                     'title' => $conflictedEvent->title,
+//                     'start' => Carbon::parse($conflictedEvent->start)->format('d/m/Y H:i'),
+//                     'end' => Carbon::parse($conflictedEvent->end)->format('d/m/Y H:i')
+//                 ]
+//             ];
 //             if (!$force) continue;
-//             continue; 
+//             continue;
 //         }
 
 //         $event = LabEvent::create([
@@ -283,7 +342,7 @@ class LabCalendar extends Component
 
 //     if (empty($createdEvents)) {
 //         return response()->json([
-//             'type' => 'error', 
+//             'type' => 'error',
 //             'message' => 'Không có lịch nào hợp lệ để tạo.'
 //         ], 409);
 //     }
@@ -518,13 +577,13 @@ class LabCalendar extends Component
         }
 
         $wasApproved = $event->status === 'approved' ;
-        
+
          if ($wasApproved) {
             $event->update([
                 'status' => 'cancelled',
                 'updated_at' => now(),
             ]);
-            
+
             $message = 'Lịch đã duyệt đã được chuyển sang trạng thái hủy.';
             $action = 'cancelled';
         } else if($event->status === 'completed') {
@@ -536,7 +595,7 @@ class LabCalendar extends Component
         }
          else {
              $event->delete();
-            
+
             $message = 'Đã xóa sự kiện thành công.';
             $action = 'deleted';
         }
@@ -560,11 +619,11 @@ class LabCalendar extends Component
             'success' => false,
             'message' => 'Không tìm thấy sự kiện.'
         ], 404);
-        
+
     } catch (\Throwable $e) {
         \Log::error("Lỗi xóa event {$id}: " . $e->getMessage());
         \Log::error($e->getTraceAsString());
-        
+
         return response()->json([
             'success' => false,
             'message' => 'Có lỗi xảy ra khi xóa sự kiện.'
@@ -634,11 +693,11 @@ class LabCalendar extends Component
     }
 
     $senderName = $user->full_name ?? $user->name ?? 'Người dùng';
-    
-     $title = $event->status === 'cancelled' 
-        ? 'Lịch đã duyệt bị hủy' 
+
+     $title = $event->status === 'cancelled'
+        ? 'Lịch đã duyệt bị hủy'
         : 'Lịch đặt phòng đã bị xóa';
-        
+
     $message = $event->status === 'cancelled'
         ? "{$senderName} đã hủy lịch đã duyệt: {$event->title} tại phòng {$event->lab_code}"
         : "{$senderName} đã xóa lịch: {$event->title} tại phòng {$event->lab_code}";
