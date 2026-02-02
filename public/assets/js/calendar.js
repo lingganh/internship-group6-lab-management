@@ -1101,7 +1101,7 @@ window.saveEvent = async function() {
 
       if (res.data?.type === 'confirm') {
         // Lưu formData để dùng lại khi user confirm
-        // pendingFormData = fd
+        pendingFormData = fd
         showConflictModal(res.data.data.conflicts)
         return
       }
@@ -1433,40 +1433,68 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
 
 // ======================= CONFLICT MODAL =======================
 function showConflictModal(conflicts) {
-    const list = document.getElementById('conflictList');
-    if (!list) return;
+  const list = document.getElementById('conflictList')
+  if (!list) {
+    console.error('Missing #conflictList')
+    return
+  }
 
-    list.innerHTML = '';
-    conflicts.forEach(c => {
-        const li = document.createElement('li');
-        li.className = 'mb-2 p-2 border-bottom'; // Thêm chút style cho dễ nhìn
-        li.innerHTML = `
-      <div class="text-sm font-bold text-primary">Thời gian bạn chọn:</div>
-      <div>${c.requested_start} → ${c.requested_end}</div>
-      <div class="text-sm font-bold text-danger mt-1">Bị trùng với lịch:</div>
-      <div><strong>${c.conflict_with.title}</strong></div>
-      <div class="text-muted">${c.conflict_with.start} → ${c.conflict_with.end}</div>
-    `;
-        list.appendChild(li);
-    });
+  list.innerHTML = ''
 
-    // Cập nhật lại UI của Modal Conflict nếu cần
-    const confirmBtn = document.querySelector('#confirmConflictModal .js-confirm-continue');
-    if (confirmBtn) {
-        confirmBtn.textContent = 'Đã hiểu';
-        // Khi bấm vào sẽ gọi closeConflictModal()
-    }
+  conflicts.forEach(c => {
+    const li = document.createElement('li')
+    li.innerHTML = `
+      <b>${c.requested_start} → ${c.requested_end}</b><br>
+      <span class="text-danger">
+        Trùng với: ${c.conflict_with.title}
+        (${c.conflict_with.start} → ${c.conflict_with.end})
+      </span>
+    `
+    list.appendChild(li)
+  })
 
-    toggleModal('confirmConflictModal', true);
+  toggleModal('confirmConflictModal', true)
 }
 
- window.confirmContinue = function () {
-    closeConflictModal();
- };
+window.confirmContinue = async function () {
+  if (!pendingFormData) {
+    console.error('pendingFormData is null')
+    closeConflictModal()
+    return
+  }
+
+  // Thêm flag force để backend biết là user đã confirm
+  pendingFormData.append('force', 'true')
+
+  const res = await sendBookingRequest('/bookings', pendingFormData)
+
+  if (!res.ok) {
+    closeConflictModal()
+    return
+  }
+
+  if (res.data?.type === 'confirm') {
+    // Nếu vẫn còn conflicts (trường hợp hiếm), hiển thị lại modal
+    showConflictModal(res.data.data.conflicts)
+    return
+  }
+
+  if (res.data?.type === 'error') {
+    showToast('error', res.data.message)
+    closeConflictModal()
+    return
+  }
+
+  // ✅ SUCCESS: Đóng modal conflict + modal đăng ký + hiện toast + reload
+  showToast('success', res.data?.message || 'Đã gửi yêu cầu đăng ký lịch.')
+  closeConflictModal()
+  closeModal()
+  await loadEvents()
+  pendingFormData = null
+}
 
 // ======================= INITIALIZATION =======================
 document.addEventListener('DOMContentLoaded', function () {
   initDataMaps()
   initCalendar()
 })
-
