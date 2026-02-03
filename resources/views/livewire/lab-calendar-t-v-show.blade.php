@@ -162,13 +162,33 @@
                 position: relative;
             }
 
+            /* Custom Checkbox chung */
+            .custom-checkbox {
+                width: 22px;
+                height: 22px;
+                border-radius: 0.5rem;
+                border: 2px solid #d1d5db;
+                background: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                transition: all 0.2s;
+            }
+
+            /* Khi checkbox được check, lấy màu từ biến --active-color m đã truyền ở style inline */
+            .tv-filter-checkbox:checked~.custom-checkbox {
+                background: var(--active-color);
+                border-color: var(--active-color);
+            }
+
             .custom-checkbox::after {
                 content: '';
                 position: absolute;
                 display: none;
-                left: 7px;
-                top: 3px;
-                width: 6px;
+                left: 6px;
+                top: 2px;
+                width: 5px;
                 height: 10px;
                 border: solid white;
                 border-width: 0 2px 2px 0;
@@ -177,23 +197,6 @@
 
             .tv-filter-checkbox:checked~.custom-checkbox::after {
                 display: block;
-            }
-
-            .tv-filter-checkbox:checked~.custom-checkbox {
-                border-color: transparent;
-            }
-
-            /* Status checkbox colors */
-            .tv-filter-item.status-pending .tv-filter-checkbox:checked~.custom-checkbox {
-                background: #f59e0b;
-            }
-
-            .tv-filter-item.status-approved .tv-filter-checkbox:checked~.custom-checkbox {
-                background: #10b981;
-            }
-
-            .tv-filter-item.status-completed .tv-filter-checkbox:checked~.custom-checkbox {
-                background: #6366f1;
             }
 
             /* Category checkbox - đồng màu xanh dương */
@@ -720,7 +723,9 @@
                                     <label class="tv-filter-item status-{{ $status['code'] }}">
                                         <input type="checkbox" class="tv-filter-checkbox status-filter"
                                             data-status="{{ $status['code'] }}" checked onchange="applyFilters()">
-                                        <span class="custom-checkbox"></span>
+                                        <span class="custom-checkbox"
+                                            style="--active-color: {{ $status['color'] ?? '#3b82f6' }};">
+                                        </span>
                                         <span class="tv-filter-label">{{ $status['name'] }}</span>
                                     </label>
                                 @endforeach
