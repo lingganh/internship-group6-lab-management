@@ -20,26 +20,33 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <h5 class="fw-semibold text-dark m-0">Lịch đã đăng ký</h5>
 
-            <div class="d-flex gap-2 flex-wrap">
-                {{-- Ô tìm kiếm --}}
+           <div class="col-12 col-lg-8">
+        <div class="row g-2 justify-content-lg-end">
+            {{-- Ô tìm kiếm --}}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                 <input type="text" 
                     wire:model.live.debounce.300ms="searchTerm" 
-                    class="form-control form-control-sm filter-control" 
-                    placeholder="Tìm kiếm theo tên "
-                    style="min-width: 100px;">
+                    class="form-control filter-control" 
+                    placeholder="Tìm kiếm theo tên...">
+            </div>
 
-                {{-- Filter trạng thái --}}
-                <select wire:model.live="filterStatus" class="form-select  filter-control">
+            {{-- Filter trạng thái --}}
+            <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+                <select wire:model.live="filterStatus" class="form-select filter-control">
                     <option value="">Tất cả trạng thái</option>
                     <option value="pending">Chờ duyệt</option>
                     <option value="approved">Đã duyệt</option>
                     <option value="completed">Hoàn thành</option>
                     <option value="cancelled">Đã hủy</option>
                 </select>
-
-                {{-- Filter ngày --}}
-                <input type="date" wire:model.live="filterDate" class="form-control  filter-control">
             </div>
+
+            {{-- Filter ngày --}}
+            <div class="col-6 col-sm-3 col-md-3 col-lg-3">
+                <input type="date" wire:model.live="filterDate" class="form-control filter-control">
+            </div>
+        </div>
+    </div>
         </div>
 
         <div class="card clean-card">
