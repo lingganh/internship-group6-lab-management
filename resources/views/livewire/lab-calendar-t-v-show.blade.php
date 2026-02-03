@@ -740,7 +740,9 @@
                                     <label class="tv-filter-item category-filter">
                                         <input type="checkbox" class="tv-filter-checkbox category-filter-input"
                                             data-category="{{ $category['code'] }}" checked onchange="applyFilters()">
-                                        <span class="custom-checkbox"></span>
+                                         <span class="custom-checkbox"
+                                            style="--active-color: {{ $status['color'] ?? '#3b82f6' }};">
+                                        </span>
                                         <i class="fa-solid fa-{{ $category['icon'] }} tv-filter-icon"></i>
                                         <span class="tv-filter-label">{{ $category['name'] }}</span>
                                     </label>
