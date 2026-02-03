@@ -261,12 +261,14 @@
                         Hủy
                     </button>
                     <button type="button" class="btn register-btn register-btn-success" onclick="saveEvent()">
+                        <i class="btn-spinner fa-solid fa-circle-notch"></i>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            class="me-2">
+                            class="me-2 btn-icon">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
-                        Lưu
+                        <span class="btn-text">Lưu</span>
                     </button>
+                    
                 </div>
             </div>
         </div>
@@ -336,8 +338,9 @@
             <div class="modal-footer border-0 pt-0">
                 @auth
                     <button type="button" class="btn btn-danger" id="deleteEventBtn" onclick="deleteEvent()">
-                        <i class="fa-regular fa-trash-can"></i>
-                        <span>Xóa</span>
+                        <i class="btn-spinner fa-solid fa-circle-notch"></i>
+                        <i class="fa-regular fa-trash-can btn-icon"></i>
+                        <span class="btn-text">Xóa</span>
                     </button>
                     <button type="button" class="btn btn-primary" id="editEventBtn" onclick="editEvent()">
                         <i class="fa-regular fa-pen-to-square"></i>
@@ -363,7 +366,10 @@
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-secondary" onclick="closeConfirmDelete()">Hủy</button>
-                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Xóa</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="btn-spinner fa-solid fa-circle-notch"></i>
+                    <span class="btn-text">Xóa</span>
+                </button>
             </div>
         </div>
     </div>
@@ -384,7 +390,10 @@
 
             <div class="modal-footer border-0 pt-0">
                 <button class="btn btn-secondary" onclick="closeConflictModal()">Hủy</button>
-                <button class="btn btn-danger" onclick="confirmContinue()">Vẫn đăng ký</button>
+                <button class="btn btn-danger" onclick="confirmContinue()">
+                    <i class="btn-spinner fa-solid fa-circle-notch"></i>
+                    <span class="btn-text">Vẫn đăng ký</span>
+                </button>
             </div>
         </div>
     </div>
@@ -416,6 +425,7 @@
             display: inline-flex;
             align-items: center;
             border: 1px solid transparent;
+            position: relative;
         }
 
         .register-btn-success {
@@ -541,6 +551,53 @@
         .detail-modal-card {
             max-width: 560px;
         }
+
+        /* ========== LOADING SPINNER STYLES ========== */
+        .btn-spinner {
+            display: none;
+            margin-right: 8px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn.loading .btn-spinner {
+            display: inline-block;
+        }
+
+        .btn.loading .btn-icon {
+            display: none;
+        }
+
+        .btn.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Thêm transition mượt hơn */
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover:not(.loading) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active:not(.loading) {
+            transform: translateY(0);
+        }
     </style>
 
     {{-- SCRIPTS --}}
@@ -560,28 +617,74 @@
     <script src="{{ asset('assets/js/calendar.js') }}"></script>
     <script>
         // Toggle sidebar cho mobile
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('sidebarToggle');
-    const sidebar = document.querySelector('.lab-sidebar');
-    
-    // Tạo overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'lab-sidebar-overlay';
-    document.body.appendChild(overlay);
-    
-    if (toggleBtn && sidebar) {
-        // Toggle sidebar
-        toggleBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.lab-sidebar');
+            
+            // Tạo overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'lab-sidebar-overlay';
+            document.body.appendChild(overlay);
+            
+            if (toggleBtn && sidebar) {
+                // Toggle sidebar
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+                
+                // Đóng khi click overlay
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
         });
+
         
-        // Đóng khi click overlay
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-        });
-    }
-});
+        function setButtonLoading(button) {
+            if (!button) return;
+            button.classList.add('loading');
+            button.disabled = true;
+        }
+
+         
+        function removeButtonLoading(button) {
+            if (!button) return;
+            button.classList.remove('loading');
+            button.disabled = false;
+        }
+
+         
+         * Ví dụ sử dụng trong các function hiện tại:
+         * 
+         * async function saveEvent() {
+         *     const saveBtn = document.querySelector('.register-btn-success');
+         *     setButtonLoading(saveBtn);
+         *     
+         *     try {
+         *         // Your save logic here
+         *         await fetch(...);
+         *     } catch (error) {
+         *         console.error(error);
+         *     } finally {
+         *         removeButtonLoading(saveBtn);
+         *     }
+         * }
+         * 
+         * async function deleteEvent() {
+         *     const deleteBtn = document.getElementById('deleteEventBtn');
+         *     setButtonLoading(deleteBtn);
+         *     
+         *     try {
+         *         // Your delete logic here
+         *         await fetch(...);
+         *     } catch (error) {
+         *         console.error(error);
+         *     } finally {
+         *         removeButtonLoading(deleteBtn);
+         *     }
+         * }
+         */
     </script>
 </div>
