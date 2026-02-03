@@ -257,12 +257,12 @@ function checkPermission(eventData) {
 
     const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
     const color = props._color || event.backgroundColor || '#3788d8'
-    const chipBg = isLightColor(color) ? 'rgb(255, 255, 255)' : 'rgb(242, 235, 235)'
-    const chipBorder = isLightColor(color) ? 'rgb(240, 240, 240)' : 'rgba(25rgb(255, 255, 255)'
+       const chipBg = isLightColor(color) ? 'rgba(234, 234, 237, 0.12)' : 'rgba(255, 255, 255, 0.22)'
+    const chipBorder = isLightColor(color) ? 'rgba(5, 5, 5, 0.16)' : 'rgba(255, 255, 255, 0.18)'
 
      const isCompleted = status === 'completed'
-    const textOpacity = isCompleted ? '0.4' : '0.7'
-    const iconOpacity = isCompleted ? '0.4' : '0.7'
+    const textOpacity = isCompleted ? '0.6' : '0.9'
+    const iconOpacity = isCompleted ? '0.6' : '0.9'
 
     let html = ''
 
