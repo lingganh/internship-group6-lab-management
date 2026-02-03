@@ -238,78 +238,8 @@ function checkPermission(eventData) {
 }
 
 // ======================= EVENT RENDERING =======================
-// function getEventContent(arg) {
-//   const event = arg.event
-//   const props = event.extendedProps || {}
-//   const status = props.status || 'pending'
-//   const category = props.category || 'work'
-
-//   const durationMinutes = (event.end - event.start) / (1000 * 60)
-
-//   const isTiny = durationMinutes <= 30
-//   const isShort = durationMinutes <= 60
-//   const isMedium = durationMinutes <= 90
-
-//   const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
-//   const categoryIcon = CATEGORY_ICONS[category] || CATEGORY_ICONS.work
-//   const categoryText = CATEGORY_NAMES[category] || 'Làm việc / Nghiên cứu'
-
-//   const color = props._color || event.backgroundColor || '#3788d8'
-//   const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
-//   const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
-
-//   let html = ''
-
-//   if (isTiny) {
-//     html = `
-//       <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;">
-//         <div style="font-weight:800;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
-//         <div style="font-weight:700;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
-//       </div>
-//     `
-//   } else if (isShort) {
-//     html = `
-//       <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;">
-//         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-//           <div style="font-weight:800;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
-//           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;">${statusIcon}</span>
-//         </div>
-//         <div style="font-weight:700;line-height:1.2;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${event.title || ''}</div>
-//       </div>
-//     `
-//   } else if (isMedium) {
-//     html = `
-//       <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;">
-//         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-//           <div style="font-weight:800;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
-//           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;">${statusIcon}</span>
-//         </div>
-//         <div style="font-weight:800;line-height:1.2;margin-bottom:3px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${event.title || ''}</div>
-//         <div style="display:flex;align-items:center;gap:5px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-//           ${categoryIcon}
-//           <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${categoryText}</span>
-//         </div>
-//       </div>
-//     `
-//   } else {
-//     html = `
-//       <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;">
-//         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-//           <div class="fc-event-time" style="font-weight:800;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
-//           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;">${statusIcon}</span>
-//         </div>
-//         <div class="fc-event-title" style="font-weight:800;line-height:1.2;margin-bottom:4px;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${event.title || ''}</div>
-//         <div style="display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:3px;white-space:nowrap;">
-//           ${categoryIcon}
-//           <span style="white-space:nowrap;">${categoryText}</span>
-//         </div>
-//       </div>
-//     `
-//   }
-
-//   return { html }
-// }
-function getEventContent(arg) {
+ 
+ function getEventContent(arg) {
     const event = arg.event
     const props = event.extendedProps || {}
     const status = props.status || 'pending'
@@ -321,62 +251,65 @@ function getEventContent(arg) {
     const isShort = durationMinutes <= 60
     const isMedium = durationMinutes <= 90
 
-    // ✅ Icon category (thêm prefix fa-solid fa-)
-    const categoryIcon = props.categoryIcon
+     const categoryIcon = props.categoryIcon
         ? `<i class="fa-solid fa-${props.categoryIcon}"></i>`
         : '<i class="fa-solid fa-briefcase"></i>' // fallback
 
     const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
     const color = props._color || event.backgroundColor || '#3788d8'
-    const chipBg = isLightColor(color) ? 'rgba(17,24,39,.12)' : 'rgba(255,255,255,.22)'
-    const chipBorder = isLightColor(color) ? 'rgba(17,24,39,.16)' : 'rgba(255,255,255,.18)'
+    const chipBg = isLightColor(color) ? 'rgba(7, 7, 8, 0.12)' : 'rgba(48, 46, 46, 0.22)'
+    const chipBorder = isLightColor(color) ? 'rgba(5, 5, 5, 0.16)' : 'rgba(28, 27, 27, 0.18)'
+
+     const isCompleted = status === 'completed'
+    const textOpacity = isCompleted ? '0.5' : '0.7'
+    const iconOpacity = isCompleted ? '0.4' : '0.7'
 
     let html = ''
 
     if (isTiny) {
         html = `
-      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;color:rgba(0,0,0,0.5);">
-        <div style="font-weight:300;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
+      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;color:rgba(100,100,100,${textOpacity});">
+        <div style="font-weight:600;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
         ${categoryIcon}
-        <div style="font-weight:300;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
+        <div style="font-weight:600;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
       </div>
     `
     } else if (isShort) {
         html = `
-      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;color:rgba(0,0,0,0.5);">
+      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;color:rgba(100,100,100,${textOpacity});">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-          <div style="font-weight:300;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
-          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;opacity:0.7;">${statusIcon}</span>
+          <div style="font-weight:600;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;opacity:${iconOpacity};">${statusIcon}</span>
         </div>
         <div style="display:flex;align-items:center;gap:5px;">
           ${categoryIcon}
-          <div style="font-weight:400;line-height:1.2;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
+          <div style="font-weight:700;line-height:1.2;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
         </div>
       </div>
     `
     } else if (isMedium) {
         html = `
-      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(0,0,0,0.5);">
+      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(100,100,100,${textOpacity});">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-          <div style="font-weight:300;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
-          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;opacity:0.7;">${statusIcon}</span>
+          <div style="font-weight:600;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;opacity:${iconOpacity};">${statusIcon}</span>
         </div>
         <div style="display:flex;align-items:center;gap:5px;">
           ${categoryIcon}
-          <div style="font-weight:400;line-height:1.2;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
+          <div style="font-weight:700;line-height:1.2;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
         </div>
       </div>
     `
     } else {
         html = `
-      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(0,0,0,0.5);">
+      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(100,100,100,${textOpacity});">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-          <div class="fc-event-time" style="font-weight:300;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
-          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;opacity:0.7;">${statusIcon}</span>
+          <div class="fc-event-time" style="font-weight:600;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;opacity:${iconOpacity};">${statusIcon}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           ${categoryIcon}
-          <div class="fc-event-title" style="font-weight:400;line-height:1.2;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:1;">${event.title || ''}</div>
+          <div class="fc-event-title" style="font-weight:700;line-height:1.2;font-size:15px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:1;">${event.title || ''}</div>
         </div>
       </div>
     `
@@ -384,6 +317,32 @@ function getEventContent(arg) {
 
     return { html }
 }
+
+function onEventDidMount(info) {
+  const el = info.el
+  const props = info.event.extendedProps || {}
+  const status = props.status || 'pending'
+  const color = props._color || info.event.backgroundColor || '#3788d8'
+  const textColor = props._textColor || readableTextColor(color)
+
+  el.style.setProperty('--fc-event-bg-color', color)
+  el.style.setProperty('--fc-event-border-color', color)
+  el.style.setProperty('--fc-event-text-color', textColor)
+
+  if (status === 'pending') {
+    el.classList.add('is-pending')
+  } else {
+    el.classList.remove('is-pending')
+  }
+
+  const canEdit = checkPermission(info.event)
+  if (!canEdit) {
+    el.classList.add('is-no-edit')
+  } else {
+    el.classList.remove('is-no-edit')
+  }
+}
+
 
 function onEventDidMount(info) {
   const el = info.el

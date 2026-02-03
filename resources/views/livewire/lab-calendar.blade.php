@@ -58,7 +58,7 @@
                                 @foreach($categories as $category)
                                     <label class="lab-check-item">
                                         <input type="checkbox" checked data-filter-category="{{ $category->code }}">
-                                        <span class="custom-checkbox" style="--cb-color:blue;"></span>
+                                        <span class="custom-checkbox" style="--cb-color:rgb(191, 191, 227);"></span>
 
                                          <span class="lab-check-label">
                                             {{ $category->name }}
