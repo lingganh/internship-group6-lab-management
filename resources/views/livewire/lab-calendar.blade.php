@@ -74,6 +74,9 @@
                 {{-- MAIN CALENDAR --}}
                 <div class="lab-calendar-main">
                     <div class="lab-calendar-card">
+                         <button type="button" class="lab-sidebar-toggle" id="sidebarToggle">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
                         <div id="calendar"></div>
                     </div>
                 </div>
@@ -555,4 +558,30 @@
         window.LAB_GROUPS = @json($groups->map(fn($g) => ['id' => $g->id, 'name' => $g->name])->values());
     </script>
     <script src="{{ asset('assets/js/calendar.js') }}"></script>
+    <script>
+        // Toggle sidebar cho mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.lab-sidebar');
+    
+    // Tạo overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'lab-sidebar-overlay';
+    document.body.appendChild(overlay);
+    
+    if (toggleBtn && sidebar) {
+        // Toggle sidebar
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        
+        // Đóng khi click overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+});
+    </script>
 </div>
