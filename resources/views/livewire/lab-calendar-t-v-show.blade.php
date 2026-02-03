@@ -1,9 +1,7 @@
 <div>
-    <meta http-equiv="refresh" content="600">
-    {{-- CSS --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
+    {{-- LIVEWIRE COMPONENT - SINGLE ROOT ELEMENT REQUIRED --}}
+<div>
+    {{-- CSS trong component Livewire --}}
     <style>
         * {
             margin: 0;
@@ -514,14 +512,200 @@
             font-size: 0.875rem;
             font-weight: 600;
         }
+
+        /* ============= OVERLAY FOR MOBILE ============= */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ============= TOOLTIP ============= */
+        .tooltip {
+            position: fixed;
+            background: #1f2937;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 320px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #1f2937;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .tooltip-time {
+            opacity: 0.9;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tooltip-category {
+            opacity: 0.8;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .tooltip-description {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        /* Tooltip cho toggle button */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 0.5rem;
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+        }
+
+        /* ============= TOGGLE BUTTON (RE-DESIGNED) ============= */
+.tv-toggle-btn {
+    position: absolute; /* Đổi từ fixed sang absolute để nó đi theo layout */
+    top: 20px;
+    left: 300px; /* Nằm sát mép sidebar (320px - một chút) */
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-left: none; /* Bỏ viền trái để cảm giác dính liền vào sidebar */
+    border-radius: 0 0.75rem 0.75rem 0; /* Bo góc bên phải thôi */
+    width: 28px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ sang phải */
+}
+
+    /* Khi sidebar ẩn, nút quay về sát mép trái màn hình */
+    .tv-toggle-btn.sidebar-hidden {
+        left: 0;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tv-toggle-btn:hover {
+        background: #f3f4f6;
+        width: 32px; /* Hơi dài ra một tí khi hover cho dễ bấm */
+    }
+
+    .tv-toggle-btn i {
+        font-size: 0.8rem; /* Nhỏ lại cho tinh tế */
+        color: #9ca3af;
+        transition: transform 0.3s;
+    }
+
+    /* Ẩn cái bóng giả khi sidebar đang hiện để nhìn cho liền mạch */
+    .tv-sidebar:not(.hidden) ~ .tv-toggle-btn {
+        border-left: 1px solid #e5e7eb; /* Hiện lại viền nếu thích tách biệt nhẹ */
+    }
+            [data-tooltip]:hover::after {
+            opacity: 1;
+        }
+
+        /* ============= RESPONSIVE ============= */
+        @media (max-width: 1024px) {
+            .tv-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 30;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            }
+            
+            .tv-sidebar.hidden {
+                transform: translateX(-100%);
+                margin-left: 0;
+            }
+            
+            .tv-main {
+                margin-left: 0;
+            }
+
+            .tv-toggle-btn {
+                z-index: 35;
+            }
+
+            /* Ẩn tooltip trên mobile */
+            [data-tooltip]::after {
+                display: none;
+            }
+        }
     </style>
 
-    {{-- PAGE --}}
+    {{-- CDN Links --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    {{-- MAIN CONTAINER - SINGLE ROOT WRAPPER --}}
     <div class="tv-calendar-page">
+        {{-- TOOLTIP --}}
+        <div id="eventTooltip" class="tooltip"></div>
+
+        {{-- OVERLAY --}}
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
         {{-- TOGGLE BUTTON --}}
         <button type="button" class="tv-toggle-btn" id="toggleBtn" onclick="toggleSidebar()">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
 
         <div class="tv-layout">
             {{-- SIDEBAR --}}
@@ -581,78 +765,78 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Modal Chi tiết --}}
-    <div id="detailModal" class="tv-modal">
-        <div class="tv-modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Chi tiết sự kiện</h3>
-                <button class="modal-close" onclick="closeModal()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <div class="detail-item">
-                    <div class="detail-icon">
+        {{-- Modal Chi tiết --}}
+        <div id="detailModal" class="tv-modal">
+            <div class="tv-modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Chi tiết sự kiện</h3>
+                    <button class="modal-close" onclick="closeModal()">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </div>
-                    <div class="detail-content">
-                        <div class="detail-label">Tiêu đề</div>
-                        <div class="detail-value" id="modal-title"></div>
-                    </div>
+                    </button>
                 </div>
 
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                <div class="modal-body">
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Tiêu đề</div>
+                            <div class="detail-value" id="modal-title"></div>
+                        </div>
                     </div>
-                    <div class="detail-content">
-                        <div class="detail-label">Thời gian</div>
-                        <div class="detail-value" id="modal-time"></div>
-                    </div>
-                </div>
 
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Thời gian</div>
+                            <div class="detail-value" id="modal-time"></div>
+                        </div>
                     </div>
-                    <div class="detail-content">
-                        <div class="detail-label">Loại sự kiện</div>
-                        <div class="detail-value" id="modal-category"></div>
-                    </div>
-                </div>
 
-                <div class="detail-item" id="modal-description-wrapper" style="display: none;">
-                    <div class="detail-icon">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
-                        </svg>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Loại sự kiện</div>
+                            <div class="detail-value" id="modal-category"></div>
+                        </div>
                     </div>
-                    <div class="detail-content">
-                        <div class="detail-label">Mô tả</div>
-                        <div class="detail-value" id="modal-description"></div>
-                    </div>
-                </div>
 
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                    <div class="detail-item" id="modal-description-wrapper" style="display: none;">
+                        <div class="detail-icon">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Mô tả</div>
+                            <div class="detail-value" id="modal-description"></div>
+                        </div>
                     </div>
-                    <div class="detail-content">
-                        <div class="detail-label">Trạng thái</div>
-                        <div id="modal-status"></div>
+
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Trạng thái</div>
+                            <div id="modal-status"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -661,206 +845,335 @@
 
     {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-<script>
-    setTimeout(function() {
-        window.location.href = window.location.href;
-    }, 600000);
+    <script>
+        // Auto refresh page sau 10 phút
+        setTimeout(function() {
+            window.location.href = window.location.href;
+        }, 600000);
 
-    var calendar = null;
-    var events = @json($events);
-    var hiddenStatuses = [];
-    var hiddenCategories = [];
-    var sidebarVisible = true;
+        var calendar = null;
+        var events = @json($events);
+        var hiddenStatuses = [];
+        var hiddenCategories = [];
+        var sidebarVisible = true;
+        var tooltip = null;
+        var tooltipTimeout = null;
 
-    // Toggle sidebar
-    function toggleSidebar() {
-        var sidebar = document.getElementById('tvSidebar');
-        var toggleBtn = document.getElementById('toggleBtn');
-        
-        sidebarVisible = !sidebarVisible;
-        
-        if (sidebarVisible) {
-            sidebar.classList.remove('hidden');
-            toggleBtn.classList.remove('sidebar-hidden');
-        } else {
-            sidebar.classList.add('hidden');
-            toggleBtn.classList.add('sidebar-hidden');
+        // ============= TOOLTIP FUNCTIONS =============
+        function showTooltip(event, mouseEvent) {
+            if (!tooltip) {
+                tooltip = document.getElementById('eventTooltip');
+            }
+            
+            // Clear timeout nếu đang có
+            if (tooltipTimeout) {
+                clearTimeout(tooltipTimeout);
+            }
+
+            var props = event.extendedProps;
+            
+            // Build tooltip content
+            var content = '<div class="tooltip-title">' + event.title + '</div>';
+            
+            var startDate = new Date(event.start);
+            var endDate = new Date(event.end);
+            var timeStr = formatTime(startDate) + ' - ' + formatTime(endDate);
+            content += '<div class="tooltip-time"><i class="fa-solid fa-clock"></i> ' + timeStr + '</div>';
+            
+            if (props.category_name) {
+                var icon = props.category_icon ? '<i class="fa-solid fa-' + props.category_icon + '"></i> ' : '';
+                content += '<div class="tooltip-category">' + icon + props.category_name + '</div>';
+            }
+            
+            if (props.description) {
+                content += '<div class="tooltip-description">' + props.description + '</div>';
+            }
+            
+            tooltip.innerHTML = content;
+            
+            // Position tooltip
+            var x = mouseEvent.pageX;
+            var y = mouseEvent.pageY;
+            
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = (y + 20) + 'px';
+            
+            // Show tooltip sau 300ms
+            tooltipTimeout = setTimeout(function() {
+                tooltip.classList.add('show');
+            }, 300);
         }
-    }
 
-    // Init clock
-    function updateClock() {
-        var now = new Date();
-        var str = now.toLocaleString('vi-VN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        var clockEl = document.getElementById('sidebar-clock');
-        if (clockEl) {
-            clockEl.textContent = str;
-        }
-    }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    // Check if event is past
-    function isEventPast(eventEnd) {
-        var now = new Date();
-        var end = new Date(eventEnd);
-        return end < now;
-    }
-
-    // Apply filters - NHANH HƠN
-    function applyFilters() {
-        hiddenStatuses = [];
-        hiddenCategories = [];
-        
-        var statusCheckboxes = document.querySelectorAll('.status-filter');
-        for (var i = 0; i < statusCheckboxes.length; i++) {
-            if (!statusCheckboxes[i].checked) {
-                hiddenStatuses.push(statusCheckboxes[i].getAttribute('data-status'));
+        function hideTooltip() {
+            if (tooltipTimeout) {
+                clearTimeout(tooltipTimeout);
+            }
+            if (tooltip) {
+                tooltip.classList.remove('show');
             }
         }
-        
-        var categoryCheckboxes = document.querySelectorAll('.category-filter-input');
-        for (var j = 0; j < categoryCheckboxes.length; j++) {
-            if (!categoryCheckboxes[j].checked) {
-                hiddenCategories.push(categoryCheckboxes[j].getAttribute('data-category'));
-            }
+
+        function formatTime(date) {
+            return date.toLocaleString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
-        
-        // CHỈ GỌI refetchEvents() THAY VÌ XÓA VÀ THÊM LẠI
-        if (calendar) {
-            calendar.refetchEvents();
-        }
-    }
 
-    // Init calendar - DÙNG FUNCTION CALLBACK
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            locale: 'vi',
-            firstDay: 1,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            buttonText: {
-                today: 'Hôm nay',
-                month: 'Tháng',
-                week: 'Tuần',
-                day: 'Ngày'
-            },
-            slotMinTime: '07:00:00',
-            slotMaxTime: '19:00:00',
-            allDaySlot: false,
-            nowIndicator: true,
-            height: '100%',
-            contentHeight: '100%',
-            expandRows: true,
-             events: function(info, successCallback, failureCallback) {
-                var filteredEvents = events.filter(function(e) {
-                    var statusHidden = hiddenStatuses.indexOf(e.status) !== -1;
-                    var categoryHidden = hiddenCategories.indexOf(e.category) !== -1;
-                    return !statusHidden && !categoryHidden;
-                }).map(function(e) {
-                    var bgColor = e.color || '#3b82f6';
-                    var classes = [];
-                    
-                    if (e.is_current) {
-                        classes.push('event-current');
-                    } else if (isEventPast(e.end)) {
-                        classes.push('event-past');
-                    }
-
-                    return {
-                        id: e.id,
-                        title: e.title,
-                        start: e.start,
-                        end: e.end,
-                        backgroundColor: bgColor,
-                        borderColor: bgColor,
-                        textColor: '#ffffff',
-                        classNames: classes,
-                        extendedProps: {
-                            category: e.category,
-                            category_icon: e.category_icon,
-                            category_name: e.category_name,
-                            status_name: e.status_name,
-                            status: e.status,
-                            lab_code: e.lab_code,
-                            lab_name: e.lab_name,
-                            description: e.description,
-                            registered_for: e.registered_for,
-                            is_current: e.is_current
-                        }
-                    };
-                });
+        // ============= TOGGLE SIDEBAR =============
+        function toggleSidebar() {
+            var sidebar = document.getElementById('tvSidebar');
+            var toggleBtn = document.getElementById('toggleBtn');
+            var overlay = document.getElementById('sidebarOverlay');
+            
+            sidebarVisible = !sidebarVisible;
+            
+            if (sidebarVisible) {
+                sidebar.classList.remove('hidden');
+                toggleBtn.classList.remove('sidebar-hidden');
                 
-                successCallback(filteredEvents);
-            },
-            eventClick: function(info) {
-                showEventDetails(info.event);
+                // Hiện overlay nếu là mobile
+                if (window.innerWidth <= 1024) {
+                    overlay.classList.add('active');
+                }
+                
+                // Lưu trạng thái
+                localStorage.setItem('sidebarVisible', 'true');
+            } else {
+                sidebar.classList.add('hidden');
+                toggleBtn.classList.add('sidebar-hidden');
+                overlay.classList.remove('active');
+                
+                localStorage.setItem('sidebarVisible', 'false');
+            }
+            
+            // Resize calendar sau khi animation hoàn tất
+            setTimeout(function() {
+                if (calendar) {
+                    calendar.updateSize();
+                }
+            }, 300);
+        }
+
+        // Đóng sidebar khi nhấn ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebarVisible && window.innerWidth <= 1024) {
+                toggleSidebar();
             }
         });
 
-        calendar.render();
-    });
-
-    // Show event details
-    function showEventDetails(event) {
-        var props = event.extendedProps;
-
-        document.getElementById('modal-title').textContent = event.title;
-
-        var startDate = new Date(event.start);
-        var endDate = new Date(event.end);
-        var timeStr = formatDateTime(startDate) + ' - ' + formatDateTime(endDate);
-        document.getElementById('modal-time').textContent = timeStr;
-
-        var categoryIcon = props.category_icon ? '<i class="fa-solid fa-' + props.category_icon + '"></i> ' : '';
-        var categoryText = props.category_name || props.category;
-        document.getElementById('modal-category').innerHTML = categoryIcon + categoryText;
-
-        var descWrapper = document.getElementById('modal-description-wrapper');
-        var descSpan = document.getElementById('modal-description');
-
-        if (props.description) {
-            descSpan.textContent = props.description;
-            descWrapper.style.display = 'flex';
-        } else {
-            descWrapper.style.display = 'none';
+        // ============= CLOCK =============
+        function updateClock() {
+            var now = new Date();
+            var str = now.toLocaleString('vi-VN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            var clockEl = document.getElementById('sidebar-clock');
+            if (clockEl) {
+                clockEl.textContent = str;
+            }
         }
 
-        var statusText = props.status_name || props.status;
-        var statusBadge = '<span class="status-badge" style="background-color: ' + event.backgroundColor + '; color: white;">' + statusText + '</span>';
-        document.getElementById('modal-status').innerHTML = statusBadge;
+        updateClock();
+        setInterval(updateClock, 1000);
 
-        document.getElementById('detailModal').classList.add('active');
-    }
+        // ============= HELPER FUNCTIONS =============
+        function isEventPast(eventEnd) {
+            var now = new Date();
+            var end = new Date(eventEnd);
+            return end < now;
+        }
 
-    function closeModal() {
-        document.getElementById('detailModal').classList.remove('active');
-    }
+        // ============= APPLY FILTERS =============
+        function applyFilters() {
+            hiddenStatuses = [];
+            hiddenCategories = [];
+            
+            var statusCheckboxes = document.querySelectorAll('.status-filter');
+            for (var i = 0; i < statusCheckboxes.length; i++) {
+                if (!statusCheckboxes[i].checked) {
+                    hiddenStatuses.push(statusCheckboxes[i].getAttribute('data-status'));
+                }
+            }
+            
+            var categoryCheckboxes = document.querySelectorAll('.category-filter-input');
+            for (var j = 0; j < categoryCheckboxes.length; j++) {
+                if (!categoryCheckboxes[j].checked) {
+                    hiddenCategories.push(categoryCheckboxes[j].getAttribute('data-category'));
+                }
+            }
+            
+            if (calendar) {
+                calendar.refetchEvents();
+            }
+        }
 
-    function formatDateTime(date) {
-        return date.toLocaleString('vi-VN', {
-            weekday: 'short',
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        // ============= INIT CALENDAR =============
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khôi phục trạng thái sidebar từ localStorage
+            var savedState = localStorage.getItem('sidebarVisible');
+            if (savedState === 'false') {
+                sidebarVisible = false;
+                document.getElementById('tvSidebar').classList.add('hidden');
+                document.getElementById('toggleBtn').classList.add('sidebar-hidden');
+            }
+            
+            // Tự động ẩn sidebar trên mobile khi load
+            if (window.innerWidth <= 1024 && savedState === null) {
+                sidebarVisible = false;
+                document.getElementById('tvSidebar').classList.add('hidden');
+                document.getElementById('toggleBtn').classList.add('sidebar-hidden');
+            }
+
+            var calendarEl = document.getElementById('calendar');
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                locale: 'vi',
+                firstDay: 1,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Hôm nay',
+                    month: 'Tháng',
+                    week: 'Tuần',
+                    day: 'Ngày'
+                },
+                slotMinTime: '07:00:00',
+                slotMaxTime: '19:00:00',
+                allDaySlot: false,
+                nowIndicator: true,
+                height: '100%',
+                contentHeight: '100%',
+                expandRows: true,
+                events: function(info, successCallback, failureCallback) {
+                    var filteredEvents = events.filter(function(e) {
+                        var statusHidden = hiddenStatuses.indexOf(e.status) !== -1;
+                        var categoryHidden = hiddenCategories.indexOf(e.category) !== -1;
+                        return !statusHidden && !categoryHidden;
+                    }).map(function(e) {
+                        var bgColor = e.color || '#3b82f6';
+                        var classes = [];
+                        
+                        if (e.is_current) {
+                            classes.push('event-current');
+                        } else if (isEventPast(e.end)) {
+                            classes.push('event-past');
+                        }
+
+                        return {
+                            id: e.id,
+                            title: e.title,
+                            start: e.start,
+                            end: e.end,
+                            backgroundColor: bgColor,
+                            borderColor: bgColor,
+                            textColor: '#ffffff',
+                            classNames: classes,
+                            extendedProps: {
+                                category: e.category,
+                                category_icon: e.category_icon,
+                                category_name: e.category_name,
+                                status_name: e.status_name,
+                                status: e.status,
+                                lab_code: e.lab_code,
+                                lab_name: e.lab_name,
+                                description: e.description,
+                                registered_for: e.registered_for,
+                                is_current: e.is_current
+                            }
+                        };
+                    });
+                    
+                    successCallback(filteredEvents);
+                },
+                eventClick: function(info) {
+                    showEventDetails(info.event);
+                },
+                // THÊM TOOLTIP KHI HOVER
+                eventMouseEnter: function(info) {
+                    showTooltip(info.event, info.jsEvent);
+                },
+                eventMouseLeave: function(info) {
+                    hideTooltip();
+                }
+            });
+
+            calendar.render();
         });
-    }
-</script>
+
+        // ============= MODAL FUNCTIONS =============
+        function showEventDetails(event) {
+            // Ẩn tooltip khi mở modal
+            hideTooltip();
+            
+            var props = event.extendedProps;
+
+            document.getElementById('modal-title').textContent = event.title;
+
+            var startDate = new Date(event.start);
+            var endDate = new Date(event.end);
+            var timeStr = formatDateTime(startDate) + ' - ' + formatDateTime(endDate);
+            document.getElementById('modal-time').textContent = timeStr;
+
+            var categoryIcon = props.category_icon ? '<i class="fa-solid fa-' + props.category_icon + '"></i> ' : '';
+            var categoryText = props.category_name || props.category;
+            document.getElementById('modal-category').innerHTML = categoryIcon + categoryText;
+
+            var descWrapper = document.getElementById('modal-description-wrapper');
+            var descSpan = document.getElementById('modal-description');
+
+            if (props.description) {
+                descSpan.textContent = props.description;
+                descWrapper.style.display = 'flex';
+            } else {
+                descWrapper.style.display = 'none';
+            }
+
+            var statusText = props.status_name || props.status;
+            var statusBadge = '<span class="status-badge" style="background-color: ' + event.backgroundColor + '; color: white;">' + statusText + '</span>';
+            document.getElementById('modal-status').innerHTML = statusBadge;
+
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function formatDateTime(date) {
+            return date.toLocaleString('vi-VN', {
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Close modal khi click bên ngoài
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal khi nhấn ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</div>
 </div>
