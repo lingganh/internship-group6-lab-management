@@ -218,8 +218,8 @@
         /* ============= TOGGLE BUTTON ============= */
         .tv-toggle-btn {
             position: fixed;
-            top: 1.5rem;
-            left: 1.5rem;
+            top: 600px;
+            left: 200px;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 0.75rem;
