@@ -64,6 +64,19 @@
                                         </span>
                                     </button>
                                 @endif
+                                 <button class="btn btn-danger"
+                                            wire:click="previewRejectConflicts"
+                                            wire:loading.attr="disabled"
+                                            wire:target="previewRejectConflicts">
+                                        <span wire:loading.remove wire:target="previewRejectConflicts">
+                                            <i class="ph-x-circle me-1"></i>
+                                           Xử lý lịch trùng
+                                        </span>
+                                        <span wire:loading wire:target="previewRejectConflicts">
+                                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                            Đang xử lý...
+                                        </span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -230,7 +243,69 @@
                     </div>
                 </div>
             </div>
+ <!-- #region -->
+ <!-- #region -->   
+                {{-- Modal Preview Conflict --}}
+<div x-show="modals.previewConflict"
+     x-cloak
+     @open-preview-conflict-modal.window="showModal('previewConflict')"
+     @close-preview-conflict-modal.window="hideModal('previewConflict')"
+     class="modal fade"
+     :class="{ 'show d-block': modals.previewConflict }"
+     tabindex="-1"
+     style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 approval-modal">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold text-danger">⚠ Xác nhận từ chối lịch trùng</h5>
+                <button type="button" class="btn-close" @click="hideModal('previewConflict')"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Các lịch sau bị trùng với lịch đã duyệt, xác nhận từ chối tất cả?</p>
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-hover align-middle shadow-none">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Người đăng ký</th>
+                                <th>Phòng</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($conflictPreviewList as $item)
+                                <tr>
+                                    <td><strong>{{ $item['user'] }}</strong><br><small>{{ $item['title'] }}</small></td>
+                                    <td><span class="badge bg-secondary">{{ $item['lab'] }}</span></td>
+                                    <td class="text-danger small fw-bold">{{ $item['time'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('previewConflict')">Hủy</button>
+                <button type="button" 
+            wire:click="rejectAllConflicts" 
+            class="btn approval-btn approval-btn-danger"
+            wire:loading.attr="disabled"
+            wire:target="rejectAllConflicts">
+        
+        {{-- Khi bình thường --}}
+        <span wire:loading.remove wire:target="rejectAllConflicts">
+            Xác nhận từ chối tất cả
+        </span>
 
+        {{-- Khi đang xoay --}}
+        <span wire:loading wire:target="rejectAllConflicts">
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Đang xử lý...
+        </span>
+    </button>
+            </div>
+        </div>
+    </div>
+</div>
             {{-- Modal Details --}}
             <div x-show="$wire.selectedSchedule !== null"
                  x-cloak
@@ -1165,6 +1240,7 @@
                     password: false,
                     conflict: false,
                     batchConflict: false,
+                    previewConflict: false, 
                 },
                 
                 showModal(type) {
@@ -1178,5 +1254,7 @@
                 }
             }
         }
+       
     </script>
+    
 </div>

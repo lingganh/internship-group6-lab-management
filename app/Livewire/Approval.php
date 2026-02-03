@@ -119,6 +119,73 @@ class Approval extends Component
             ->get(['id', 'title', 'lab_code', 'start', 'end', 'status', 'user_id']);
     }
 
+ public array $conflictPreviewList = [];
+
+public function previewRejectConflicts()
+{
+    // Tìm các lịch pending bị trùng giờ (Sử dụng whereExists tối ưu hơn)
+    $conflicts = LabEvent::where('status', 'pending')
+        ->whereExists(function ($query) {
+            $query->select(\DB::raw(1))
+                ->from('lab_events as approved')
+                ->whereIn('approved.status', ['approved', 'completed'])
+                ->whereColumn('approved.lab_code', 'lab_events.lab_code')
+                ->whereColumn('approved.id', '<>', 'lab_events.id')
+                ->whereRaw('approved.start < lab_events.end')
+                ->whereRaw('approved.end > lab_events.start');
+        })
+        ->with(['user:id,full_name', 'lab:id,name'])
+        ->get();
+
+    if ($conflicts->isEmpty()) {
+        $this->dispatch('alert', type: 'info', message: 'Không tìm thấy lịch nào bị trùng.');
+        return;
+    }
+
+    $this->conflictPreviewList = $conflicts->map(fn($ev) => [
+        'id' => $ev->id,
+        'title' => $ev->title,
+        'lab' => $ev->lab_code,
+        'user' => $ev->user->full_name ?? 'N/A',
+        'time' => $ev->start->format('d/m H:i') . ' - ' . $ev->end->format('H:i'),
+    ])->toArray();
+
+    $this->dispatch('open-preview-conflict-modal');
+}
+
+public function rejectAllConflicts()
+{
+    // 1. Lấy danh sách ID từ bản xem trước để xử lý chính xác những gì Admin thấy
+    $ids = collect($this->conflictPreviewList)->pluck('id');
+    
+    if ($ids->isEmpty()) {
+        $this->dispatch('close-preview-conflict-modal');
+        return;
+    }
+
+    $reason = 'Lịch bị trùng với lịch đã được phê duyệt trước đó. Vui lòng chọn khung giờ khác.';
+    
+    // 2. Lấy dữ liệu và thực hiện cập nhật
+    $eventsToReject = LabEvent::whereIn('id', $ids)->with('user')->get();
+    
+    foreach ($eventsToReject as $event) {
+        $event->update(['status' => 'cancelled', 'reason' => $reason]);
+
+        // Thông báo qua hệ thống và Email
+        $this->notifyUserEventResult($event, 'rejected');
+        
+        if ($event->user && $event->user->email) {
+            Mail::to($event->user->email)->queue(
+                new \App\Mail\RejectionNotification($event, $reason)
+            );
+        }
+    }
+
+    // 3. Dọn dẹp và đóng Modal thông qua Alpine.js
+    $this->conflictPreviewList = [];
+    $this->dispatch('close-preview-conflict-modal');  
+    $this->dispatch('alert', type: 'success', message: 'Đã xử lý từ chối các lịch trùng!');
+}
     private function makeConflictPayload(LabEvent $event, $conflicts): array
     {
         $fmt = fn($dt) => Carbon::parse($dt)->format('d/m/Y H:i');
@@ -888,7 +955,7 @@ class Approval extends Component
         ]);
     }
 
-    public function render()
+        public function render()
     {
         // Tự động chuyển status completed
         $now = Carbon::now();
@@ -917,7 +984,8 @@ class Approval extends Component
             ->when($this->filterUserId !== '', fn($q) => $q->where('user_id', $this->filterUserId))
             ->when($this->filterDate !== '', fn($q) => $q->whereDate('start', $this->filterDate))
             ->when($this->filterLabCode !== '', fn($q) => $q->where('lab_code', $this->filterLabCode))
-            ->orderBy('created_at', 'desc')
+            ->orderBy('start', 'asc')       // Ưu tiên 1: Lịch sắp diễn ra hiện lên trước
+            ->orderBy('created_at', 'asc')  // Ưu tiên 2: Cùng giờ bắt đầu thì thằng nào đký trước hiện trước
             ->paginate(15);
 
         // Đếm pending với CÙNG filters - QUAN TRỌNG!
