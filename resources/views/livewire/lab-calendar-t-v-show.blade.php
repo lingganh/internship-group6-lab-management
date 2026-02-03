@@ -200,7 +200,23 @@
             .tv-filter-checkbox:checked~.custom-checkbox::after {
                 display: block;
             }
-
+            .tv-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                /* Làm nền tối hơn cho TV dễ nhìn */
+                z-index: 9999;
+                /* Dùng flex để hỗ trợ căn giữa cho các trình duyệt hiểu flex */
+                display: none;
+                align-items: center;
+                -webkit-align-items: center;
+                justify-content: center;
+                -webkit-justify-content: center;
+            }
             /* Category checkbox - đồng màu xanh dương */
             .tv-filter-item.category-filter .tv-filter-checkbox:checked~.custom-checkbox {
                 background: #3b82f6;
