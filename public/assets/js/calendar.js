@@ -257,18 +257,18 @@ function checkPermission(eventData) {
 
     const statusIcon = STATUS_ICONS[status] || STATUS_ICONS.pending
     const color = props._color || event.backgroundColor || '#3788d8'
-    const chipBg = isLightColor(color) ? 'rgba(7, 7, 8, 0.12)' : 'rgba(48, 46, 46, 0.22)'
-    const chipBorder = isLightColor(color) ? 'rgba(5, 5, 5, 0.16)' : 'rgba(28, 27, 27, 0.18)'
+    const chipBg = isLightColor(color) ? 'rgb(255, 255, 255)' : 'rgb(242, 235, 235)'
+    const chipBorder = isLightColor(color) ? 'rgb(240, 240, 240)' : 'rgba(25rgb(255, 255, 255)'
 
      const isCompleted = status === 'completed'
-    const textOpacity = isCompleted ? '0.5' : '0.7'
+    const textOpacity = isCompleted ? '0.4' : '0.7'
     const iconOpacity = isCompleted ? '0.4' : '0.7'
 
     let html = ''
 
     if (isTiny) {
         html = `
-      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;color:rgba(100,100,100,${textOpacity});">
+      <div class="fc-event-main-custom fc-event-tiny" style="padding:4px 6px;overflow:hidden;height:100%;display:flex;align-items:center;gap:6px;color:rgba(255, 255, 255,${textOpacity});">
         <div style="font-weight:600;font-size:10px;white-space:nowrap;">${arg.timeText || ''}</div>
         ${categoryIcon}
         <div style="font-weight:600;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${event.title || ''}</div>
@@ -276,7 +276,7 @@ function checkPermission(eventData) {
     `
     } else if (isShort) {
         html = `
-      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;color:rgba(100,100,100,${textOpacity});">
+      <div class="fc-event-main-custom fc-event-short" style="padding:5px 7px;overflow:hidden;height:100%;color:rgba(255, 255, 255,${textOpacity});">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
           <div style="font-weight:600;font-size:10px;letter-spacing:.2px;">${arg.timeText || ''}</div>
           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:9px;opacity:${iconOpacity};">${statusIcon}</span>
@@ -289,7 +289,7 @@ function checkPermission(eventData) {
     `
     } else if (isMedium) {
         html = `
-      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(100,100,100,${textOpacity});">
+      <div class="fc-event-main-custom fc-event-medium" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(255, 255, 255,${textOpacity});">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
           <div style="font-weight:600;font-size:11px;letter-spacing:.2px;">${arg.timeText || ''}</div>
           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:10px;opacity:${iconOpacity};">${statusIcon}</span>
@@ -302,7 +302,7 @@ function checkPermission(eventData) {
     `
     } else {
         html = `
-      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(100,100,100,${textOpacity});">
+      <div class="fc-event-main-custom fc-event-full" style="padding:6px 8px;overflow:hidden;height:100%;color:rgba(255, 255, 255,${textOpacity});">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
           <div class="fc-event-time" style="font-weight:600;letter-spacing:.2px;font-size:11px;">${arg.timeText || ''}</div>
           <span style="margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:${chipBg};border:1px solid ${chipBorder};font-size:11px;opacity:${iconOpacity};">${statusIcon}</span>
