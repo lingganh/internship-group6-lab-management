@@ -661,154 +661,118 @@
 
     {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script>
+    setTimeout(function() {
+        window.location.href = window.location.href;
+    }, 600000);
 
-    <script>
-        setTimeout(function() {
-            window.location.href = window.location.href;
-        }, 600000);
+    var calendar = null;
+    var events = @json($events);
+    var hiddenStatuses = [];
+    var hiddenCategories = [];
+    var sidebarVisible = true;
 
-        var calendar = null;
-        var events = @json($events);
-        var hiddenStatuses = [];
-        var hiddenCategories = [];
-        var sidebarVisible = true;
+    // Toggle sidebar
+    function toggleSidebar() {
+        var sidebar = document.getElementById('tvSidebar');
+        var toggleBtn = document.getElementById('toggleBtn');
+        
+        sidebarVisible = !sidebarVisible;
+        
+        if (sidebarVisible) {
+            sidebar.classList.remove('hidden');
+            toggleBtn.classList.remove('sidebar-hidden');
+        } else {
+            sidebar.classList.add('hidden');
+            toggleBtn.classList.add('sidebar-hidden');
+        }
+    }
 
-        // Toggle sidebar
-        function toggleSidebar() {
-            var sidebar = document.getElementById('tvSidebar');
-            var toggleBtn = document.getElementById('toggleBtn');
-            
-            sidebarVisible = !sidebarVisible;
-            
-            if (sidebarVisible) {
-                sidebar.classList.remove('hidden');
-                toggleBtn.classList.remove('sidebar-hidden');
-            } else {
-                sidebar.classList.add('hidden');
-                toggleBtn.classList.add('sidebar-hidden');
+    // Init clock
+    function updateClock() {
+        var now = new Date();
+        var str = now.toLocaleString('vi-VN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        var clockEl = document.getElementById('sidebar-clock');
+        if (clockEl) {
+            clockEl.textContent = str;
+        }
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Check if event is past
+    function isEventPast(eventEnd) {
+        var now = new Date();
+        var end = new Date(eventEnd);
+        return end < now;
+    }
+
+    // Apply filters - NHANH HƠN
+    function applyFilters() {
+        hiddenStatuses = [];
+        hiddenCategories = [];
+        
+        var statusCheckboxes = document.querySelectorAll('.status-filter');
+        for (var i = 0; i < statusCheckboxes.length; i++) {
+            if (!statusCheckboxes[i].checked) {
+                hiddenStatuses.push(statusCheckboxes[i].getAttribute('data-status'));
             }
         }
-
-        // Init clock
-        function updateClock() {
-            var now = new Date();
-            var str = now.toLocaleString('vi-VN', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            var clockEl = document.getElementById('sidebar-clock');
-            if (clockEl) {
-                clockEl.textContent = str;
+        
+        var categoryCheckboxes = document.querySelectorAll('.category-filter-input');
+        for (var j = 0; j < categoryCheckboxes.length; j++) {
+            if (!categoryCheckboxes[j].checked) {
+                hiddenCategories.push(categoryCheckboxes[j].getAttribute('data-category'));
             }
         }
-
-        updateClock();
-        setInterval(updateClock, 1000);
-
-        // Check if event is past
-        function isEventPast(eventEnd) {
-            var now = new Date();
-            var end = new Date(eventEnd);
-            return end < now;
+        
+        // CHỈ GỌI refetchEvents() THAY VÌ XÓA VÀ THÊM LẠI
+        if (calendar) {
+            calendar.refetchEvents();
         }
+    }
 
-        // Apply filters
-        function applyFilters() {
-            hiddenStatuses = [];
-            hiddenCategories = [];
-            
-            var statusCheckboxes = document.querySelectorAll('.status-filter');
-            for (var i = 0; i < statusCheckboxes.length; i++) {
-                if (!statusCheckboxes[i].checked) {
-                    hiddenStatuses.push(statusCheckboxes[i].getAttribute('data-status'));
-                }
-            }
-            
-            var categoryCheckboxes = document.querySelectorAll('.category-filter-input');
-            for (var j = 0; j < categoryCheckboxes.length; j++) {
-                if (!categoryCheckboxes[j].checked) {
-                    hiddenCategories.push(categoryCheckboxes[j].getAttribute('data-category'));
-                }
-            }
-            
-            if (calendar) {
-                calendar.removeAllEvents();
-                
-                for (var k = 0; k < events.length; k++) {
-                    var e = events[k];
-                    
+    // Init calendar - DÙNG FUNCTION CALLBACK
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            locale: 'vi',
+            firstDay: 1,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            buttonText: {
+                today: 'Hôm nay',
+                month: 'Tháng',
+                week: 'Tuần',
+                day: 'Ngày'
+            },
+            slotMinTime: '07:00:00',
+            slotMaxTime: '19:00:00',
+            allDaySlot: false,
+            nowIndicator: true,
+            height: '100%',
+            contentHeight: '100%',
+            expandRows: true,
+             events: function(info, successCallback, failureCallback) {
+                var filteredEvents = events.filter(function(e) {
                     var statusHidden = hiddenStatuses.indexOf(e.status) !== -1;
                     var categoryHidden = hiddenCategories.indexOf(e.category) !== -1;
-                    
-                    if (!statusHidden && !categoryHidden) {
-                        var bgColor = e.color || '#3b82f6';
-                        var classes = [];
-                        
-                        if (e.is_current) {
-                            classes.push('event-current');
-                        } else if (isEventPast(e.end)) {
-                            classes.push('event-past');
-                        }
-                        
-                        calendar.addEvent({
-                            id: e.id,
-                            title: e.title,
-                            start: e.start,
-                            end: e.end,
-                            backgroundColor: bgColor,
-                            borderColor: bgColor,
-                            textColor: '#ffffff',
-                            classNames: classes,
-                            extendedProps: {
-                                category: e.category,
-                                category_icon: e.category_icon,
-                                category_name: e.category_name,
-                                status_name: e.status_name,
-                                status: e.status,
-                                lab_code: e.lab_code,
-                                lab_name: e.lab_name,
-                                description: e.description,
-                                registered_for: e.registered_for,
-                                is_current: e.is_current
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        // Init calendar
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                locale: 'vi',
-                firstDay: 1,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                buttonText: {
-                    today: 'Hôm nay',
-                    month: 'Tháng',
-                    week: 'Tuần',
-                    day: 'Ngày'
-                },
-                slotMinTime: '07:00:00',
-                slotMaxTime: '19:00:00',
-                allDaySlot: false,
-                nowIndicator: true,
-                height: '100%',
-                contentHeight: '100%',
-                expandRows: true,
-                events: events.map(function(e) {
+                    return !statusHidden && !categoryHidden;
+                }).map(function(e) {
                     var bgColor = e.color || '#3b82f6';
                     var classes = [];
                     
@@ -840,60 +804,63 @@
                             is_current: e.is_current
                         }
                     };
-                }),
-                eventClick: function(info) {
-                    showEventDetails(info.event);
-                }
-            });
-
-            calendar.render();
+                });
+                
+                successCallback(filteredEvents);
+            },
+            eventClick: function(info) {
+                showEventDetails(info.event);
+            }
         });
 
-        // Show event details
-        function showEventDetails(event) {
-            var props = event.extendedProps;
+        calendar.render();
+    });
 
-            document.getElementById('modal-title').textContent = event.title;
+    // Show event details
+    function showEventDetails(event) {
+        var props = event.extendedProps;
 
-            var startDate = new Date(event.start);
-            var endDate = new Date(event.end);
-            var timeStr = formatDateTime(startDate) + ' - ' + formatDateTime(endDate);
-            document.getElementById('modal-time').textContent = timeStr;
+        document.getElementById('modal-title').textContent = event.title;
 
-            var categoryIcon = props.category_icon ? '<i class="fa-solid fa-' + props.category_icon + '"></i> ' : '';
-            var categoryText = props.category_name || props.category;
-            document.getElementById('modal-category').innerHTML = categoryIcon + categoryText;
+        var startDate = new Date(event.start);
+        var endDate = new Date(event.end);
+        var timeStr = formatDateTime(startDate) + ' - ' + formatDateTime(endDate);
+        document.getElementById('modal-time').textContent = timeStr;
 
-            var descWrapper = document.getElementById('modal-description-wrapper');
-            var descSpan = document.getElementById('modal-description');
+        var categoryIcon = props.category_icon ? '<i class="fa-solid fa-' + props.category_icon + '"></i> ' : '';
+        var categoryText = props.category_name || props.category;
+        document.getElementById('modal-category').innerHTML = categoryIcon + categoryText;
 
-            if (props.description) {
-                descSpan.textContent = props.description;
-                descWrapper.style.display = 'flex';
-            } else {
-                descWrapper.style.display = 'none';
-            }
+        var descWrapper = document.getElementById('modal-description-wrapper');
+        var descSpan = document.getElementById('modal-description');
 
-            var statusText = props.status_name || props.status;
-            var statusBadge = '<span class="status-badge" style="background-color: ' + event.backgroundColor + '; color: white;">' + statusText + '</span>';
-            document.getElementById('modal-status').innerHTML = statusBadge;
-
-            document.getElementById('detailModal').classList.add('active');
+        if (props.description) {
+            descSpan.textContent = props.description;
+            descWrapper.style.display = 'flex';
+        } else {
+            descWrapper.style.display = 'none';
         }
 
-        function closeModal() {
-            document.getElementById('detailModal').classList.remove('active');
-        }
+        var statusText = props.status_name || props.status;
+        var statusBadge = '<span class="status-badge" style="background-color: ' + event.backgroundColor + '; color: white;">' + statusText + '</span>';
+        document.getElementById('modal-status').innerHTML = statusBadge;
 
-        function formatDateTime(date) {
-            return date.toLocaleString('vi-VN', {
-                weekday: 'short',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-    </script>
+        document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function formatDateTime(date) {
+        return date.toLocaleString('vi-VN', {
+            weekday: 'short',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+</script>
 </div>
