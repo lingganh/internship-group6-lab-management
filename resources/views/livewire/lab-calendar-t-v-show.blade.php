@@ -31,6 +31,7 @@
             display: flex;
             flex: 1;
             min-height: 0;
+            position: relative;
         }
 
         /* ============= SIDEBAR ============= */
@@ -42,6 +43,13 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+            z-index: 20;
+        }
+
+        .tv-sidebar.hidden {
+            transform: translateX(-100%);
+            margin-left: -320px;
         }
 
         .tv-sidebar-header {
@@ -121,28 +129,84 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            background: #f9fafb;
+            border: 1px solid transparent;
         }
 
         .tv-filter-item:hover {
             background-color: #f3f4f6;
+            border-color: #e5e7eb;
         }
 
+        /* Custom Checkbox */
         .tv-filter-checkbox {
-            width: 18px;
-            height: 18px;
+            position: absolute;
+            opacity: 0;
             cursor: pointer;
-            flex-shrink: 0;
         }
 
-        .tv-filter-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 0.5rem;
+            border: 2px solid #d1d5db;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
             flex-shrink: 0;
+            position: relative;
+        }
+
+        .custom-checkbox::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .tv-filter-checkbox:checked ~ .custom-checkbox::after {
+            display: block;
+        }
+
+        .tv-filter-checkbox:checked ~ .custom-checkbox {
+            border-color: transparent;
+        }
+
+        /* Status checkbox colors */
+        .tv-filter-item.status-pending .tv-filter-checkbox:checked ~ .custom-checkbox {
+            background: #f59e0b;
+        }
+
+        .tv-filter-item.status-approved .tv-filter-checkbox:checked ~ .custom-checkbox {
+            background: #10b981;
+        }
+
+        .tv-filter-item.status-completed .tv-filter-checkbox:checked ~ .custom-checkbox {
+            background: #6366f1;
+        }
+
+        /* Category checkbox - đồng màu xanh dương */
+        .tv-filter-item.category-filter .tv-filter-checkbox:checked ~ .custom-checkbox {
+            background: #3b82f6;
+        }
+
+        .tv-filter-label {
+            font-size: 0.875rem;
+            color: #374151;
+            font-weight: 500;
+            flex: 1;
         }
 
         .tv-filter-icon {
@@ -153,11 +217,44 @@
             flex-shrink: 0;
         }
 
-        .tv-filter-label {
-            font-size: 0.875rem;
+        /* ============= TOGGLE BUTTON ============= */
+        .tv-toggle-btn {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            z-index: 25;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tv-toggle-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .tv-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tv-toggle-btn i {
+            font-size: 1.25rem;
             color: #374151;
-            font-weight: 500;
-            flex: 1;
+            transition: transform 0.3s;
+        }
+
+        .tv-toggle-btn.sidebar-hidden i {
+            transform: rotate(180deg);
         }
 
         /* ============= MAIN CONTENT ============= */
@@ -254,13 +351,11 @@
             opacity: 0.95;
         }
 
-        /* Event đang diễn ra - pulse */
         .event-current {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
             box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3) !important;
         }
 
-        /* Event đã qua - mờ đi */
         .event-past {
             opacity: 0.4 !important;
             filter: grayscale(30%);
@@ -423,6 +518,11 @@
 
     {{-- PAGE --}}
     <div class="tv-calendar-page">
+        {{-- TOGGLE BUTTON --}}
+        <button type="button" class="tv-toggle-btn" id="toggleBtn" onclick="toggleSidebar()">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
         <div class="tv-layout">
             {{-- SIDEBAR --}}
             <aside class="tv-sidebar" id="tvSidebar">
@@ -440,13 +540,13 @@
                         <div class="tv-filter-title">Trạng thái</div>
                         <div class="tv-filter-items">
                             @foreach($statuses as $status)
-                                <label class="tv-filter-item">
+                                <label class="tv-filter-item status-{{ $status['code'] }}">
                                     <input type="checkbox" 
                                            class="tv-filter-checkbox status-filter" 
                                            data-status="{{ $status['code'] }}" 
                                            checked 
                                            onchange="applyFilters()">
-                                    <span class="tv-filter-dot" style="background: {{ $status['color'] }};"></span>
+                                    <span class="custom-checkbox"></span>
                                     <span class="tv-filter-label">{{ $status['name'] }}</span>
                                 </label>
                             @endforeach
@@ -458,12 +558,13 @@
                         <div class="tv-filter-title">Loại sự kiện</div>
                         <div class="tv-filter-items">
                             @foreach($categories as $category)
-                                <label class="tv-filter-item">
+                                <label class="tv-filter-item category-filter">
                                     <input type="checkbox" 
-                                           class="tv-filter-checkbox category-filter" 
+                                           class="tv-filter-checkbox category-filter-input" 
                                            data-category="{{ $category['code'] }}" 
                                            checked 
                                            onchange="applyFilters()">
+                                    <span class="custom-checkbox"></span>
                                     <i class="fa-solid fa-{{ $category['icon'] }} tv-filter-icon"></i>
                                     <span class="tv-filter-label">{{ $category['name'] }}</span>
                                 </label>
@@ -570,6 +671,23 @@
         var events = @json($events);
         var hiddenStatuses = [];
         var hiddenCategories = [];
+        var sidebarVisible = true;
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            var sidebar = document.getElementById('tvSidebar');
+            var toggleBtn = document.getElementById('toggleBtn');
+            
+            sidebarVisible = !sidebarVisible;
+            
+            if (sidebarVisible) {
+                sidebar.classList.remove('hidden');
+                toggleBtn.classList.remove('sidebar-hidden');
+            } else {
+                sidebar.classList.add('hidden');
+                toggleBtn.classList.add('sidebar-hidden');
+            }
+        }
 
         // Init clock
         function updateClock() {
@@ -611,7 +729,7 @@
                 }
             }
             
-            var categoryCheckboxes = document.querySelectorAll('.category-filter');
+            var categoryCheckboxes = document.querySelectorAll('.category-filter-input');
             for (var j = 0; j < categoryCheckboxes.length; j++) {
                 if (!categoryCheckboxes[j].checked) {
                     hiddenCategories.push(categoryCheckboxes[j].getAttribute('data-category'));
