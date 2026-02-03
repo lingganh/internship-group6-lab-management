@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="fullName" class="col-form-label" wire:ignore>
                             Họ và Tên: <span class="required">*</span>
                         </label>
@@ -35,7 +35,7 @@
                                for="fullName">{{ $message }}</label>
                         @enderror
                     </div>
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="role" class="col-form-label">
                             Vai trò: <span class="required">*</span>
                         </label>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="code" class="col-form-label" wire:ignore>
                             Mã Giảng viên: <span class="required">*</span>
                         </label>
@@ -62,7 +62,7 @@
                                for="code">{{ $message }}</label>
                         @enderror
                     </div>
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="email" class="col-form-label">
                             Email: <span class="required">*</span>
                         </label>
@@ -77,7 +77,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="className" class="col-form-label" wire:ignore>
                             Bộ môn:
                         </label>
@@ -92,7 +92,7 @@
                                for="className">{{ $message }}</label>
                         @enderror
                     </div>
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="phone" class="col-form-label">
                             Số điện thoại:
                         </label>
@@ -107,7 +107,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="dateOfBirdth" class="col-form-label" wire:ignore>
                             Ngày sinh:
                         </label>
@@ -117,7 +117,7 @@
                                for="dateOfBirdth">{{ $message }}</label>
                         @enderror
                     </div>
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="gender" class="col-form-label">
                             Giới tính:
                         </label>
@@ -133,7 +133,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="lastLoginAt" class="col-form-label" wire:ignore>
                             Lần đăng nhập gần nhất:
                         </label>
@@ -143,7 +143,7 @@
                                for="lastLoginAt">{{ $message }}</label>
                         @enderror
                     </div>
-                    <div class="col-6">
+                    <div class="col-xl-6 col-md-12">
                         <label for="createUserAt" class="col-form-label">
                             Ngày tạo tài khoản:
                         </label>
@@ -165,7 +165,7 @@
                         <div class="alert shadow-sm border-info">
                             <div class="row g-2 fw-bold text-dark">
                                 @foreach($user->recoveryCodes() as $code)
-                                    <div class="col-6">
+                                    <div class="col-xl-6 col-md-12">
                                         {{ $code }}
                                     </div>
                                 @endforeach

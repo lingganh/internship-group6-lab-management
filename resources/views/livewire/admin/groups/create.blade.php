@@ -109,7 +109,7 @@
                                 <span wire:loading wire:target="addStudent"><i class="ph-spinner-gap animate-spin"></i> Đang thêm...</span>
                             </button>
                         </div>
-                        <div class="table-responsive-md" style="position: relative">
+                        <div class="table-responsive-md" style="position: relative;">
                             <table class="table fs-table text-center table-group-custom">
                                 <thead>
                                     <tr class="table-light">

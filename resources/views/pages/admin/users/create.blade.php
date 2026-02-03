@@ -6,10 +6,6 @@
                     <h4 class="page-title mb-0">
                         Người dùng - <span class="fw-normal">Danh sách người dùng</span>
                     </h4>
-
-                    <a href="#page_header" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
-                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                    </a>
                 </div>
 
             </div>
@@ -21,10 +17,6 @@
                         <a href="{{route('admin.users.index')}}" class="breadcrumb-item">Danh sách người dùng</a>
                         <span class="breadcrumb-item active">Thêm mới người dùng</span>
                     </div>
-
-                    <a href="#breadcrumb_elements" class="btn btn-light align-self-center collapsed d-lg-none border-transparent rounded-pill p-0 ms-auto" data-bs-toggle="collapse">
-                        <i class="ph-caret-down collapsible-indicator ph-sm m-1"></i>
-                    </a>
                 </div>
 
             </div>

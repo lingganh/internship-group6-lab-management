@@ -1,12 +1,12 @@
 <div>
     <div class="card">
-        <div class="card-header py-3 d-flex justify-content-between">
+        <div class="card-header py-3 d-flex justify-content-between flex-wrap gap-2">
             <div class="d-flex gap-2">
                 <div>
                     <input wire:model.live="search" type="text" class="form-control" placeholder="Tìm kiếm...">
                 </div>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <div>
                     Số hàng mỗi trang:
                     <select wire:model.live="perPage" class="form-select d-inline-block w-auto" style="padding: 8px 24px 8px 10px;">
