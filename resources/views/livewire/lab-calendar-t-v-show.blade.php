@@ -1,74 +1,195 @@
-<div  >
+<div>
     <meta http-equiv="refresh" content="600">
     {{-- CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <style>
-        .tv-calendar-page {
-            min-height: 100vh;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: #f9fafb;
         }
 
-        .tv-header {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        .tv-calendar-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .tv-header-content {
-            max-width: 1600px;
-            margin: 0 auto;
+        .tv-layout {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ============= SIDEBAR ============= */
+        .tv-sidebar {
+            width: 320px;
+            min-width: 320px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .tv-sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .tv-header-title {
+            margin-bottom: 1rem;
         }
 
         .tv-title {
-            font-size: 1.875rem;
+            font-size: 1.125rem;
             font-weight: 700;
             color: #111827;
             margin: 0;
+            line-height: 1.4;
+        }
+
+        .tv-sidebar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
         }
 
         .tv-clock {
-            font-size: 1.125rem;
+            font-size: 0.875rem;
             color: #6b7280;
             font-weight: 500;
         }
 
-        .tv-legend {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
+        .tv-sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: #4b5563;
+        .tv-sidebar-content::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .legend-dot {
+        .tv-sidebar-content::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        .tv-sidebar-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .tv-filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .tv-filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .tv-filter-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .tv-filter-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tv-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .tv-filter-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .tv-filter-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .tv-filter-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .tv-filter-icon {
+            font-size: 1rem;
+            color: #6b7280;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .tv-filter-label {
+            font-size: 0.875rem;
+            color: #374151;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        /* ============= MAIN CONTENT ============= */
+        .tv-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .tv-calendar-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem 2rem 5px 2rem;
+            flex: 1;
+            padding: 1rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* FullCalendar custom styles */
+        #calendar {
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ============= CALENDAR STYLES ============= */
         .fc {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            height: 100% !important;
+        }
+
+        .fc .fc-view-harness {
+            height: 100% !important;
         }
 
         .fc-theme-standard td,
@@ -80,10 +201,10 @@
             background: #f9fafb;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             letter-spacing: 0.05em;
             color: #6b7280;
-            padding: 1rem 0;
+            padding: 0.75rem 0.25rem;
         }
 
         .fc-daygrid-day-number {
@@ -110,10 +231,10 @@
 
         .fc-event {
             border: none !important;
-            padding: 6px 10px;
-            margin: 2px 4px;
+            padding: 4px 8px;
+            margin: 1px 2px;
             border-radius: 6px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -133,52 +254,73 @@
             opacity: 0.95;
         }
 
-        /* Event is currently happening - pulse animation */
+        /* Event đang diễn ra - pulse */
         .event-current {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2) !important;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3) !important;
+        }
+
+        /* Event đã qua - mờ đi */
+        .event-past {
+            opacity: 0.4 !important;
+            filter: grayscale(30%);
+        }
+
+        .event-past:hover {
+            opacity: 0.6 !important;
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
+            0%, 100% {
                 opacity: 1;
             }
-
             50% {
                 opacity: 0.85;
             }
         }
 
-        /* Category colors */
-        .event-work {
-            background: #bc307b;
-            color: white;
+        .fc-timegrid-now-indicator-line {
+            border-color: #ea4335 !important;
+            border-width: 2px 0 0 !important;
+            z-index: 5;
         }
 
-        .event-seminar {
-            background: #c4b517;
-            color: white;
+        .fc .fc-timegrid-slot {
+            height: 2.5em;
         }
 
-        .event-other {
-            background: #4d6d41;
-            color: white;
+        .fc-timegrid-now-indicator-line::before {
+            content: "";
+            position: absolute;
+            left: -6px;
+            top: -6px;
+            width: 12px;
+            height: 12px;
+            background-color: #ea4335;
+            border-radius: 50%;
+            z-index: 6;
         }
 
-        /* Status colors */
-        .event-approved {
-            background: #10b981;
-            color: white;
+        .fc-scroller {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
         }
 
-        .event-completed {
-            background: #6366f1;
-            color: white;
+        .fc-scroller::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
 
-        /* Modal styles */
+        .fc-scroller::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        .fc-scroller::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        /* ============= MODAL ============= */
         .tv-modal {
             display: none;
             position: fixed;
@@ -217,34 +359,6 @@
             font-weight: 700;
             color: #111827;
             margin: 0;
-        }
-
-        .fc-timegrid-now-indicator-line {
-            border-color: #ea4335 !important;
-            /* Màu đỏ của Google */
-            border-width: 2px 0 0 !important;
-            z-index: 5;
-        }
-
-        .fc .fc-timegrid-slot {
-            height: 3.0em;
-            /* chỉnh 2.6em ~ 3.6em tùy thích */
-        }
-
-
-        /* Tạo hình tròn ở đầu đường kẻ (Marker) */
-        .fc-timegrid-now-indicator-line::before {
-            content: "";
-            position: absolute;
-            left: -6px;
-            /* Điều chỉnh để hình tròn nằm đè lên trục thời gian */
-            top: -6px;
-            /* Căn giữa hình tròn với đường kẻ 2px */
-            width: 12px;
-            height: 12px;
-            background-color: #ea4335;
-            border-radius: 50%;
-            z-index: 6;
         }
 
         .modal-close {
@@ -305,50 +419,67 @@
             font-size: 0.875rem;
             font-weight: 600;
         }
-
-        .status-approved {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-completed {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
     </style>
 
     {{-- PAGE --}}
     <div class="tv-calendar-page">
-        {{-- Header --}}
-        <div class="tv-header">
-            <div class="tv-header-content">
-                <div>
-                    <h3 class="tv-title">📅 LAB Phát triển phần mềm và hệ thống thông minh</h3>
-                    <div class="tv-clock" id="current-time"></div>
+        <div class="tv-layout">
+            {{-- SIDEBAR --}}
+            <aside class="tv-sidebar" id="tvSidebar">
+                <div class="tv-sidebar-header">
+                    <div class="tv-header-title">
+                        <h3 class="tv-title">📅 LAB Phát triển phần mềm và hệ thống thông minh</h3>
+                    </div>
+                    <h3 class="tv-sidebar-title">Bộ lọc</h3>
+                    <div class="tv-clock" id="sidebar-clock"></div>
                 </div>
 
-                <div class="tv-legend">
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: #10b981;"></span>
-                        <span>Đã duyệt</span>
+                <div class="tv-sidebar-content">
+                    {{-- Filter by Status --}}
+                    <div class="tv-filter-section">
+                        <div class="tv-filter-title">Trạng thái</div>
+                        <div class="tv-filter-items">
+                            @foreach($statuses as $status)
+                                <label class="tv-filter-item">
+                                    <input type="checkbox" 
+                                           class="tv-filter-checkbox status-filter" 
+                                           data-status="{{ $status['code'] }}" 
+                                           checked 
+                                           onchange="applyFilters()">
+                                    <span class="tv-filter-dot" style="background: {{ $status['color'] }};"></span>
+                                    <span class="tv-filter-label">{{ $status['name'] }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: #6366f1;"></span>
-                        <span>Hoàn thành</span>
+
+                    {{-- Filter by Category --}}
+                    <div class="tv-filter-section">
+                        <div class="tv-filter-title">Loại sự kiện</div>
+                        <div class="tv-filter-items">
+                            @foreach($categories as $category)
+                                <label class="tv-filter-item">
+                                    <input type="checkbox" 
+                                           class="tv-filter-checkbox category-filter" 
+                                           data-category="{{ $category['code'] }}" 
+                                           checked 
+                                           onchange="applyFilters()">
+                                    <i class="fa-solid fa-{{ $category['icon'] }} tv-filter-icon"></i>
+                                    <span class="tv-filter-label">{{ $category['name'] }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <span class="legend-dot" style="background: #22c55e; animation: pulse 2s infinite;"></span>
-                        <span>Đang diễn ra</span>
-                    </div>
+                </div>
+            </aside>
+
+            {{-- MAIN CONTENT --}}
+            <div class="tv-main">
+                <div class="tv-calendar-container">
+                    <div id="calendar"></div>
                 </div>
             </div>
         </div>
-
-        {{-- Calendar --}}
-        <div class="tv-calendar-container">
-            <div id="calendar" wire:ignore></div>
-        </div>
-
     </div>
 
     {{-- Modal Chi tiết --}}
@@ -358,8 +489,7 @@
                 <h3 class="modal-title">Chi tiết sự kiện</h3>
                 <button class="modal-close" onclick="closeModal()">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -368,8 +498,7 @@
                 <div class="detail-item">
                     <div class="detail-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
                     <div class="detail-content">
@@ -381,8 +510,7 @@
                 <div class="detail-item">
                     <div class="detail-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div class="detail-content">
@@ -394,20 +522,7 @@
                 <div class="detail-item">
                     <div class="detail-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <div class="detail-content">
-                        <div class="detail-label">Phòng lab</div>
-                        <div class="detail-value" id="modal-lab"></div>
-                    </div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
                     </div>
                     <div class="detail-content">
@@ -415,11 +530,11 @@
                         <div class="detail-value" id="modal-category"></div>
                     </div>
                 </div>
+
                 <div class="detail-item" id="modal-description-wrapper" style="display: none;">
                     <div class="detail-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
                         </svg>
                     </div>
                     <div class="detail-content">
@@ -431,8 +546,7 @@
                 <div class="detail-item">
                     <div class="detail-icon">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div class="detail-content">
@@ -448,22 +562,19 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
     <script>
+        setTimeout(function() {
+            window.location.href = window.location.href;
+        }, 600000);
 
-        //  document.addEventListener('livewire:initialized', () => {
-        //       setInterval(() => {
-        //        location.reload();
-        //         }, 10000)
-        // })
-        setTimeout(() => {
-        window.location.href = window.location.href ;
-            }, 600000);
-        let calendar = null;
-        const events = @json($events);
+        var calendar = null;
+        var events = @json($events);
+        var hiddenStatuses = [];
+        var hiddenCategories = [];
 
         // Init clock
         function updateClock() {
-            const now = new Date();
-            const str = now.toLocaleString('vi-VN', {
+            var now = new Date();
+            var str = now.toLocaleString('vi-VN', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -472,15 +583,90 @@
                 minute: '2-digit',
                 second: '2-digit'
             });
-            document.getElementById('current-time').textContent = str;
+            var clockEl = document.getElementById('sidebar-clock');
+            if (clockEl) {
+                clockEl.textContent = str;
+            }
         }
 
         updateClock();
         setInterval(updateClock, 1000);
 
+        // Check if event is past
+        function isEventPast(eventEnd) {
+            var now = new Date();
+            var end = new Date(eventEnd);
+            return end < now;
+        }
+
+        // Apply filters
+        function applyFilters() {
+            hiddenStatuses = [];
+            hiddenCategories = [];
+            
+            var statusCheckboxes = document.querySelectorAll('.status-filter');
+            for (var i = 0; i < statusCheckboxes.length; i++) {
+                if (!statusCheckboxes[i].checked) {
+                    hiddenStatuses.push(statusCheckboxes[i].getAttribute('data-status'));
+                }
+            }
+            
+            var categoryCheckboxes = document.querySelectorAll('.category-filter');
+            for (var j = 0; j < categoryCheckboxes.length; j++) {
+                if (!categoryCheckboxes[j].checked) {
+                    hiddenCategories.push(categoryCheckboxes[j].getAttribute('data-category'));
+                }
+            }
+            
+            if (calendar) {
+                calendar.removeAllEvents();
+                
+                for (var k = 0; k < events.length; k++) {
+                    var e = events[k];
+                    
+                    var statusHidden = hiddenStatuses.indexOf(e.status) !== -1;
+                    var categoryHidden = hiddenCategories.indexOf(e.category) !== -1;
+                    
+                    if (!statusHidden && !categoryHidden) {
+                        var bgColor = e.color || '#3b82f6';
+                        var classes = [];
+                        
+                        if (e.is_current) {
+                            classes.push('event-current');
+                        } else if (isEventPast(e.end)) {
+                            classes.push('event-past');
+                        }
+                        
+                        calendar.addEvent({
+                            id: e.id,
+                            title: e.title,
+                            start: e.start,
+                            end: e.end,
+                            backgroundColor: bgColor,
+                            borderColor: bgColor,
+                            textColor: '#ffffff',
+                            classNames: classes,
+                            extendedProps: {
+                                category: e.category,
+                                category_icon: e.category_icon,
+                                category_name: e.category_name,
+                                status_name: e.status_name,
+                                status: e.status,
+                                lab_code: e.lab_code,
+                                lab_name: e.lab_name,
+                                description: e.description,
+                                registered_for: e.registered_for,
+                                is_current: e.is_current
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
         // Init calendar
-        document.addEventListener('DOMContentLoaded', function () {
-            const calendarEl = document.getElementById('calendar');
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
 
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
@@ -501,20 +687,18 @@
                 slotMaxTime: '19:00:00',
                 allDaySlot: false,
                 nowIndicator: true,
-                height: 'auto',
-                events: events.map(e => {
-                    const statusColors = {
-                        'approved': '#10b981',
-                        'completed': '#6366f1'
-                    };
-
-                    const categoryColors = {
-                        'work': '#bc307b',
-                        'seminar': '#c4b517',
-                        'other': '#4d6d41'
-                    };
-
-                    const bgColor = statusColors[e.status] || categoryColors[e.category] || '#3b82f6';
+                height: '100%',
+                contentHeight: '100%',
+                expandRows: true,
+                events: events.map(function(e) {
+                    var bgColor = e.color || '#3b82f6';
+                    var classes = [];
+                    
+                    if (e.is_current) {
+                        classes.push('event-current');
+                    } else if (isEventPast(e.end)) {
+                        classes.push('event-past');
+                    }
 
                     return {
                         id: e.id,
@@ -524,9 +708,12 @@
                         backgroundColor: bgColor,
                         borderColor: bgColor,
                         textColor: '#ffffff',
-                        classNames: e.is_current ? ['event-current'] : [],
+                        classNames: classes,
                         extendedProps: {
                             category: e.category,
+                            category_icon: e.category_icon,
+                            category_name: e.category_name,
+                            status_name: e.status_name,
                             status: e.status,
                             lab_code: e.lab_code,
                             lab_name: e.lab_name,
@@ -536,7 +723,7 @@
                         }
                     };
                 }),
-                eventClick: function (info) {
+                eventClick: function(info) {
                     showEventDetails(info.event);
                 }
             });
@@ -546,48 +733,32 @@
 
         // Show event details
         function showEventDetails(event) {
-            const props = event.extendedProps;
+            var props = event.extendedProps;
 
             document.getElementById('modal-title').textContent = event.title;
 
-            const startDate = new Date(event.start);
-            const endDate = new Date(event.end);
-            const timeStr = `${formatDateTime(startDate)} - ${formatTime(endDate)}`;
+            var startDate = new Date(event.start);
+            var endDate = new Date(event.end);
+            var timeStr = formatDateTime(startDate) + ' - ' + formatDateTime(endDate);
             document.getElementById('modal-time').textContent = timeStr;
 
-            document.getElementById('modal-lab').textContent = props.lab_name || props.lab_code;
-            const categoryIcons = {
-                'work': '💼',
-                'seminar': '🎓',
-                'other': '📌'
-            };
-            const categoryLabels = {
-                'work': 'Làm việc - Nghiên cứu',
-                'seminar': 'Hội thảo - Seminar',
-                'other': 'Khác'
-            };
-            const catIcon = categoryIcons[props.category] || '📌';
-            const catLabel = categoryLabels[props.category] || 'Khác';
-            document.getElementById('modal-category').textContent = `${catIcon} ${catLabel}`;
+            var categoryIcon = props.category_icon ? '<i class="fa-solid fa-' + props.category_icon + '"></i> ' : '';
+            var categoryText = props.category_name || props.category;
+            document.getElementById('modal-category').innerHTML = categoryIcon + categoryText;
 
-            const descWrapper = document.getElementById('modal-description-wrapper');
+            var descWrapper = document.getElementById('modal-description-wrapper');
+            var descSpan = document.getElementById('modal-description');
+
             if (props.description) {
-                document.getElementById('modal-description').textContent = props.description;
+                descSpan.textContent = props.description;
                 descWrapper.style.display = 'flex';
             } else {
                 descWrapper.style.display = 'none';
             }
 
-            const statusText = props.status === 'approved' ? 'Đã duyệt' : 'Hoàn thành';
-            const statusClass = `status-${props.status}`;
-            const statusIcon = props.is_current ? '' : (props.status === 'approved' ? ' ' : ' ');
-
-            document.getElementById('modal-status').innerHTML = `
-                <span class="status-badge ${statusClass}">
-                    <span>${statusIcon}</span>
-                    <span>${statusText}</span>
-                </span>
-            `;
+            var statusText = props.status_name || props.status;
+            var statusBadge = '<span class="status-badge" style="background-color: ' + event.backgroundColor + '; color: white;">' + statusText + '</span>';
+            document.getElementById('modal-status').innerHTML = statusBadge;
 
             document.getElementById('detailModal').classList.add('active');
         }
@@ -606,41 +777,5 @@
                 minute: '2-digit'
             });
         }
-
-        function formatTime(date) {
-            return date.toLocaleTimeString('vi-VN', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Livewire hook để reload calendar khi data thay đổi
-        document.addEventListener('livewire:load', function () {
-            Livewire.hook('message.processed', (message, component) => {
-                if (calendar && component.fingerprint.name === 'lab-calendar-t-v-show') {
-                    const newEvents = @this.events;
-                    calendar.removeAllEvents();
-                    calendar.addEventSource(newEvents.map(e => {
-                        const statusColors = {
-                            'approved': '#10b981',
-                            'completed': '#6366f1'
-                        };
-                        const bgColor = statusColors[e.status] || '#3b82f6';
-
-                        return {
-                            id: e.id,
-                            title: e.title,
-                            start: e.start,
-                            end: e.end,
-                            backgroundColor: bgColor,
-                            borderColor: bgColor,
-                            textColor: '#ffffff',
-                            classNames: e.is_current ? ['event-current'] : [],
-                            extendedProps: e
-                        };
-                    }));
-                }
-            });
-        });
     </script>
 </div>

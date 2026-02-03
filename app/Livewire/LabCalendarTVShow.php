@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\LabEvent;
 use App\Models\Lab;
+use App\Models\EventCategory;
+use App\Models\EventStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -12,6 +14,8 @@ class LabCalendarTVShow extends Component
 {
     public $events = [];
     public $rooms = [];
+    public $statuses = [];
+    public $categories = [];
 
     public function mount()
     {
@@ -34,8 +38,19 @@ class LabCalendarTVShow extends Component
             ->get()
             ->toArray();
 
-        $this->events = LabEvent::with('lab:code,name')
-            ->whereIn('status', ['approved', 'completed'])
+        // Lấy danh sách trạng thái
+        $this->statuses = EventStatus::select('id', 'code', 'name', 'color')
+            ->where('code', '!=', 'cancelled')
+            ->get()
+            ->toArray();
+
+        // Lấy danh sách loại sự kiện
+        $this->categories = EventCategory::select('id', 'code', 'name', 'icon')
+            ->get()
+            ->toArray();
+
+        $this->events = LabEvent::with(['lab:code,name', 'eventStatus', 'eventCategory'])
+            ->where('status', '!=', 'cancelled')
             ->orderBy('start')
             ->get()
             ->map(function ($event) {
@@ -47,6 +62,10 @@ class LabCalendarTVShow extends Component
                     'id' => $event->id,
                     'title' => $event->title,
                     'category' => $event->category,
+                    'category_icon' => $event->category_icon, // Icon từ EventCategory
+                    'category_name' => $event->category_name, // Tên từ EventCategory
+                    'status_name' => $event->status_name, // Tên từ EventStatus
+                    'color' => $event->status_color, // Màu từ EventStatus
                     'lab_code' => $event->lab_code,
                     'lab_name' => $event->lab->name ?? '',
                     'start' => $event->start,
