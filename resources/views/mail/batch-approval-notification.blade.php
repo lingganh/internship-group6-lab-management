@@ -49,7 +49,7 @@
     </table>
 
     <p style="margin-top: 12px;">
-        <strong>Mã phòng lab:</strong>
+        <strong>Mã khóa mở cửa lab:</strong>
         <span style="font-size: 16px;">{{ $roomCode }}</span>
     </p>
 

@@ -246,7 +246,7 @@
 
                             @if($selectedSchedule->lab_code)
                                 <div class="info-box">
-                                    <label>Mã phòng</label>
+                                    <label>Mã khóa mở cửa</label>
                                     <div>{{ $selectedSchedule->lab_code }}</div>
                                 </div>
                             @endif

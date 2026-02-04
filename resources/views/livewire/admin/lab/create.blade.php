@@ -46,7 +46,7 @@
 
                             <div class="col-md-6 col-12">
                                 <label class="form-label">
-                                    Mã phòng <span class="text-danger">*</span>
+                                    Mã khóa mở cửa <span class="text-danger">*</span>
                                 </label>
                                 <input
                                     wire:model.lazy="code"

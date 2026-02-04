@@ -17,7 +17,7 @@ class BatchApprovalNotification extends Mailable implements ShouldQueue
 
     /**
      * @param Collection $events  Danh sách lịch đã duyệt
-     * @param string $roomCode   Mã phòng lab
+     * @param string $roomCode   Mã khóa mở cửa lab
      */
     public function __construct(Collection $events, string $roomCode)
     {

@@ -51,7 +51,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">
-                                Mã phòng <span class="text-danger">*</span>
+                                Mã khóa mở cửa <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" wire:model="code" readonly style="background:#f5f5f5; cursor:not-allowed;">
                         </div>

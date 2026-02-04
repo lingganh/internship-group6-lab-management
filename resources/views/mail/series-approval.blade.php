@@ -260,7 +260,7 @@
                     <span class="info-value">{{ $firstEvent->lab?->name ?? $firstEvent->lab_code }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Mã phòng:</span>
+                    <span class="info-label">Mã khóa mở cửa:</span>
                     <span class="info-value">{{ $firstEvent->lab_code }}</span>
                 </div>
                 <div class="info-row">
@@ -311,7 +311,7 @@
                 <p>• Giữ gìn vệ sinh và trang thiết bị phòng lab</p>
                 <p>• Báo trước nếu cần hủy bất kỳ buổi nào</p>
                 @if($roomCode)
-                <p>• Không chia sẻ mã phòng cho người khác</p>
+                <p>• Không chia sẻ Mã khóa mở cửa cho người khác</p>
                 @endif
             </div>
             

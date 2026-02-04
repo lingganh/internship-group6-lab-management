@@ -59,7 +59,7 @@ class Create extends Component
     }
     protected $messages = [
         'name.required'        => 'Tên phòng không được bỏ trống.',
-        'code.required'        => 'Mã phòng không được bỏ trống.',
+        'code.required'        => 'Mã khóa mở cửa không được bỏ trống.',
         'location.required'    => 'Địa điểm không được bỏ trống.',
     ];
 

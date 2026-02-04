@@ -165,7 +165,7 @@ class LabCalendar extends Component
 
      foreach ($occurrences as $index => $occ) {
         $conflictedEvent = LabEvent::where('lab_code', $request->lab_code)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'pending'])
             ->where('start', '<', $occ['end'])
             ->where('end', '>', $occ['start'])
             ->first();

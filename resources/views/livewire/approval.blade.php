@@ -126,7 +126,7 @@
                                             @endif
                                         </th>
                                         <th>Sự kiện</th>
-                                        <th>Mã phòng</th>
+                                        <th>Mã khóa mở cửa</th>
                                         <th>Người đăng ký</th>
                                         <th>Thời gian</th>
                                         <th class="text-center">Trạng thái</th>
@@ -159,7 +159,7 @@
                                                 </div>
                                             </td>
 
-                                            <td data-label="Mã phòng">
+                                            <td data-label="Mã khóa mở cửa">
                                                 <div class="fw-semibold text-dark">{{ $item->lab_code ?? '' }}</div>
                                                 <div class="small text-muted">{{ $item->lab?->name }}</div>
                                             </td>
@@ -637,19 +637,19 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 approval-modal">
                         <div class="modal-header border-0 pb-0">
-                            <h5 class="modal-title fw-semibold text-dark">🔑 Nhập mã phòng</h5>
+                            <h5 class="modal-title fw-semibold text-dark">🔑 Nhập Mã khóa mở cửa</h5>
                             <button type="button" class="btn-close" @click="hideModal('password')"></button>
                         </div>
                         <div class="modal-body">
                             <div class="approval-info border-0 p-0">
-                                <label class="form-label small fw-bold">Mã phòng lab</label>
+                                <label class="form-label small fw-bold">Mã khóa mở cửa lab</label>
                                 <input type="text"
                                        wire:model="roomCode"
                                        class="form-control approval-control"
-                                       placeholder="Nhập mã phòng..."
+                                       placeholder="Nhập Mã khóa mở cửa..."
                                        autofocus>
                                 <div class="small text-muted mt-2">
-                                    💡 Mã phòng sẽ được gửi qua email cho người dùng.
+                                    💡 Mã khóa mở cửa sẽ được gửi qua email cho người dùng.
                                     @if($seriesApproveCount > 1)
                                         <br>Có {{ $seriesApproveCount }} lịch sẽ được phê duyệt.
                                     @endif
@@ -683,18 +683,18 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 approval-modal">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-semibold text-dark">🔑 Nhập mã phòng</h5>
+                <h5 class="modal-title fw-semibold text-dark">🔑 Nhập Mã khóa mở cửa</h5>
                 <button type="button" class="btn-close" @click="hideModal('password')"></button>
             </div>
             <div class="modal-body">
                 <div class="approval-info border-0 p-0">
-                    <label class="form-label small fw-bold">Mã phòng lab <span class="text-danger">*</span></label>
+                    <label class="form-label small fw-bold">Mã khóa mở cửa lab <span class="text-danger">*</span></label>
                     
                     <input type="text"
                            wire:model.defer="roomCode"
                            wire:keydown.enter="approveSchedule"
                            class="form-control approval-control"
-                           placeholder="Nhập mã phòng..."
+                           placeholder="Nhập Mã khóa mở cửa..."
                            required
                            x-ref="roomCodeInput"
                            @open-password-modal.window="$nextTick(() => $refs.roomCodeInput?.focus())">
@@ -708,7 +708,7 @@
                     </div> --}}
                     
                     <div class="small text-muted mt-2">
-                        💡 Mã phòng sẽ được gửi qua email cho người dùng.
+                        💡 Mã khóa mở cửa sẽ được gửi qua email cho người dùng.
                         @if($seriesApproveCount > 1)
                             <br>Có {{ $seriesApproveCount }} lịch sẽ được phê duyệt.
                         @endif
@@ -812,7 +812,7 @@
 @endif
 
                             <p class="text-muted mb-0">
-                                Bạn có chắc muốn <strong>phê duyệt</strong> và tiếp tục nhập mã phòng?
+                                Bạn có chắc muốn <strong>phê duyệt</strong> và tiếp tục nhập Mã khóa mở cửa?
                             </p>
                         </div>
                         <div class="modal-footer border-0">
@@ -921,7 +921,7 @@
                 </div>
 
                 <div class="small text-muted mt-3">
-                    Nhấn <b>Duyệt tiếp</b> để chuyển sang bước nhập mã phòng. Hệ thống sẽ duyệt theo lựa chọn ở trên.
+                    Nhấn <b>Duyệt tiếp</b> để chuyển sang bước nhập Mã khóa mở cửa. Hệ thống sẽ duyệt theo lựa chọn ở trên.
                 </div>
             </div>
 

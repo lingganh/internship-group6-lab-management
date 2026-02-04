@@ -38,7 +38,7 @@ class UserSchedules extends Component
             ->where('user_id', auth()->id());
             // Đã bỏ ->whereNot('status', 'cancelled') để hiển thị cả lịch đã hủy
 
-        // Tìm kiếm theo tên sự kiện hoặc mã phòng
+        // Tìm kiếm theo tên sự kiện hoặc Mã khóa mở cửa
         if ($this->searchTerm !== '') {
             $query->where(function($q) {
                 $q->where('title', 'like', '%' . $this->searchTerm . '%')
