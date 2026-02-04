@@ -6,7 +6,7 @@
 <body>
 
     <!-- Main navbar -->
-    @include('includes.header_main')
+    @include('includes.header-tv')
     <!-- /main navbar -->
 
 
