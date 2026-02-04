@@ -21,7 +21,13 @@
                 font-family: 'Inter', system-ui, -apple-system, sans-serif;
                 background: #f9fafb;
             }
+            /* Ép nó ẩn ngay lập tức bằng CSS */
+            .tv-sidebar.hidden { transform: translateX(-100%); margin-left: -320px; }
 
+            .tv-sidebar-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+            .tv-title { font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0; line-height: 1.4; }
+            .tv-clock { font-size: 0.875rem; color: #6b7280; font-weight: 500; }
+            .tv-sidebar-content { flex: 1; overflow-y: auto; padding: 1.5rem; }
             .tv-calendar-page {
                 height: 100vh;
                 display: flex;
