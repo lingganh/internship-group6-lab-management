@@ -399,7 +399,39 @@
     </div>
 
     {{-- STYLES --}}
+    
     <style>
+        /* Fix lỗi mini calendar bị dồn hàng dọc */
+#miniCalendar {
+    width: 100% !important;
+    max-width: 100%;
+    font-size: 0.85rem; /* Mini nên cho chữ nhỏ tí cho xinh */
+}
+
+/* Đảm bảo các hàng của FullCalendar hiển thị dạng table/grid */
+#miniCalendar .fc-view-harness {
+    min-height: 250px; /* Tránh việc bị nén quá mức */
+}
+
+#miniCalendar .fc-daygrid-body, 
+#miniCalendar .fc-scrollgrid-sync-table {
+    width: 100% !important;
+}
+
+/* Ẩn bớt các thành phần không cần thiết ở bản mini */
+#miniCalendar .fc-toolbar {
+    margin-bottom: 10px !important;
+}
+
+#miniCalendar .fc-toolbar-title {
+    font-size: 1.1rem !important;
+    font-weight: 700;
+}
+
+#miniCalendar .fc-button {
+    padding: 2px 5px !important;
+    font-size: 0.8rem !important;
+}
         .register-page {
             --r-border: #e6eaf2;
             --r-text: #0f172a;
@@ -615,76 +647,27 @@
         window.LAB_GROUPS = @json($groups->map(fn($g) => ['id' => $g->id, 'name' => $g->name])->values());
     </script>
     <script src="{{ asset('assets/js/calendar.js') }}"></script>
-    <script>
-        // Toggle sidebar cho mobile
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleBtn = document.getElementById('sidebarToggle');
-            const sidebar = document.querySelector('.lab-sidebar');
-            
-            // Tạo overlay
-            const overlay = document.createElement('div');
-            overlay.className = 'lab-sidebar-overlay';
-            document.body.appendChild(overlay);
-            
-            if (toggleBtn && sidebar) {
-                // Toggle sidebar
-                toggleBtn.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                });
-                
-                // Đóng khi click overlay
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
-            }
-        });
+   <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.lab-sidebar');
 
-        
-        function setButtonLoading(button) {
-            if (!button) return;
-            button.classList.add('loading');
-            button.disabled = true;
-        }
+    if (!toggleBtn || !sidebar) return;
 
-         
-        function removeButtonLoading(button) {
-            if (!button) return;
-            button.classList.remove('loading');
-            button.disabled = false;
-        }
+    const overlay = document.createElement('div');
+    overlay.className = 'lab-sidebar-overlay';
+    document.body.appendChild(overlay);
 
-         
-         * Ví dụ sử dụng trong các function hiện tại:
-         * 
-         * async function saveEvent() {
-         *     const saveBtn = document.querySelector('.register-btn-success');
-         *     setButtonLoading(saveBtn);
-         *     
-         *     try {
-         *         // Your save logic here
-         *         await fetch(...);
-         *     } catch (error) {
-         *         console.error(error);
-         *     } finally {
-         *         removeButtonLoading(saveBtn);
-         *     }
-         * }
-         * 
-         * async function deleteEvent() {
-         *     const deleteBtn = document.getElementById('deleteEventBtn');
-         *     setButtonLoading(deleteBtn);
-         *     
-         *     try {
-         *         // Your delete logic here
-         *         await fetch(...);
-         *     } catch (error) {
-         *         console.error(error);
-         *     } finally {
-         *         removeButtonLoading(deleteBtn);
-         *     }
-         * }
-         */
-    </script>
+    toggleBtn.addEventListener('click', function () {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', function () {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+});
+</script>
+
 </div>

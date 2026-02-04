@@ -17,28 +17,6 @@
 
 
 
-        <ul class="nav flex-row justify-content-end order-1 order-lg-2 align-items-center">
-            <li class="nav-item ms-lg-2">
-                <a href="{{ route('events.calendar') }}" class="navbar-nav-link align-items-center rounded-pill p-1">
-                    <div class="status-indicator-container">
-                        <i class="ph-newspaper "></i>
-                    </div>
-                    <span class="d-none d-lg-inline-block mx-lg-2">Sự kiện</span>
-                </a>
-            </li>
-            <li class="nav-item ms-lg-2">
-                <a href="{{ route('lab.calendar.tv') }}" class="navbar-nav-link align-items-center rounded-pill p-1">
-                    <div class="status-indicator-container">
-                        <i class="ph-calendar "></i>
-                    </div>
-                    <span class="d-none d-lg-inline-block mx-lg-2">Lịch phòng LAB</span>
-                </a>
-            </li>
-
-            
-
-             
-                    
-        </ul>
+     
     </div>
 </div>
