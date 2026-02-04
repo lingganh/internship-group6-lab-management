@@ -723,7 +723,7 @@
 
             <div class="tv-layout">
                 {{-- SIDEBAR --}}
-                <aside class="tv-sidebar" id="tvSidebar">
+                <aside class="tv-sidebar sidebar-hidden" id="tvSidebar">
                     <div class="tv-sidebar-header">
                         <div class="tv-header-title">
                             <h3 class="tv-title">📅 LAB Phát triển phần mềm và hệ thống thông minh</h3>
