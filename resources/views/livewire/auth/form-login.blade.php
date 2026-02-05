@@ -7,7 +7,7 @@
                 <img src="{{asset('assets/images/logoST.jpg')}}" class="h-64px" alt="">
             </div>
             <span class="d-block text-muted">Chào mừng bạn đến với</span>
-            <h5 class="mb-0">Hệ thống quản lý phòng lab</h5>
+            <h5 class="mb-0"> Hệ thống quản lý phòng Lab Phát triển phần mềm và Hệ thống thông minh</h5>
         </div>
 
         @error('message')

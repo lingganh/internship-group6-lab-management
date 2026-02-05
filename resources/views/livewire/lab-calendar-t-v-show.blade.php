@@ -14,7 +14,7 @@
                 height: 100%;
                 overflow: hidden;
                 width: 100%;
-     
+
             }
 
             body {
@@ -732,7 +732,7 @@
                 <aside class="tv-sidebar sidebar-hidden" id="tvSidebar">
                     <div class="tv-sidebar-header">
                         <div class="tv-header-title">
-                            <h3 class="tv-title">📅 LAB Phát triển phần mềm và hệ thống thông minh</h3>
+                            <h3 class="tv-title">📅 Lab Phát triển phần mềm và hệ thống thông minh</h3>
                         </div>
                         <h3 class="tv-sidebar-title">Bộ lọc</h3>
                         <div class="tv-clock" id="sidebar-clock"></div>

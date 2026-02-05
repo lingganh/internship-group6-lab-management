@@ -114,7 +114,7 @@
     <!-- Main content section -->
     <div class="content">
         <h4>Xin chào {{ $user->full_name }},</h4>
-        <p>Xin chúc mừng. Tài khoản của bạn đã được phê duyệt thành công. Bây giờ bạn có thể truy nhập sử dụng dịch vụ của hệ thống quản lý phòng Lab. </p>
+        <p>Xin chúc mừng. Tài khoản của bạn đã được phê duyệt thành công. Bây giờ bạn có thể truy nhập sử dụng dịch vụ của hệ thống quản lý phòng Lab Phát triển phần mềm và Hệ thống thông minh. </p>
 
         <div class="info-box">
             <p style="margin: 5px 0;"><strong>Thông tin tài khoản:</strong></p>
@@ -150,7 +150,7 @@
     <!-- Footer section -->
     <div class="footer">
         <img src="{{ $message->embed(public_path('assets/images/logoST.jpg')) }}">
-        <p>Hệ thống quản lý phòng Lab 304</p>
+        <p>Hệ thống quản lý phòng Lab Phát triển phần mềm và Hệ thống thông minh</p>
     </div>
 </div>
 </body>
