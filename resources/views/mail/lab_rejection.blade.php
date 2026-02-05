@@ -39,7 +39,7 @@
 
        <div class="footer">
            <img src="{{ $message->embed(public_path('assets/images/logoST.jpg')) }}">
-           <p>Hệ thống quản lý phòng Lab 304</p>
+           <p>Hệ thống quản lý phòng Lab Phát triển phần mềm và Hệ thống thông minh</p>
         </div>
     </div>
 </body>

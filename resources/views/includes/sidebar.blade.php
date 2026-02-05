@@ -9,7 +9,7 @@ use App\Enums\User\UserRoleEnum;
         <!-- Sidebar header -->
         <div class="sidebar-section">
             <div class="sidebar-section-body d-flex justify-content-center pb-1">
-                <h5 class="sidebar-resize-hide flex-grow-1 my-auto">Hệ thống quản lý</h5>
+                <h5 class="sidebar-resize-hide flex-grow-1 my-auto">Hệ thống quản lý </h5>
                 <div>
                     <button type="button"
                         class="btn btn-flat-white btn-icon btn-sm rounded-pill border-transparent sidebar-control sidebar-main-resize d-none d-lg-inline-flex">
@@ -48,7 +48,7 @@ use App\Enums\User\UserRoleEnum;
                         <span>Đăng ký lịch</span>
                     </a>
                 </li>
-               
+
 
                 <li class="nav-item">
                     <a href="{{ route('admin.approval') }}" class="nav-link {{ request()->routeIs('admin.approval') ? 'active' : '' }}">

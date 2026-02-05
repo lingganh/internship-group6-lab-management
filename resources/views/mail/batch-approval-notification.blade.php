@@ -59,7 +59,7 @@
 
     <p style="margin-top: 24px;">
         Trân trọng,<br>
-        <strong>Hệ thống quản lý phòng lab</strong>
+        <strong>Hệ thống quản lý phòng Lab Phát triển phần mềm và Hệ thống thông minh</strong>
     </p>
 
 </body>

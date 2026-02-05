@@ -10,9 +10,10 @@
             <a href="{{ route('home') }}" class="d-inline-flex align-items-center">
                 <img class="w-40px h-40px" src="{{ asset('assets/images/login.png') }}" alt="">
             </a>
-            <span class="d-none d-lg-inline-block mx-lg-2"
-                style="text-transform: uppercase; font-weight: bold; font-size: 16px; color: #fff">Hệ thống quản lý
-                phòng lab</span>
+            <div class="d-flex flex-column">
+                <span class="d-none d-lg-inline-block mx-lg-2" style="text-transform: uppercase; font-weight: bold; line-height: 20px; font-size: 18px; color: #fff">LAB PHÁT TRIỂN PHẦN MỀM VÀ HỆ THỐNG THÔNG MINH</span>
+                <span class="d-none d-lg-inline-block mx-lg-2" style="font-weight: 500; font-size: 16px; line-height: 18px; color: #fff">Software and Intelligent Systems Development</span>
+            </div>
         </div>
 
 
