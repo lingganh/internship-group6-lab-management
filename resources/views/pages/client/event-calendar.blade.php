@@ -175,7 +175,7 @@
   <div class="seminar-wrap">
     <div class="seminar-top">
       <div class="seminar-title">
-        <h4>Lịch trình sự kiện</h4>
+        <h3>Sự kiện sắp diễn ra</h3>
       </div>
 
       <form action="{{ url()->current() }}" method="GET" class="seminar-filters">
