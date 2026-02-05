@@ -295,7 +295,7 @@
                                     </div>
 
                                     {{-- File hiện tại --}}
-                                    <div class="col-12">
+                                  <div class="col-12">
                                         <div class="diary-filebox">
                                             <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                                                 <div class="fw-bold text-dark">File đính kèm</div>
@@ -314,10 +314,7 @@
                                                         @endphp
                                                         
                                                         <div class="diary-file" wire:key="file-{{ $f->id }}">
-                                                            <a class="diary-file-link" 
-                                                               href="{{ $u != '#' ? $u : 'javascript:void(0)' }}" 
-                                                               target="{{ $u != '#' ? '_blank' : '' }}" 
-                                                               rel="noopener">
+                                                            <div class="diary-file-link">
                                                                 <div class="diary-file-ic">
                                                                     <i class="ph-file-text"></i>
                                                                 </div>
@@ -327,12 +324,24 @@
                                                                         {{ $f->file_size ? number_format($f->file_size / 1024, 1).' KB' : 'Tệp đính kèm' }}
                                                                     </div>
                                                                 </div>
-                                                            </a>
-                                                            <button type="button"
-                                                                    class="btn btn-sm btn-link text-danger"
-                                                                    wire:click.prevent="deleteFile({{ $f->id }})">
-                                                                Xóa
-                                                            </button>
+                                                            </div>
+                                                            
+                                                            <div class="d-flex gap-2">
+                                                                {{-- Nút Tải xuống --}}
+                                                                <a href="{{ $u }}" 
+                                                                download="{{ $n }}"
+                                                                class="btn btn-sm btn-link text-primary"
+                                                                @if($u == '#') onclick="return false;" @endif>
+                                                                    <i class="ph-download-simple"></i> Tải
+                                                                </a>
+                                                                
+                                                                {{-- Nút Xóa --}}
+                                                                <button type="button"
+                                                                        class="btn btn-sm btn-link text-danger"
+                                                                        wire:click.prevent="deleteFile({{ $f->id }})">
+                                                                    <i class="ph-trash"></i> Xóa
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     @endforeach
                                                 </div>
@@ -341,7 +350,6 @@
                                             @endif
                                         </div>
                                     </div>
-
                                     {{-- Thêm file mới + preview file mới --}}
                                     @if(count($newFiles) > 0)
                                         @foreach($newFiles as $idx => $file)
