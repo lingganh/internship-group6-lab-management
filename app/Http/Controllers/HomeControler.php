@@ -9,6 +9,7 @@ use Livewire\WithPagination;
 class HomeControler extends Controller
 {
     use WithPagination;
+    
     public function eventsCalendar(Request $request)
     {
         $query = LabEvent::query()
