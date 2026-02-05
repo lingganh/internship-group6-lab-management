@@ -966,39 +966,49 @@ async function sendBookingRequest(url, formData) {
 }
 
 window.saveEvent = async function() {
-  const eventId = document.getElementById('eventId').value
-  const title = document.getElementById('eventTitle').value.trim()
-  const category = document.getElementById('eventCategory').value
-  const labCode = "LAB-304"
-  const registeredFor = document.getElementById('eventRegisteredFor').value.trim()
-
-  const startDate = document.getElementById('eventStartDate').value
-  const startTime = document.getElementById('eventStartTime').value
-  const endTime = document.getElementById('eventEndTime').value
-  const description = document.getElementById('eventDescription').value.trim()
-
-  const repeatType = document.getElementById('eventRepeatType').value
-  const repeatUntil = document.getElementById('eventRepeatUntil').value
-  const repeatDays = Array.from(document.querySelectorAll('.weekday-checkbox:checked')).map((cb) => cb.value)
-
-  if (!title || !labCode || !startDate || !startTime || !endTime) {
-    showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc.')
-    return
-  }
-
-  const occResult = buildOccurrencesFromForm({ preview: false, maxOccurrences: 500 })
-  if (!occResult.ok) return
-
-  const occurrences = occResult.occurrences || []
-  if (!occurrences.length) {
-    showToast('error', 'Không tạo được lịch nào, vui lòng kiểm tra lại phần lặp.')
-    return
-  }
-
-  const isEditing = !!eventId
-  const baseUrl = isEditing ? `/bookings/${eventId}` : '/bookings'
+  // Lấy button và setup loading
+  const saveBtn = document.querySelector('.register-btn-success');
+  const btnText = saveBtn.querySelector('.btn-text');
+  const originalText = btnText.textContent;
+  
+  // Bắt đầu loading
+  saveBtn.classList.add('loading');
+  saveBtn.disabled = true;
+  btnText.textContent = 'Đang lưu...';
 
   try {
+    const eventId = document.getElementById('eventId').value
+    const title = document.getElementById('eventTitle').value.trim()
+    const category = document.getElementById('eventCategory').value
+    const labCode = "LAB-304"
+    const registeredFor = document.getElementById('eventRegisteredFor').value.trim()
+
+    const startDate = document.getElementById('eventStartDate').value
+    const startTime = document.getElementById('eventStartTime').value
+    const endTime = document.getElementById('eventEndTime').value
+    const description = document.getElementById('eventDescription').value.trim()
+
+    const repeatType = document.getElementById('eventRepeatType').value
+    const repeatUntil = document.getElementById('eventRepeatUntil').value
+    const repeatDays = Array.from(document.querySelectorAll('.weekday-checkbox:checked')).map((cb) => cb.value)
+
+    if (!title || !labCode || !startDate || !startTime || !endTime) {
+      showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc.')
+      return
+    }
+
+    const occResult = buildOccurrencesFromForm({ preview: false, maxOccurrences: 500 })
+    if (!occResult.ok) return
+
+    const occurrences = occResult.occurrences || []
+    if (!occurrences.length) {
+      showToast('error', 'Không tạo được lịch nào, vui lòng kiểm tra lại phần lặp.')
+      return
+    }
+
+    const isEditing = !!eventId
+    const baseUrl = isEditing ? `/bookings/${eventId}` : '/bookings'
+
     if (isEditing) {
       const start = `${startDate} ${startTime}:00`
       const end = `${startDate} ${endTime}:00`
@@ -1077,6 +1087,11 @@ window.saveEvent = async function() {
   } catch (error) {
     console.error('saveEvent error:', error)
     showToast('error', 'Có lỗi xảy ra khi lưu sự kiện.')
+  } finally {
+    // Kết thúc loading - LUÔN CHẠY dù có lỗi hay không
+    saveBtn.classList.remove('loading');
+    saveBtn.disabled = false;
+    btnText.textContent = originalText;
   }
 }
 
@@ -1413,35 +1428,56 @@ async function updateEventTime(calendarEvent, infoCtx = null) {
   toggleModal('confirmConflictModal', true)
 }
 
- window.confirmContinue = async function () {
-  if (!pendingFormData) {
+window.confirmContinue = async function () {
+  // Lấy button và setup loading
+  const continueBtn = document.querySelector('#confirmConflictModal .btn-danger');
+  const btnText = continueBtn.querySelector('.btn-text');
+  const originalText = btnText ? btnText.textContent : 'Vẫn đăng ký';
+  
+  // Bắt đầu loading
+  continueBtn.classList.add('loading');
+  continueBtn.disabled = true;
+  if (btnText) btnText.textContent = 'Đang xử lý...';
+
+  try {
+    if (!pendingFormData) {
+      closeConflictModal()
+      return
+    }
+
+    const newFormData = new FormData()
+    
+    // Copy tất cả fields từ pendingFormData
+    for (let [key, value] of pendingFormData.entries()) {
+      newFormData.append(key, value)
+    }
+    
+    // Thêm flag force
+    newFormData.append('force', 'true')
+
+    // Gửi lại request
+    const res = await sendBookingRequest('/bookings', newFormData)
+    
+    if (!res.ok) {
+      closeConflictModal()
+      return
+    }
+
+    showToast('success', res.data?.message || 'Đã gửi yêu cầu đăng ký lịch.')
     closeConflictModal()
-    return
+    closeModal()
+    await loadEvents()
+    pendingFormData = null
+    
+  } catch (error) {
+    console.error('confirmContinue error:', error);
+    showToast('error', 'Có lỗi xảy ra khi xử lý.');
+  } finally {
+    // Kết thúc loading - LUÔN CHẠY
+    continueBtn.classList.remove('loading');
+    continueBtn.disabled = false;
+    if (btnText) btnText.textContent = originalText;
   }
-
-  const newFormData = new FormData()
-  
-  // Copy tất cả fields từ pendingFormData
-  for (let [key, value] of pendingFormData.entries()) {
-    newFormData.append(key, value)
-  }
-  
-  // Thêm flag force
-  newFormData.append('force', 'true')
-
-  // Gửi lại request
-  const res = await sendBookingRequest('/bookings', newFormData)
-  
-  if (!res.ok) {
-    closeConflictModal()
-    return
-  }
-
-  showToast('success', res.data?.message || 'Đã gửi yêu cầu đăng ký lịch.')
-  closeConflictModal()
-  closeModal()
-  await loadEvents()
-  pendingFormData = null
 }
 // ======================= INITIALIZATION =======================
 document.addEventListener('DOMContentLoaded', function () {
