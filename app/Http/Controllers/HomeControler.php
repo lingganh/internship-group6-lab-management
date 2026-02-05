@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LabEvent;
+use Livewire\WithPagination;
 
 class HomeControler extends Controller
 {
+    use WithPagination;
     public function eventsCalendar(Request $request)
     {
         $query = LabEvent::query()
@@ -24,7 +26,7 @@ class HomeControler extends Controller
         $upcomingEvents = (clone $query)
             ->where('start', '>=', now())
             ->orderBy('start', 'asc')
-            ->get();
+            ->paginate(10);
 
         $pastQuery = (clone $query)
             ->where('start', '<', now());
