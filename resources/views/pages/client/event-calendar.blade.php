@@ -353,8 +353,10 @@
           justify-content: center;
           gap: 5px;
         }
-      }
-
+        .chip-tom {
+          background : none;
+        }
+        
       /* Tablet */
       @media (min-width: 769px) and (max-width: 1024px) {
         .col-time { width: 180px; }
@@ -362,6 +364,9 @@
         .col-user { width: 180px; }
         .col-desc { width: 200px; }
         .custom-table td { padding: 12px 10px; font-size: 13px; }
+        .chip-tom{
+          background : none;
+        }
       }
     </style>
 
@@ -405,7 +410,7 @@
               $isToday = $event->start->isToday();
               $isTomorrow = $event->start->isTomorrow();
               $badgeClass = $isToday ? 'chip-today' : ($isTomorrow ? 'chip-tom' : 'chip-up');
-              $badgeText = $isToday ? 'Hôm nay' : ($isTomorrow ? 'Ngày mai' : 'Sắp tới');
+              $badgeText = $isToday ? 'Hôm nay' : ($isTomorrow ? 'Ngày mai' : 'Sắp diễn ra');
               $categoryMap = ['work' => 'Làm việc / Nghiên cứu', 'seminar' => 'Hội Thảo / Seminar', 'other' => 'Khác'];
               
               // Lấy tên nhóm từ registered_for
