@@ -162,3 +162,4 @@ Route::middleware('auth')->get('/notifications/{notification}/open', [Notificati
 Route::get('coming-soon', fn() => view('coming-soon'))->name('admin.coming-soon');
 //TV 
 Route::get('/lab-calendar-tv', \App\Livewire\LabCalendarTVShow::class)->name('lab.calendar.tv');
+Route::get('/api/lab-events/{id}/files', [LabCalendar::class, 'getEventFiles']);

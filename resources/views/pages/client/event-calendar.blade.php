@@ -12,7 +12,7 @@
       }
 
       .seminar-wrap {
-        max-width: 1240px;
+        max-width: 1400px;
         margin: 0 auto;
         padding: 40px 20px;
         font-family: 'Inter', system-ui, sans-serif;
@@ -82,24 +82,32 @@
       }
 
       .col-time {
-        width: 220px;
+        width: 200px;
       }
 
       .col-event {
         width: auto;
+        min-width: 180px;
       }
 
       .col-cat {
-        width: 220px;
-      }
-
-      /* Cột loại sự kiện */
-      .col-user {
         width: 180px;
       }
 
+      .col-user {
+        width: 200px;
+      }
+
+      .col-desc {
+        width: 250px;
+      }
+
+      .col-files {
+        width: 120px;
+      }
+
       .col-status {
-        width: 130px;
+        width: 120px;
       }
 
       .custom-table th {
@@ -169,24 +177,6 @@
         white-space: nowrap;
       }
 
-      /* .event-cat-text {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-transform: lowercase;
-      font-variant: small-caps;
-    }
-
-    .event-cat-text::before {
-      content: "•";
-      color: var(--primary);
-      font-size: 16px;
-      line-height: 0;
-    } */
-
       .badge-status {
         font-size: 11px;
         font-weight: 700;
@@ -211,127 +201,79 @@
         background: #f0fdf4;
       }
 
-      /* --- Tối ưu thêm cho Responsive --- */
-@media (max-width: 768px) {
-    .seminar-wrap {
-        padding: 20px 10px;
-    }
-
-    .seminar-title h3 {
-        font-size: 20px;
-        text-align: center;
-        width: 100%;
-    }
-
-    /* Biến bảng thành dạng Card để dễ đọc trên Mobile */
-    .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
-        display: block;
-        width: 100%;
-    }
-
-    .custom-table thead {
-        display: none; /* Ẩn tiêu đề bảng */
-    }
-
-    .custom-table tr {
-        margin-bottom: 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius);
-        background: #fff;
-        padding: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-
-    .custom-table td {
+      /* --- User Info với Group --- */
+      .user-info-block {
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .user-name {
+        font-weight: 600;
+        color: var(--text-main);
+      }
+
+      .user-group {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-style: italic;
+      }
+
+      /* --- Description --- */
+      .desc-text {
+        max-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        line-height: 1.4;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      /* --- File Download Button --- */
+      .file-download-btn {
+        display: inline-flex;
         align-items: center;
-        text-align: right;
-        padding: 8px 5px;
-        border-bottom: 1px dashed #eee;
-        min-height: 45px;
-    }
+        gap: 6px;
+        padding: 8px 14px;
+        background: #eff6ff;
+        color: var(--primary);
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid #dbeafe;
+      }
 
-    .custom-table td:last-child {
-        border-bottom: none;
-    }
+      .file-download-btn:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: translateY(-1px);
+      }
 
-    /* Hiển thị label từ thuộc tính data-label */
-    .custom-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
+      .no-files {
         color: var(--text-muted);
         font-size: 12px;
-        text-transform: uppercase;
-        text-align: left;
-        flex: 1;
-    }
+        font-style: italic;
+      }
 
-    /* Căn chỉnh nội dung bên phải trong Card */
-    .custom-table td > div, 
-    .custom-table td > span {
-        flex: 2;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    /* Thu nhỏ icon ngày tháng trên mobile */
-    .date-icon-box {
-        width: 38px;
-        height: 38px;
-        font-size: 14px;
-    }
-    
-    .date-icon-box span {
-        font-size: 8px;
-    }
-
-    .time-val {
-        font-size: 13px;
-    }
-
-    /* Ẩn cột STT trên mobile vì không cần thiết trong dạng card */
-    .stt-col {
-        display: none !important;
-    }
-
-    /* Tối ưu bộ phân trang Laravel */
-    .pagination-wrap {
-        width: 100%;
-        overflow-x: auto;
-        display: flex;
-        justify-content: center;
-    }
-    
-    .pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 5px;
-    }
-}
-
-/* Tablet (769px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .col-time { width: 180px; }
-    .col-cat { width: 150px; }
-    .col-user { width: 150px; }
-    .custom-table td { padding: 12px 10px; font-size: 13px; }
-}
-
-      /* --- Responsive --- */
+      /* --- Responsive Mobile --- */
       @media (max-width: 768px) {
-        .seminar-top {
-          flex-direction: column;
-          align-items: flex-start;
+        .seminar-wrap {
+          padding: 20px 10px;
         }
 
-        .seminar-filters {
+        .seminar-title h3 {
+          font-size: 20px;
+          text-align: center;
           width: 100%;
-          flex-direction: column;
         }
 
-        .seminar-control input,
-        .seminar-control select {
+        .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
+          display: block;
           width: 100%;
         }
 
@@ -340,17 +282,26 @@
         }
 
         .custom-table tr {
-          display: block;
-          margin-bottom: 15px;
-          border-bottom: 2px solid var(--border-color);
+          margin-bottom: 1rem;
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius);
+          background: #fff;
+          padding: 10px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .custom-table td {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          border: none;
-          padding: 8px 20px;
+          align-items: flex-start;
+          text-align: right;
+          padding: 8px 5px;
+          border-bottom: 1px dashed #eee;
+          min-height: 45px;
+        }
+
+        .custom-table td:last-child {
+          border-bottom: none;
         }
 
         .custom-table td::before {
@@ -359,11 +310,58 @@
           color: var(--text-muted);
           font-size: 12px;
           text-transform: uppercase;
+          text-align: left;
+          flex: 1;
+        }
+
+        .custom-table td > div, 
+        .custom-table td > span {
+          flex: 2;
+          display: flex;
+          justify-content: flex-end;
+          flex-direction: column;
+          align-items: flex-end;
+        }
+
+        .date-icon-box {
+          width: 38px;
+          height: 38px;
+          font-size: 14px;
+        }
+        
+        .date-icon-box span {
+          font-size: 8px;
+        }
+
+        .time-val {
+          font-size: 13px;
         }
 
         .stt-col {
           display: none !important;
         }
+
+        .pagination-wrap {
+          width: 100%;
+          overflow-x: auto;
+          display: flex;
+          justify-content: center;
+        }
+        
+        .pagination {
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 5px;
+        }
+      }
+
+      /* Tablet */
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .col-time { width: 180px; }
+        .col-cat { width: 150px; }
+        .col-user { width: 180px; }
+        .col-desc { width: 200px; }
+        .custom-table td { padding: 12px 10px; font-size: 13px; }
       }
     </style>
 
@@ -384,14 +382,6 @@
             <option value="other">Khác</option>
           </select>
         </div>
-        {{-- <div class="seminar-control">
-          <select wire:model.live="year">
-            <option value="">Tất cả năm</option>
-            @foreach($years as $y)
-            <option value="{{ $y }}">{{ $y }}</option>
-            @endforeach
-          </select>
-        </div> --}}
       </div>
     </div>
 
@@ -400,10 +390,12 @@
         <thead>
           <tr>
             <th class="col-stt">STT</th>
-            <th class="col-time">Thời gian & Ngày</th>
+            <th class="col-time">Thời gian</th>
             <th class="col-event">Sự kiện</th>
-            <th class="col-cat">Loại sự kiện</th>
-            <th class="col-user">Người phụ trách</th>
+            <th class="col-cat">Loại</th>
+            <th class="col-user">Phụ trách</th>
+            <th class="col-desc">Mô tả</th>
+            <th class="col-files">Tệp đính kèm</th>
             <th class="col-status" style="text-align: center;">Trạng thái</th>
           </tr>
         </thead>
@@ -415,10 +407,20 @@
               $badgeClass = $isToday ? 'chip-today' : ($isTomorrow ? 'chip-tom' : 'chip-up');
               $badgeText = $isToday ? 'Hôm nay' : ($isTomorrow ? 'Ngày mai' : 'Sắp tới');
               $categoryMap = ['work' => 'Làm việc / Nghiên cứu', 'seminar' => 'Hội Thảo / Seminar', 'other' => 'Khác'];
+              
+              // Lấy tên nhóm từ registered_for
+              $groupName = null;
+              if ($event->registered_for) {
+                $group = \App\Models\Group::find($event->registered_for);
+                $groupName = $group ? $group->name : null;
+              }
+              
+              // Đếm số file đính kèm
+              $filesCount = $event->files()->count();
             @endphp
-            <tr wire:key="event-{{ $event->id }}" class="js-open-event" data-bs-toggle="modal"
-              data-bs-target="#eventDetailModal">
+            <tr wire:key="event-{{ $event->id }}">
               <td class="stt-col" data-label="STT">{{ $index + 1 }}</td>
+              
               <td data-label="Thời gian">
                 <div class="datetime-block">
                   <div class="date-icon-box">
@@ -426,54 +428,138 @@
                     <span>T{{ $event->start->format('m') }}</span>
                   </div>
                   <div class="time-info">
-                    <div class="time-val">{{ $event->start->format('H:i') }} @if($event->end)—
-                    {{ $event->end->format('H:i') }}@endif</div>
+                    <div class="time-val">
+                      {{ $event->start->format('H:i') }}
+                      @if($event->end)— {{ $event->end->format('H:i') }}@endif
+                    </div>
                     <div class="day-val" style="font-size: 12px; color: var(--text-muted);">
-                      {{ $event->start->isoFormat('dddd') }}</div>
+                      {{ $event->start->isoFormat('dddd') }}
+                    </div>
                   </div>
                 </div>
               </td>
+              
               <td data-label="Sự kiện">
                 <span class="event-title-text" style="font-weight: 600;">{{ $event->title }}</span>
               </td>
-              <td data-label="Loại sự kiện">
+              
+              <td data-label="Loại">
                 <span class="event-cat-text">{{ $categoryMap[$event->category] ?? 'Khác' }}</span>
               </td>
+              
               <td data-label="Phụ trách">
-                <span class="user-name">{{ $event->user->full_name ?? $event->user->name ?? 'N/A' }}</span>
+                <div class="user-info-block">
+                  <span class="user-name">{{ $event->user->full_name ?? $event->user->name ?? 'N/A' }}</span>
+                  @if($groupName)
+                    <span class="user-group">Đăng ký cho: {{ $groupName }}</span>
+                  @endif
+                </div>
               </td>
+              
+              <td data-label="Mô tả">
+                @if($event->description)
+                  <div class="desc-text">{{ $event->description }}</div>
+                @else
+                  <span class="no-files">Không có mô tả</span>
+                @endif
+              </td>
+              
+              <td data-label="Tệp đính kèm">
+                @if($filesCount > 0)
+                  <a href="#" class="file-download-btn" 
+                     onclick="event.stopPropagation(); showFilesModal({{ $event->id }}); return false;">
+                    <i class="fa-solid fa-paperclip"></i>
+                    <span>{{ $filesCount }} file</span>
+                  </a>
+                @else
+                  <span class="no-files">Không có file</span>
+                @endif
+              </td>
+              
               <td align="center" data-label="Trạng thái">
                 <span class="badge-status {{ $badgeClass }}">{{ $badgeText }}</span>
               </td>
             </tr>
           @empty
             <tr>
-              <td colspan="6" class="text-center py-5 text-muted">
+              <td colspan="8" class="text-center py-5 text-muted">
                 Hiện tại chưa có sự kiện nào.
               </td>
             </tr>
           @endforelse
         </tbody>
       </table>
-      <div class="d-flex justify-content-between align-items-center mt-4">
-
-
-      </div>
-
     </div>
+    <br>
     <div class="pagination-wrap">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-
-
-
         <div class="pagination-controls">
           {{ $upcomingEvents->links('vendor.pagination.bootstrap-5') }}
         </div>
-
       </div>
     </div>
-
- 
-  
   </div>
+
+  {{-- Modal hiển thị danh sách files --}}
+  <div class="modal fade" id="filesModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Tệp đính kèm</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="filesModalBody">
+          <div class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang tải...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function showFilesModal(eventId) {
+      const modal = new bootstrap.Modal(document.getElementById('filesModal'));
+      const modalBody = document.getElementById('filesModalBody');
+      
+      modal.show();
+      
+      try {
+        const response = await fetch(`/api/lab-events/${eventId}/files`);
+        const data = await response.json();
+        
+        if (data.files && data.files.length > 0) {
+          let html = '<div class="list-group">';
+          data.files.forEach(file => {
+            html += `
+              <a href="/storage/${file.file_path}" 
+                 class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                 download="${file.file_name}" 
+                 target="_blank">
+                <div>
+                  <i class="fa-solid fa-file me-2"></i>
+                  <span>${file.file_name}</span>
+                </div>
+                <span class="badge bg-primary rounded-pill">${formatFileSize(file.file_size)}</span>
+              </a>
+            `;
+          });
+          html += '</div>';
+          modalBody.innerHTML = html;
+        } else {
+          modalBody.innerHTML = '<p class="text-center text-muted">Không có file đính kèm</p>';
+        }
+      } catch (error) {
+        modalBody.innerHTML = '<p class="text-center text-danger">Có lỗi xảy ra khi tải danh sách file</p>';
+      }
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+  </script>
 </x-client-layout>

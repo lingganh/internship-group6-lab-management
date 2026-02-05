@@ -683,6 +683,13 @@ class LabCalendar extends Component
             }
         }
     }
+    public function getEventFiles($id)
+{
+    $event = LabEvent::findOrFail($id);
+    $files = $event->files()->select('id', 'file_name', 'file_path', 'file_size', 'file_type')->get();
+    
+    return response()->json(['files' => $files]);
+}
     private function notifyAdminsDeletedEvent(LabEvent $event): void
 {
     $user = Auth::user();

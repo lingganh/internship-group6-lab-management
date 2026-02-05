@@ -56,4 +56,5 @@ class HomeControler extends Controller
             compact('upcomingEvents', 'pastEvents', 'years', 'categories')
         );
     }
+    
 }
