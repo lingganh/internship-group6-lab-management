@@ -369,10 +369,11 @@ class LabDiary extends Component
             });
         }
 
-        
-        $events = $q->paginate(15);
+        //dòng này luôn phải ở trên paginate để tránh xung đột giữa các luồng
         $this->ExportData=$q->get();
-       
+
+        $events = $q->paginate(15);
+               
         return view('livewire.lab-diary', compact('labs', 'events', 'users', 'groups'))
             ->layout('components.layouts.admin-layout');
     }

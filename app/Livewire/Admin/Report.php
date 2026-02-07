@@ -84,9 +84,9 @@ class Report extends Component
         }
 
         // Fetch events
-         $this->exportLab = $query->orderBy('start', 'desc')->get();
+        $this->exportLab = $query->orderBy('start', 'desc')->get();
         $events = $query->orderBy('start', 'desc')->limit(5)->get();
-       
+
 
 
 
@@ -96,7 +96,7 @@ class Report extends Component
         $this->dispatch('push_PCData1', data: $chartData1);
         $this->dispatch('push_PCData2', data: $chartData2);
 
-        return view('livewire.admin.report', [  
+        return view('livewire.admin.report', [
             'events' => $events,
             'chartData1' => $chartData1,
             'chartData2' => $chartData2,

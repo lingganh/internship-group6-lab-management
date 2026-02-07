@@ -82,10 +82,6 @@ class Dashboard extends Component
         //chartData
         $BarData = [12, 19, 3, 5, 2, 3, 12];
         $tz = new DateTimeZone('Asia/Ho_Chi_Minh');
-
-
-
-
         //weekly data
         $days = collect();
 
@@ -112,6 +108,9 @@ class Dashboard extends Component
                 'count' => $count,
             ])
             ->values();
+
+       
+
 
         //weekPieChart  
         $this->WeekPCData = $Week
@@ -179,6 +178,7 @@ class Dashboard extends Component
         $this->dispatch('push_data_weekbc', data: $this->WeekBCData);
         $this->dispatch('push_data_weekpc', data: $this->WeekPCData);
         $this->dispatch('push_data_equip', data: $this->EquipCData);
+        $this->dispatch('test',data:$Week);
     }
 
     public function loadBarWeek()
