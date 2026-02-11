@@ -9,6 +9,9 @@
         --text-muted: #64748b;
         --border-color: #f1f5f9;
         --radius: 12px;
+        /* Thêm màu cho hàng nổi bật */
+        --featured-bg: #f0f7ff; 
+        --featured-border: #3b82f6;
       }
 
       .seminar-wrap {
@@ -77,38 +80,14 @@
         table-layout: fixed;
       }
 
-      .col-stt {
-        width: 60px;
-      }
-
-      .col-time {
-        width: 200px;
-      }
-
-      .col-event {
-        width: auto;
-        min-width: 180px;
-      }
-
-      .col-cat {
-        width: 180px;
-      }
-
-      .col-user {
-        width: 200px;
-      }
-
-      .col-desc {
-        width: 250px;
-      }
-
-      .col-files {
-        width: 120px;
-      }
-
-      .col-status {
-        width: 120px;
-      }
+      .col-stt { width: 60px; }
+      .col-time { width: 200px; }
+      .col-event { width: auto; min-width: 180px; }
+      .col-cat { width: 180px; }
+      .col-user { width: 200px; }
+      .col-desc { width: 250px; }
+      .col-files { width: 120px; }
+      .col-status { width: 120px; }
 
       .custom-table th {
         background: #fcfcfd;
@@ -130,9 +109,32 @@
         word-wrap: break-word;
       }
 
+      /* --- MỚI: TẠO SỰ KHÁC BIỆT GIỮA CÁC HÀNG --- */
+      /* Màu xen kẽ cho hàng chẵn */
+      .custom-table tbody tr:nth-child(even) {
+        background-color: #fafbfc;
+      }
+
       .custom-table tbody tr:hover {
-        background-color: #f8fafc;
+        background-color: #f1f5f9 !important;
         cursor: pointer;
+      }
+
+      /* --- MỚI: STYLE CHO HÀNG NỔI BẬT (FEATURED) --- */
+      .row-featured {
+        background-color: var(--featured-bg) !important;
+      }
+      
+      .row-featured td {
+        border-bottom-color: #dbeafe;
+      }
+
+      /* Vạch màu bên trái cho hàng nổi bật */
+      .row-featured .stt-col {
+        position: relative;
+        border-left: 4px solid var(--featured-border);
+        font-weight: bold;
+        color: var(--primary);
       }
 
       /* --- DateTime & Badges --- */
@@ -155,6 +157,12 @@
         font-weight: 800;
         line-height: 1.1;
         flex-shrink: 0;
+      }
+
+      /* Làm đậm icon ngày của hàng nổi bật */
+      .row-featured .date-icon-box {
+        background: var(--primary);
+        color: white;
       }
 
       .date-icon-box span {
@@ -186,38 +194,14 @@
         white-space: nowrap;
       }
 
-      .chip-today {
-        color: #e11d48;
-        background: #fff1f2;
-      }
+      .chip-today { color: #e11d48; background: #fff1f2; }
+      .chip-tom { color: #d97706; background: #fff7ed; }
+      .chip-up { color: #16a34a; background: #f0fdf4; }
 
-      .chip-tom {
-        color: #d97706;
-        background: #fff7ed;
-      }
-
-      .chip-up {
-        color: #16a34a;
-        background: #f0fdf4;
-      }
-
-      /* --- User Info với Group --- */
-      .user-info-block {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .user-name {
-        font-weight: 600;
-        color: var(--text-main);
-      }
-
-      .user-group {
-        font-size: 12px;
-        color: var(--text-muted);
-        font-style: italic;
-      }
+      /* --- User Info --- */
+      .user-info-block { display: flex; flex-direction: column; gap: 4px; }
+      .user-name { font-weight: 600; color: var(--text-main); }
+      .user-group { font-size: 12px; color: var(--text-muted); font-style: italic; }
 
       /* --- Description --- */
       .desc-text {
@@ -254,119 +238,20 @@
         transform: translateY(-1px);
       }
 
-      .no-files {
-        color: var(--text-muted);
-        font-size: 12px;
-        font-style: italic;
-      }
+      .no-files { color: var(--text-muted); font-size: 12px; font-style: italic; }
 
       /* --- Responsive Mobile --- */
       @media (max-width: 768px) {
-        .seminar-wrap {
-          padding: 20px 10px;
-        }
-
-        .seminar-title h3 {
-          font-size: 20px;
-          text-align: center;
-          width: 100%;
-        }
-
-        .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
-          display: block;
-          width: 100%;
-        }
-
-        .custom-table thead {
-          display: none;
-        }
-
-        .custom-table tr {
-          margin-bottom: 1rem;
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius);
-          background: #fff;
-          padding: 10px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .custom-table td {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          text-align: right;
-          padding: 8px 5px;
-          border-bottom: 1px dashed #eee;
-          min-height: 45px;
-        }
-
-        .custom-table td:last-child {
-          border-bottom: none;
-        }
-
-        .custom-table td::before {
-          content: attr(data-label);
-          font-weight: 700;
-          color: var(--text-muted);
-          font-size: 12px;
-          text-transform: uppercase;
-          text-align: left;
-          flex: 1;
-        }
-
-        .custom-table td > div, 
-        .custom-table td > span {
-          flex: 2;
-          display: flex;
-          justify-content: flex-end;
-          flex-direction: column;
-          align-items: flex-end;
-        }
-
-        .date-icon-box {
-          width: 38px;
-          height: 38px;
-          font-size: 14px;
-        }
-        
-        .date-icon-box span {
-          font-size: 8px;
-        }
-
-        .time-val {
-          font-size: 13px;
-        }
-
-        .stt-col {
-          display: none !important;
-        }
-
-        .pagination-wrap {
-          width: 100%;
-          overflow-x: auto;
-          display: flex;
-          justify-content: center;
-        }
-        
-        .pagination {
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 5px;
-        }
-        .chip-tom {
-          background : none;
-        }
-        
-      /* Tablet */
-      @media (min-width: 769px) and (max-width: 1024px) {
-        .col-time { width: 180px; }
-        .col-cat { width: 150px; }
-        .col-user { width: 180px; }
-        .col-desc { width: 200px; }
-        .custom-table td { padding: 12px 10px; font-size: 13px; }
-        .chip-tom{
-          background : none;
-        }
+        .seminar-wrap { padding: 20px 10px; }
+        .seminar-title h3 { font-size: 20px; text-align: center; width: 100%; }
+        .custom-table, .custom-table tbody, .custom-table tr, .custom-table td { display: block; width: 100%; }
+        .custom-table thead { display: none; }
+        .custom-table tr { margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius); background: #fff; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        /* Reset background nổi bật trên mobile để dễ nhìn */
+        .row-featured { border: 2px solid var(--featured-border) !important; }
+        .custom-table td { display: flex; justify-content: space-between; align-items: flex-start; text-align: right; padding: 8px 5px; border-bottom: 1px dashed #eee; min-height: 45px; }
+        .custom-table td::before { content: attr(data-label); font-weight: 700; color: var(--text-muted); font-size: 12px; text-transform: uppercase; text-align: left; flex: 1; }
+        .stt-col { display: none !important; }
       }
     </style>
 
@@ -409,22 +294,27 @@
             @php
               $isToday = $event->start->isToday();
               $isTomorrow = $event->start->isTomorrow();
+              $isFeatured = $event->is_featured; // Sử dụng biến này để highlight
+              
               $badgeClass = $isToday ? 'chip-today' : ($isTomorrow ? 'chip-tom' : 'chip-up');
               $badgeText = $isToday ? 'Hôm nay' : ($isTomorrow ? 'Ngày mai' : 'Sắp diễn ra');
               $categoryMap = ['work' => 'Làm việc / Nghiên cứu', 'seminar' => 'Hội Thảo / Seminar', 'other' => 'Khác'];
               
-              // Lấy tên nhóm từ registered_for
               $groupName = null;
               if ($event->registered_for) {
                 $group = \App\Models\Group::find($event->registered_for);
                 $groupName = $group ? $group->name : null;
               }
-              
-              // Đếm số file đính kèm
               $filesCount = $event->files()->count();
             @endphp
-            <tr wire:key="event-{{ $event->id }}">
-              <td class="stt-col" data-label="STT">{{ $index + 1 }}</td>
+            <tr wire:key="event-{{ $event->id }}" class="{{ $isFeatured ? 'row-featured' : '' }}">
+              <td class="stt-col" data-label="STT">
+                @if($isFeatured)
+                  <i class="fa-solid fa-star" title="Nổi bật" style="color: #f59e0b;"></i>
+                @else
+                  {{ $index + 1 }}
+                @endif
+              </td>
               
               <td data-label="Thời gian">
                 <div class="datetime-block">
@@ -445,7 +335,9 @@
               </td>
               
               <td data-label="Sự kiện">
-                <span class="event-title-text" style="font-weight: 600;">{{ $event->title }}</span>
+                <span class="event-title-text" style="font-weight: {{ $isFeatured ? '800' : '600' }}; {{ $isFeatured ? 'color: var(--primary);' : '' }}">
+                  {{ $event->title }}
+                </span>
               </td>
               
               <td data-label="Loại">
@@ -487,14 +379,13 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8" class="text-center py-5 text-muted">
-                Hiện tại chưa có sự kiện nào.
-              </td>
+              <td colspan="8" class="text-center py-5 text-muted">Hiện tại chưa có sự kiện nào.</td>
             </tr>
           @endforelse
         </tbody>
       </table>
     </div>
+
     <br>
     <div class="pagination-wrap">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
@@ -528,13 +419,10 @@
     async function showFilesModal(eventId) {
       const modal = new bootstrap.Modal(document.getElementById('filesModal'));
       const modalBody = document.getElementById('filesModalBody');
-      
       modal.show();
-      
       try {
         const response = await fetch(`/api/lab-events/${eventId}/files`);
         const data = await response.json();
-        
         if (data.files && data.files.length > 0) {
           let html = '<div class="list-group">';
           data.files.forEach(file => {

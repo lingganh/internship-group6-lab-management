@@ -251,6 +251,7 @@ public function rejectAllConflicts()
             'user_id' => (string) ($this->selectedSchedule->user_id ?? ''),
             'group_id' => (string) ($this->selectedSchedule->group_id ?? $this->selectedSchedule->registered_for ?? ''),
             'feedback' => (string) ($this->selectedSchedule->feedback ?? ''),
+            'is_featured' => (bool) ($this->selectedSchedule->is_featured ?? false),
         ];
 
         $this->newFiles = [];
@@ -275,6 +276,8 @@ public function rejectAllConflicts()
             'edit.user_id' => 'nullable|exists:users,id',
             'edit.group_id' => 'nullable|exists:groups,id',
             'newFiles.*' => 'nullable|file|max:5120',
+            'edit.is_featured' => 'boolean',
+
         ], [
             'edit.title.required' => 'Tiêu đề không được để trống.',
             'edit.end.after' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
@@ -293,6 +296,7 @@ public function rejectAllConflicts()
             'user_id' => $this->edit['user_id'] ?: null,
             'registered_for' => $this->edit['group_id'] ?: null,
             'feedback' => trim((string) $this->edit['feedback']) !== '' ? trim((string) $this->edit['feedback']) : null,
+            'is_featured' => (bool) $this->edit['is_featured'],
         ]);
 
         // Lưu file mới
@@ -984,6 +988,7 @@ public function rejectAllConflicts()
             ->when($this->filterUserId !== '', fn($q) => $q->where('user_id', $this->filterUserId))
             ->when($this->filterDate !== '', fn($q) => $q->whereDate('start', $this->filterDate))
             ->when($this->filterLabCode !== '', fn($q) => $q->where('lab_code', $this->filterLabCode))
+            ->orderByDesc('is_featured') 
             ->orderBy('start', 'asc')       // Ưu tiên 1: Lịch sắp diễn ra hiện lên trước
             ->orderBy('created_at', 'asc')  // Ưu tiên 2: Cùng giờ bắt đầu thì thằng nào đký trước hiện trước
             ->paginate(15);

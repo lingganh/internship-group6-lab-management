@@ -135,7 +135,9 @@
                                 </thead>
                                 <tbody>
                                     @forelse($schedules as $item)
-                                        <tr wire:key="schedule-{{ $item->id }}">
+                                        <tr wire:key="schedule-{{ $item->id }}"
+                                            class="{{ $item->is_featured ? 'featured-row' : '' }}">
+
                                             <td>
                                                 @if($item->status === 'pending')
                                                     <input type="checkbox"
@@ -145,12 +147,13 @@
                                             </td>
 
                                             <td data-label="Sự kiện">
-                                                <div class="fw-semibold text-dark text-wrap-mobile d-flex align-items-center gap-1">
+                                               <div class="fw-semibold text-dark text-wrap-mobile d-flex align-items-center gap-1">
+                                                    @if($item->is_featured)
+                                                        <i class="ph-star-fill featured-star" title="Sự kiện nổi bật"></i>
+                                                    @endif
                                                     {{ $item->title }}
-                                                    {{-- @if($item->series_id)
-                                                        <span class="badge bg-info text-white" title="Lịch lặp"><i class="fa-solid fa-repeat"></i></span>
-                                                    @endif --}}
                                                 </div>
+
                                                 <div class="small text-muted">
                                                     {{ $this->categoryLabel($item->category) }}
                                                     @if($item->series_id)
@@ -434,7 +437,7 @@
 
                                     <div class="col-12">
                                         <div class="approval-info">
-                                            <label class="form-label small fw-semibold text-dark mb-1">Feedback</label>
+                                            <label class="form-label small fw-semibold text-dark mb-1">Đánh giá sử dụng phòng</label>
                                             <textarea wire:model.defer="edit.feedback"
                                                       class="form-control approval-control"
                                                       rows="3"></textarea>
@@ -546,10 +549,22 @@
                                             @error('newFiles.*') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
+                                     <div class="col-12 col-md-4">
+                        <div class="approval-info">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="edit_is_featured" wire:model.defer="edit.is_featured">
+                                <label class="form-check-label fw-semibold" for="edit_is_featured">
+                                    ⭐ Đánh dấu sự kiện nổi bật
+                                </label>
+                            </div>
+                            
+                        </div>
+                    </div>
+
                                 </div>
                             @endif
                         </div>
-
+                  
                         <div class="modal-footer border-0 pt-0">
                             <div class="d-flex w-100 justify-content-between align-items-center gap-2">
                                 <button type="button" class="btn approval-btn approval-btn-ghost" @click="hideModal('details')">
@@ -574,7 +589,7 @@
                                             type="button"
                                             class="btn"
                                             style="background-color: #ef4444; color: white; border: none;">
-                                        Xóa
+                                        Xóa / Từ chối lịch
                                     </button>
 
                                     <button wire:click="updateEvent" 
@@ -604,14 +619,14 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 approval-modal">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-semibold">{{ $confirmTitle ?: 'Xác nhận từ chối' }}</h5>
+                <h5 class="modal-title fw-semibold">{{ $confirmTitle ?: 'Xác nhận ' }}</h5>
                 <button type="button" class="btn-close" @click="hideModal('confirm')"></button>
             </div>
             <div class="modal-body">
                 <div class="approval-info border-0 p-0">
                     <p class="text-muted">{{ $confirmMessage }}</p>
                     
-                    <label class="form-label small fw-bold">Lý do từ chối <span class="text-danger">*</span></label>
+                    <label class="form-label small fw-bold">Lý do  <span class="text-danger">*</span></label>
                     <textarea wire:model.defer="rejectionNote" 
                               class="form-control approval-control" 
                               rows="3" 
@@ -624,7 +639,7 @@
                 <button wire:click="performConfirm" 
                         class="btn approval-btn approval-btn-danger"
                         wire:loading.attr="disabled">
-                    <span wire:loading.remove wire:target="performConfirm">Xác nhận từ chối</span>
+                    <span wire:loading.remove wire:target="performConfirm">Xác nhận</span>
                     <span wire:loading wire:target="performConfirm">
                         <span class="spinner-border spinner-border-sm"></span>
                     </span>
@@ -1164,8 +1179,53 @@
             border-radius: 14px;
             overflow: hidden;
         }
+        /* Custom Checkbox cho Sự kiện nổi bật */
+        .approval-info .form-check {
+            background: #fffbeb; /* Vàng nhạt sang chảnh */
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 12px 15px 12px 40px; /* Cách trái để nhường chỗ cho checkbox */
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            min-width: 250px;
+        }
 
-        .approval-desc {
+        .approval-info .form-check:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+
+        /* Biến hình cái ô checkbox */
+        .approval-info .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            margin-left: -30px; /* Đẩy nó về đúng vị trí trong box */
+            cursor: pointer;
+            border: 2px solid #f59e0b;
+        }
+
+        .approval-info .form-check-input:checked {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+        }
+
+        .approval-info .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
+        }
+
+        /* Chỉnh cái chữ cho đẹp */
+        .approval-info .form-check-label {
+            color: #92400e;
+            font-size: 0.95rem;
+            user-select: none; /* Không cho quét khối chữ khi bấm nhầm */
+            display: block;
+        }
+                .approval-desc {
             background: #f8fafc;
             padding: 10px;
             border-radius: 8px;
@@ -1174,6 +1234,39 @@
             border: 1px solid var(--ap-border);
             color: var(--ap-text);
         }
+            /* ===============================
+            EVENT NỔI BẬT (ADMIN)
+            ================================ */
+
+            /* Hàng nổi bật */
+            .featured-row {
+                background: linear-gradient(90deg, #fffbeb 0%, #ffffff 70%);
+                    border-left: 4px solid var(--ap-warn);
+                }
+
+                .featured-row:hover {
+                    background: #fff7ed !important;
+                }
+
+                /* Icon sao */
+                .featured-star {
+                    color: #f59e0b;
+                    font-size: 14px;
+                    margin-right: 2px;
+                    flex-shrink: 0;
+                }
+
+                /* Đậm hơn một chút */
+                .featured-row .fw-semibold {
+                    font-weight: 700;
+                }
+                @media (max-width: 991.98px) {
+                .featured-row {
+                    border-left: none;
+                    border-top: 4px solid #f59e0b;
+                    background: #fffbeb;
+                }
+            }
 
         @media (max-width: 991.98px) {
             .approval-table,

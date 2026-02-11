@@ -23,6 +23,7 @@ class LabEvent extends Model
     protected $casts = [
         'start' => 'datetime',
         'end' => 'datetime',
+        'is_featured' => 'boolean',
     ];
     public function user()
     {

@@ -26,6 +26,7 @@ class HomeControler extends Controller
 
         $upcomingEvents = (clone $query)
             ->where('start', '>=', now())
+            ->orderByDesc('is_featured')
             ->orderBy('start', 'asc')
             ->paginate(10);
 
