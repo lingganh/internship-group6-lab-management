@@ -493,6 +493,12 @@
 
     });
 
+    $wire.on('test',({
+        data
+    })=>{
+        console.log(data)
+    })
+
     let equipChart = null;
 
     function translate(status) {
