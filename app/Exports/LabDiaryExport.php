@@ -39,10 +39,10 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         return [
             'STT',
-            'Mục đích',
+            'Mục đích sử dụng',
             'Ngày',
             'Giờ',
-            'Phòng lab',
+            // 'Phòng lab',
             'Người sử dụng',
             'Phản Hồi',
         ];
@@ -61,7 +61,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
             $categoryMap[$event->category].$event->title?? '',
             optional($event->start)->format('d/m/Y'),
             optional($event->start)->format('H:i').'-'.optional($event->end)->format('H:i'),
-            $event->lab?->name ?? $event->lab_code, 
+            // $event->lab?->name ?? $event->lab_code, 
             $event->group?->name ?: ($event->user?->full_name ?? ''),
             $event->feedback ?? '',
         ];
@@ -72,7 +72,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function styles(Worksheet $sheet)
     {
-        $text = '';
+        $text = 'Phòng Lab Phát triển phần mềm và hệ thống thông minh ';
 
         if (!empty($this->start)) {
             $text .= 'Từ ngày ' . \Carbon\Carbon::parse($this->start)->format('d/m/Y');
@@ -85,15 +85,15 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
             $text .= 'đến ngày ' . \Carbon\Carbon::parse($this->end)->format('d/m/Y');
         }
 
-        $sheet->mergeCells('A1:I1');
+        $sheet->mergeCells('A1:F1');
         $sheet->setCellValue('A1', 'NHẬT KÝ SỬ DỤNG PHÒNG LAB');
 
-        $sheet->mergeCells('A2:G2');
+        $sheet->mergeCells('A2:F2');
 
         $sheet->setCellValue('A2', $text);
 
 
-        $sheet->mergeCells('A3:G3');
+        $sheet->mergeCells('A3:F3');
         $sheet->setCellValue(
             'A3',
             'Ngày xuất báo cáo: ' . now()->format('d/m/Y H:i')
@@ -113,7 +113,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
         $sheet->freezePane('A5');
 
         // Header style
-        $sheet->getStyle('A4:G4')->applyFromArray([
+        $sheet->getStyle('A4:F4')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -131,7 +131,7 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
 
         // Border for all data
         $lastRow = $sheet->getHighestRow();
-        $sheet->getStyle("A4:G{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A4:F{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => 'thin',
@@ -139,10 +139,11 @@ class LabDiaryExport implements FromCollection, WithHeadings, WithMapping, WithS
                 ],
             ],
         ]);
-        $sheet->setAutoFilter("A4:G{$lastRow}");
+        $sheet->setAutoFilter("A4:F{$lastRow}");
 
         // Align columns
-        $sheet->getStyle('B:E')->getAlignment()->setHorizontal('center');
-        $sheet->getStyle('G')->getAlignment()->setWrapText(true);
+        $sheet->getStyle("A4:E{$lastRow}")->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('B')->getAlignment()->setHorizontal('left');
+        $sheet->getStyle('F')->getAlignment()->setWrapText(true);
     }
 }
